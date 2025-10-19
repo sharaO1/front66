@@ -563,6 +563,9 @@ export default function Warehouse() {
   const [clientOptions, setClientOptions] = useState<
     { id: string; name: string }[]
   >([]);
+  const [categories, setCategories] = useState<
+    { id: string; name: string; description?: string }[]
+  >([]);
 
   // Date range filters for movements and history
   const [movementFrom, setMovementFrom] = useState<string | null>(null);
