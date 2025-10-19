@@ -32,6 +32,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 import { useChatStore, ChatMessage, EMPTY_MESSAGES } from "@/stores/chatStore";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { API_BASE, joinApi } from "@/lib/api";
 
 function formatMessage(t: string): string {
   if (!t) return "";
