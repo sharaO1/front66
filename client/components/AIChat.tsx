@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Table,
@@ -524,10 +524,34 @@ export default function AIChat({
     [input, isSending, isTyping, scrollToBottom, accessToken],
   );
 
-  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter") {
-      e.preventDefault();
-      handleSend();
+      // Ctrl+Enter or Cmd+Enter: insert new line
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const target = e.currentTarget;
+        const start = target.selectionStart ?? 0;
+        const end = target.selectionEnd ?? 0;
+        const newValue = input.substring(0, start) + "\n" + input.substring(end);
+        setInput(newValue);
+        setTimeout(() => {
+          target.selectionStart = target.selectionEnd = start + 1;
+        }, 0);
+      } else if (!e.shiftKey) {
+        // Regular Enter: send message
+        e.preventDefault();
+        handleSend();
+      }
+      // Shift+Enter: insert new line (default textarea behavior)
+    }
+  };
+
+  // Auto-expand textarea height as user types
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    if (inputRef.current) {
+      inputRef.current.style.height = "auto";
+      inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 200) + "px";
     }
   };
 
@@ -800,14 +824,15 @@ export default function AIChat({
                       handleSend();
                     }}
                   >
-                    <Input
+                    <Textarea
                       ref={inputRef}
                       value={input}
-                      onChange={(e) => setInput(e.target.value)}
+                      onChange={handleInputChange}
                       onKeyDown={onKeyDown}
                       placeholder="Type your message…"
-                      className="min-h-[48px] sm:min-h-[52px] rounded-xl py-5 px-4 shadow-sm"
+                      className="min-h-[48px] max-h-[200px] rounded-xl py-3 px-4 shadow-sm resize-none border-2 border-primary bg-white dark:bg-gray-900"
                       disabled={isSending || isTyping}
+                      rows={1}
                     />
                     <Button
                       type="submit"
