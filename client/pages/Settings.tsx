@@ -248,8 +248,8 @@ export default function Settings() {
     try {
       const method = editingCategoryId ? "PUT" : "POST";
       const url = editingCategoryId
-        ? `http://localhost:5002/api/categories/${editingCategoryId}`
-        : "http://localhost:5002/api/categories";
+        ? joinApi(`categories/${editingCategoryId}`)
+        : joinApi("categories");
 
       const response = await fetch(url, {
         method,
