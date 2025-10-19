@@ -558,13 +558,39 @@ export default function AIChat({
       const html = document.documentElement;
       const prevBodyOverflow = body.style.overflow;
       const prevHtmlOverflow = html.style.overflow;
+      const prevBodyPosition = body.style.position;
+      const prevBodyWidth = body.style.width;
 
       body.style.overflow = "hidden";
       html.style.overflow = "hidden";
+      body.style.position = "fixed";
+      body.style.width = "100%";
+
+      // Prevent scroll on document except within chat message list
+      const handleWheel = (e: WheelEvent) => {
+        const target = e.target as HTMLElement;
+        if (listRef.current && !listRef.current.contains(target)) {
+          e.preventDefault();
+        }
+      };
+
+      const handleTouchMove = (e: TouchEvent) => {
+        const target = e.target as HTMLElement;
+        if (listRef.current && !listRef.current.contains(target)) {
+          e.preventDefault();
+        }
+      };
+
+      document.addEventListener("wheel", handleWheel, { passive: false });
+      document.addEventListener("touchmove", handleTouchMove, { passive: false });
 
       return () => {
         body.style.overflow = prevBodyOverflow;
         html.style.overflow = prevHtmlOverflow;
+        body.style.position = prevBodyPosition;
+        body.style.width = prevBodyWidth;
+        document.removeEventListener("wheel", handleWheel);
+        document.removeEventListener("touchmove", handleTouchMove);
       };
     }
   }, [isOpen, isFullScreen, page]);
