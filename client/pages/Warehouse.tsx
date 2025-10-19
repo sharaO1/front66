@@ -1481,6 +1481,34 @@ export default function Warehouse() {
     };
   }, [products, skuBuffer, toast, t]);
 
+  // Handle scroll to hide/show alert cards
+  useEffect(() => {
+    let lastScrollY = 0;
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Scrolling down and past threshold
+        setShowAlertCards(false);
+      } else {
+        // Scrolling up or at top
+        setShowAlertCards(true);
+      }
+      lastScrollY = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
