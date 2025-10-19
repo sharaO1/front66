@@ -301,16 +301,13 @@ export default function Settings() {
 
   const deleteCategory = async (categoryId: string) => {
     try {
-      const response = await fetch(
-        joinApi(`categories/${categoryId}`),
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
-          },
+      const response = await fetch(joinApi(`categories/${categoryId}`), {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
         },
-      );
+      });
 
       if (!response.ok) {
         throw new Error("Failed to delete category");
