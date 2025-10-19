@@ -208,7 +208,7 @@ export default function Settings() {
   const fetchCategories = async () => {
     try {
       setIsLoadingCategories(true);
-      const response = await fetch("http://localhost:5002/api/categories", {
+      const response = await fetch(joinApi("categories"), {
         headers: {
           "Content-Type": "application/json",
           ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
