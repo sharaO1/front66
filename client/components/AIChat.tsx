@@ -739,7 +739,7 @@ export default function AIChat({
 
                 <div
                   className={cn(
-                    "border-t bg-background p-3",
+                    "border-t bg-background py-5 px-3",
                     containerFixed ? "sticky bottom-0" : "",
                   )}
                   style={
