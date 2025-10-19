@@ -24,7 +24,9 @@ import {
   Key,
   Check,
   Eye,
-  EyeOff
+  EyeOff,
+  Plus,
+  Tag
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
