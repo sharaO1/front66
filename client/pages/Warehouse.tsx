@@ -743,6 +743,7 @@ export default function Warehouse() {
   };
 
   useEffect(() => {
+    fetchCategoriesFromApi();
     fetchProductsFromApi();
   }, [accessToken]);
 
