@@ -1481,31 +1481,19 @@ export default function Warehouse() {
     };
   }, [products, skuBuffer, toast, t]);
 
-  // Handle scroll to hide/show alert cards
+  // Handle scroll to hide alert cards (only hide, don't show again until top)
   useEffect(() => {
-    let lastScrollY = 0;
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
 
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        // Scrolling down and past threshold
-        setShowAlertCards(false);
-      } else {
-        // Scrolling up or at top
-        setShowAlertCards(true);
-      }
-      lastScrollY = currentScrollY;
+      // Only show cards if at the very top (scrollY < 10)
+      // Once hidden by scrolling, cards stay hidden
+      setShowAlertCards(currentScrollY < 10);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
     };
   }, []);
 
