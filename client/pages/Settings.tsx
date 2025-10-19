@@ -175,7 +175,7 @@ export default function Settings() {
 
     setIsAddingCategory(true);
     try {
-      const response = await fetch("http://192.168.1.28:5002/api/categories", {
+      const response = await fetch("http://localhost:5002/api/categories", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
