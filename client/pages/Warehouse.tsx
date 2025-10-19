@@ -3779,12 +3779,17 @@ export default function Warehouse() {
                     <SelectValue placeholder={t("warehouse.select_category")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Smartphones">Smartphones</SelectItem>
-                    <SelectItem value="Laptops">Laptops</SelectItem>
-                    <SelectItem value="Tablets">Tablets</SelectItem>
-                    <SelectItem value="Accessories">Accessories</SelectItem>
-                    <SelectItem value="Footwear">Footwear</SelectItem>
-                    <SelectItem value="Clothing">Clothing</SelectItem>
+                    {categories.length > 0 ? (
+                      categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.name}>
+                          {cat.name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="" disabled>
+                        {t("warehouse.no_categories")}
+                      </SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
