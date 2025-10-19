@@ -376,7 +376,10 @@ export default function AIChat({
     async (fullText: string) => {
       setIsTyping(true);
       const id = `ai-${Date.now()}`;
-      setStoreMessages((prev) => [...prev, { id, role: "ai", text: "" }], userId);
+      setStoreMessages(
+        (prev) => [...prev, { id, role: "ai", text: "" }],
+        userId,
+      );
 
       await new Promise<void>((resolve) => {
         let i = 0;
@@ -416,11 +419,7 @@ export default function AIChat({
       };
       const aiId = `ai-${Date.now()}`;
       setStoreMessages(
-        (prev) => [
-          ...prev,
-          userMsg,
-          { id: aiId, role: "ai", text: "" },
-        ],
+        (prev) => [...prev, userMsg, { id: aiId, role: "ai", text: "" }],
         userId,
       );
       setInput("");
@@ -459,7 +458,8 @@ export default function AIChat({
                 if (done) break;
                 acc += decoder.decode(value, { stream: true });
                 setStoreMessages(
-                  (prev) => prev.map((m) => (m.id === aiId ? { ...m, text: acc } : m)),
+                  (prev) =>
+                    prev.map((m) => (m.id === aiId ? { ...m, text: acc } : m)),
                   userId,
                 );
                 scrollToBottom(true);
