@@ -3010,7 +3010,15 @@ export default function Warehouse() {
                             {t("warehouse.max_stock")}: {product.maxStock}
                           </div>
                         </TableCell>
-                        <TableCell>{getStatusBadge(calculateStatus(getVisibleQuantity(product), product.minStock))}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
+                            {isProductExpired(product.expiryDate) ? (
+                              getExpiredBadge()
+                            ) : (
+                              getStatusBadge(calculateStatus(getVisibleQuantity(product), product.minStock))
+                            )}
+                          </div>
+                        </TableCell>
                         <TableCell>
                           <div className="font-medium">
                             ${product.sellingPrice.toLocaleString()}
