@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,9 +26,13 @@ import {
   Eye,
   EyeOff,
   Plus,
-  Tag
+  Tag,
+  Edit,
+  Trash2,
+  AlertCircle
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface SystemSettings {
   companyName: string;
@@ -56,6 +60,12 @@ interface SecuritySettings {
 interface CategoryForm {
   name: string;
   description: string;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  description?: string;
 }
 
 export default function Settings() {
@@ -100,6 +110,9 @@ export default function Settings() {
   });
 
   const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
 
   const saveSystemSettings = () => {
     toast({
@@ -163,6 +176,35 @@ export default function Settings() {
     setShowChangePassword(false);
   };
 
+  const fetchCategories = async () => {
+    try {
+      setIsLoadingCategories(true);
+      const response = await fetch("http://localhost:5002/api/categories", {
+        headers: {
+          "Content-Type": "application/json",
+          ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch categories");
+      }
+
+      const data = await response.json();
+      if (data.ok && Array.isArray(data.result)) {
+        setCategories(data.result);
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to load categories.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingCategories(false);
+    }
+  };
+
   const addCategory = async () => {
     if (!categoryForm.name.trim()) {
       toast({
@@ -175,8 +217,13 @@ export default function Settings() {
 
     setIsAddingCategory(true);
     try {
-      const response = await fetch("http://localhost:5002/api/categories", {
-        method: "POST",
+      const method = editingCategoryId ? "PUT" : "POST";
+      const url = editingCategoryId
+        ? `http://localhost:5002/api/categories/${editingCategoryId}`
+        : "http://localhost:5002/api/categories";
+
+      const response = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
           ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
@@ -188,30 +235,83 @@ export default function Settings() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to add category");
+        throw new Error("Failed to save category");
       }
 
-      const data = await response.json();
-
+      const isUpdate = editingCategoryId;
       toast({
         title: "Success",
-        description: `Category "${categoryForm.name}" has been added successfully.`,
+        description: `Category "${categoryForm.name}" has been ${isUpdate ? "updated" : "added"} successfully.`,
       });
 
       setCategoryForm({
         name: "",
         description: "",
       });
+      setEditingCategoryId(null);
+      fetchCategories();
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to add category. Please try again.",
+        description: error.message || "Failed to save category. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsAddingCategory(false);
     }
   };
+
+  const editCategory = (category: Category) => {
+    setCategoryForm({
+      name: category.name,
+      description: category.description || "",
+    });
+    setEditingCategoryId(category.id);
+  };
+
+  const deleteCategory = async (categoryId: string) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5002/api/categories/${categoryId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete category");
+      }
+
+      toast({
+        title: "Success",
+        description: "Category has been deleted successfully.",
+      });
+
+      fetchCategories();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete category. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingCategoryId(null);
+    setCategoryForm({
+      name: "",
+      description: "",
+    });
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -274,15 +374,17 @@ export default function Settings() {
                 </Button>
               </CardContent>
             </Card>
+          </div>
 
+          <div className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Tag className="h-5 w-5" />
-                  Add Product Category
+                  {editingCategoryId ? "Edit Product Category" : "Add Product Category"}
                 </CardTitle>
                 <CardDescription>
-                  Create a new product category for your inventory
+                  {editingCategoryId ? "Update category details" : "Create a new product category for your inventory"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -307,14 +409,113 @@ export default function Settings() {
                     rows={4}
                   />
                 </div>
-                <Button
-                  onClick={addCategory}
-                  className="w-full"
-                  disabled={isAddingCategory}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  {isAddingCategory ? "Adding Category..." : "Add Category"}
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={addCategory}
+                    className="flex-1"
+                    disabled={isAddingCategory}
+                  >
+                    {editingCategoryId ? (
+                      <>
+                        <Save className="mr-2 h-4 w-4" />
+                        {isAddingCategory ? "Updating..." : "Update Category"}
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="mr-2 h-4 w-4" />
+                        {isAddingCategory ? "Adding..." : "Add Category"}
+                      </>
+                    )}
+                  </Button>
+                  {editingCategoryId && (
+                    <Button
+                      onClick={cancelEdit}
+                      variant="outline"
+                      disabled={isAddingCategory}
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Manage Categories</CardTitle>
+                <CardDescription>
+                  View, edit, and delete existing product categories
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoadingCategories ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    Loading categories...
+                  </div>
+                ) : categories.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No categories yet. Create one above.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {categories.map((category) => (
+                      <div
+                        key={category.id}
+                        className="flex items-start justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium truncate">{category.name}</h4>
+                          {category.description && (
+                            <p className="text-sm text-muted-foreground line-clamp-2">
+                              {category.description}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex gap-2 ml-4 flex-shrink-0">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => editCategory(category)}
+                            title="Edit category"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                title="Delete category"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle className="flex items-center gap-2">
+                                  <AlertCircle className="h-5 w-5 text-destructive" />
+                                  Delete Category
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete the category "{category.name}"? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <div className="flex gap-3 justify-end">
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => deleteCategory(category.id)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </div>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
