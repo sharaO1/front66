@@ -54,6 +54,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { API_BASE, joinApi } from "@/lib/api";
 
 interface SystemSettings {
   companyName: string;
