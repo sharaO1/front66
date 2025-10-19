@@ -594,6 +594,25 @@ export default function AIChat({
                   ? "fixed right-4 lg:right-6 bottom-[calc(env(safe-area-inset-bottom)+4.5rem)] lg:bottom-6 z-50"
                   : "relative z-auto mt-6",
           )}
+          style={
+            page || isFullScreen
+              ? {
+                  overscrollBehavior: "none",
+                  WebkitTouchCallout: "none",
+                  WebkitUserSelect: "none",
+                }
+              : undefined
+          }
+          onTouchMove={(e) => {
+            if (page || isFullScreen) {
+              e.preventDefault();
+            }
+          }}
+          onWheel={(e) => {
+            if (page || isFullScreen) {
+              e.preventDefault();
+            }
+          }}
         >
           <Card
             className={cn(
