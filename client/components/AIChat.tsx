@@ -560,12 +560,16 @@ export default function AIChat({
       const prevHtml = html.style.overflow;
       body.style.overflow = "hidden";
       html.style.overflow = "hidden";
+      document.body.style.position = "fixed";
+      document.body.style.width = "100%";
       return () => {
         body.style.overflow = prevBody;
         html.style.overflow = prevHtml;
+        document.body.style.position = "";
+        document.body.style.width = "";
       };
     }
-  }, [isOpen, isFullScreen, page]);
+  }, [isOpen, isFullScreen, page, isMobile]);
 
   return (
     <>
