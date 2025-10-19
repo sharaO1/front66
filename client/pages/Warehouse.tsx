@@ -2938,7 +2938,12 @@ export default function Warehouse() {
       </Dialog>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div
+        className={`transition-all duration-300 overflow-hidden ${
+          showAlertCards ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -3023,6 +3028,7 @@ export default function Warehouse() {
             </p>
           </CardContent>
         </Card>
+      </div>
       </div>
 
       <Tabs defaultValue="inventory" className="space-y-4">
