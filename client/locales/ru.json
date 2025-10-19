@@ -89,7 +89,7 @@
     "finance": "Финансы",
     "employees": "Сотрудники",
     "user_management": "Управление пользователами",
-    "settings": "Настройки",
+    "settings": "На��тройки",
     "filials": "Филиалы"
   },
   "dashboard": {
@@ -212,7 +212,7 @@
       "product_added_desc": "{{name}} добавлен на склад.",
       "product_deleted_title": "Товар удален",
       "product_deleted_desc": "{{name}} удален со склада.",
-      "stock_added_title": "Запасы добавлены",
+      "stock_added_title": "З��пасы добавлены",
       "stock_added_desc": "Добавлено {{quantity}} ед. к {{name}}",
       "stock_removed_title": "Запасы списаны",
       "stock_removed_desc": "Списано {{quantity}} ед. с {{name}}",
@@ -251,6 +251,7 @@
     "discarded": "Списано",
     "discard_reason": "Причина списания",
     "expired": "Просрочено",
+    "expired_products": "Просроченные товары",
     "broken": "повреждено",
     "lost": "Потеряно",
     "other": "Другое",
@@ -397,7 +398,7 @@
     "country": "Страна",
     "total_filials": "Всего филиалов",
     "retail_stores": "Розничные магазины",
-    "customer_facing_locations": "торговые точки",
+    "customer_facing_locations": "��орговые точки",
     "warehouses": "Склады",
     "storage_facilities": "Хранилища",
     "total_staff": "Всего персонала",
@@ -425,7 +426,7 @@
     "created": "Создано",
     "updated": "Обновлено",
     "edit_filial": "Редактировать филиал",
-    "edit_description": "Обновить информацию о филиале.",
+    "edit_description": "О��новить информацию о филиале.",
     "update_filial": "Обновить филиал",
     "required_fields_error": "Пожалуйста, заполните все обязательные поля",
     "toast": {
@@ -569,10 +570,10 @@
     "transaction_description": "Описание транзакции",
     "reports_analytics": "Отчеты и аналитика",
     "financial_goals": "Финансовые цели",
-    "cash_flow_trend": "Тренд денежного потока",
+    "cash_flow_trend": "Тр��нд денежного потока",
     "monthly_income_expenses": "Ежемесячные доходы и расходы",
     "expense_breakdown": "Разбивка расходов",
-    "expenses_by_category": "Расходы по категориям",
+    "expenses_by_category": "Расходы по катего��иям",
     "monthly_performance": "Ежемесячная производительность",
     "income_expenses_profit": "Сравнение доходов, расходов и прибыли",
     "track_financial_objectives": "Отслеживайте свои финансовые цели и прогресс",
@@ -633,7 +634,7 @@
     "last_week": "Последняя неделя",
     "last_month": "Последний месяц",
     "last_year": "Последний год",
-    "last_12_months": "Последние 12 месяцев",
+    "last_12_months": "��оследние 12 месяцев",
     "amount_label": "Сумма ($)",
     "export_financial_report": "Экспорт финансового отчета",
     "export_pdf_title": "Отчет PDF",
@@ -721,7 +722,7 @@
     "retention": "Удержание",
     "sales_team": "Команда продаж",
     "active_sales_staff": "Активных сотрудников продаж",
-    "todays_sales": "Продажи сегодня",
+    "todays_sales": "Прод��жи сегодня",
     "transactions": "Транзакции",
     "commissions": "Комиссии",
     "todays_commissions_desc": "Сумма комиссионных за сегодня",
@@ -774,7 +775,7 @@
     "select_email_unused": "Выберите неиспользуемый email",
     "sales_details_title": "Детали продаж",
     "sales_history_for": "История продаж для",
-    "sales_label": "Продажи",
+    "sales_label": "��родажи",
     "not_marked": "Не отмечено",
     "commission": "Комиссия",
     "monthly_sales_target": "Ежемесячный план продаж",
@@ -897,7 +898,7 @@
     "monthly": "Ежемесячно",
     "yearly": "Ежегодно",
     "cloud_storage": "Облачное хранилище",
-    "local_storage": "Локальное хранилище",
+    "local_storage": "Л��кальное хранилище",
     "external_drive": "Внешний диск",
     "network_drive": "Сетевой диск",
     "days_ago": "дней, 7 часов назад"
@@ -952,7 +953,7 @@
     "resources": {
       "users": "Управление пользователями",
       "employees": "Управление сотрудниками",
-      "clients": "Управление клиентами",
+      "clients": "��правление клиентами",
       "sales": "Управление продажами",
       "finance": "Финансовое управление",
       "dashboard": "Панель",
@@ -986,7 +987,7 @@
     "finance": "Финансы",
     "hr": "HR",
     "it": "ИТ",
-    "operations": "Операции"
+    "operations": "О��ерации"
   },
   "admin": {
     "users": {
@@ -1056,7 +1057,7 @@
         "sections": {
           "basic_info": "Базовая информация",
           "role_access": "Роль и доссуп",
-          "permissions_preview": "Предпросмотр прав роли"
+          "permissions_preview": "П��едпросмотр прав роли"
         },
         "labels": {
           "first_name": "Имя",
