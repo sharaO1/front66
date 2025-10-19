@@ -582,15 +582,13 @@ export default function AIChat({
       {isOpen && (
         <div
           className={cn(
-            page && isFullScreen
+            page
               ? "fixed inset-0 z-50 p-0 bg-background overscroll-none touch-none"
-              : page
-                ? "relative z-auto"
-                : isFullScreen
-                  ? "fixed inset-0 z-50 p-0 bg-background overscroll-none touch-none"
-                  : variant === "floating"
-                    ? "fixed right-4 lg:right-6 bottom-[calc(env(safe-area-inset-bottom)+4.5rem)] lg:bottom-6 z-50"
-                    : "relative z-auto mt-6",
+              : isFullScreen
+                ? "fixed inset-0 z-50 p-0 bg-background overscroll-none touch-none"
+                : variant === "floating"
+                  ? "fixed right-4 lg:right-6 bottom-[calc(env(safe-area-inset-bottom)+4.5rem)] lg:bottom-6 z-50"
+                  : "relative z-auto mt-6",
           )}
         >
           <Card
