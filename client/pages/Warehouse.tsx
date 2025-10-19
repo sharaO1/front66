@@ -1617,6 +1617,27 @@ export default function Warehouse() {
     }
   };
 
+  const isProductExpired = (expiryDate?: string): boolean => {
+    if (!expiryDate) return false;
+    try {
+      const expDate = new Date(expiryDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      expDate.setHours(0, 0, 0, 0);
+      return expDate < today;
+    } catch {
+      return false;
+    }
+  };
+
+  const getExpiredBadge = () => {
+    return (
+      <Badge variant="destructive" className="bg-red-500 text-white">
+        {t("warehouse.expired")}
+      </Badge>
+    );
+  };
+
   const formatReason = (reason: string): string => {
     const r = String(reason || "").toLowerCase();
     if (r === "purchase") return t("warehouse.purchase");
