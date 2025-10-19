@@ -556,17 +556,38 @@ export default function AIChat({
     if (shouldLock) {
       const body = document.body;
       const html = document.documentElement;
-      const prevBody = body.style.overflow;
-      const prevHtml = html.style.overflow;
+      const prevBodyOverflow = body.style.overflow;
+      const prevHtmlOverflow = html.style.overflow;
+      const prevBodyPosition = body.style.position;
+      const prevBodyWidth = body.style.width;
+      const prevBodyHeight = body.style.height;
+
       body.style.overflow = "hidden";
       html.style.overflow = "hidden";
-      document.body.style.position = "fixed";
-      document.body.style.width = "100%";
+      body.style.position = "fixed";
+      body.style.width = "100%";
+      body.style.height = "100%";
+
+      // Prevent all scroll events
+      const preventScroll = (e: Event) => {
+        if (shouldLock) {
+          e.preventDefault();
+        }
+      };
+
+      document.addEventListener("wheel", preventScroll, { passive: false });
+      document.addEventListener("touchmove", preventScroll, { passive: false });
+      document.addEventListener("scroll", preventScroll, { passive: false });
+
       return () => {
-        body.style.overflow = prevBody;
-        html.style.overflow = prevHtml;
-        document.body.style.position = "";
-        document.body.style.width = "";
+        body.style.overflow = prevBodyOverflow;
+        html.style.overflow = prevHtmlOverflow;
+        body.style.position = prevBodyPosition;
+        body.style.width = prevBodyWidth;
+        body.style.height = prevBodyHeight;
+        document.removeEventListener("wheel", preventScroll);
+        document.removeEventListener("touchmove", preventScroll);
+        document.removeEventListener("scroll", preventScroll);
       };
     }
   }, [isOpen, isFullScreen, page, isMobile]);
