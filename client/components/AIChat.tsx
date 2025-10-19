@@ -611,39 +611,13 @@ export default function AIChat({
         <div
           className={cn(
             page
-              ? "fixed inset-0 z-50 p-0 bg-background overscroll-none"
+              ? "fixed inset-0 z-50 p-0 bg-background"
               : isFullScreen
-                ? "fixed inset-0 z-50 p-0 bg-background overscroll-none"
+                ? "fixed inset-0 z-50 p-0 bg-background"
                 : variant === "floating"
                   ? "fixed right-4 lg:right-6 bottom-[calc(env(safe-area-inset-bottom)+4.5rem)] lg:bottom-6 z-50"
                   : "relative z-auto mt-6",
           )}
-          style={
-            page || isFullScreen
-              ? {
-                  overscrollBehavior: "none",
-                  touchAction: "none",
-                }
-              : undefined
-          }
-          onWheel={(e) => {
-            if (page || isFullScreen) {
-              const target = e.target as HTMLElement;
-              if (target === listRef.current || listRef.current?.contains(target)) {
-                return;
-              }
-              e.preventDefault();
-            }
-          }}
-          onTouchMove={(e) => {
-            if (page || isFullScreen) {
-              const target = e.target as HTMLElement;
-              if (target === listRef.current || listRef.current?.contains(target)) {
-                return;
-              }
-              e.preventDefault();
-            }
-          }}
         >
           <Card
             className={cn(
