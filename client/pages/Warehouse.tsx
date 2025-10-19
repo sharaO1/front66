@@ -1391,13 +1391,21 @@ export default function Warehouse() {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const activeElement = document.activeElement as HTMLElement;
-      const isInputField = activeElement?.tagName === "INPUT" || activeElement?.tagName === "TEXTAREA";
+      const isInputField =
+        activeElement?.tagName === "INPUT" ||
+        activeElement?.tagName === "TEXTAREA";
 
       // Handle Enter key - if buffer has content, search for product
-      if (event.key === "Enter" && skuBuffer.trim().length > 0 && !isInputField) {
+      if (
+        event.key === "Enter" &&
+        skuBuffer.trim().length > 0 &&
+        !isInputField
+      ) {
         event.preventDefault();
         const sku = skuBuffer.trim();
-        const foundProduct = products.find(p => p.sku.toLowerCase() === sku.toLowerCase());
+        const foundProduct = products.find(
+          (p) => p.sku.toLowerCase() === sku.toLowerCase(),
+        );
         if (foundProduct) {
           setSelectedProduct(foundProduct);
           setIsViewDialogOpen(true);
@@ -1439,7 +1447,9 @@ export default function Warehouse() {
         skuTimeoutRef.current = setTimeout(() => {
           const sku = newBuffer.trim();
           if (sku.length > 0) {
-            const foundProduct = products.find(p => p.sku.toLowerCase() === sku.toLowerCase());
+            const foundProduct = products.find(
+              (p) => p.sku.toLowerCase() === sku.toLowerCase(),
+            );
             if (foundProduct) {
               setSelectedProduct(foundProduct);
               setIsViewDialogOpen(true);
@@ -1487,7 +1497,10 @@ export default function Warehouse() {
       return { id: null as string | null, name: null as string | null };
     }
     const idRaw =
-      (authUser as any).filialId ?? (authUser as any).filialID ?? (authUser as any).storeId ?? null;
+      (authUser as any).filialId ??
+      (authUser as any).filialID ??
+      (authUser as any).storeId ??
+      null;
     const nameRaw =
       (authUser as any).filialName ?? (authUser as any).location ?? null;
     const id = idRaw != null ? String(idRaw) : null;
@@ -1499,7 +1512,8 @@ export default function Warehouse() {
   const matchesFilial = (st: ProductStore) => {
     if (!isScoped) return true;
     const stId = st && st.storeId != null ? String(st.storeId) : "";
-    const stName = st && st.storeName ? String(st.storeName).toLowerCase().trim() : "";
+    const stName =
+      st && st.storeName ? String(st.storeName).toLowerCase().trim() : "";
     return (
       (scopedFilial.id && stId === scopedFilial.id) ||
       (scopedFilial.name && stName === scopedFilial.name)
@@ -1515,7 +1529,10 @@ export default function Warehouse() {
   const getQuantityAtLocation = (product: Product, locId: string | null) => {
     if (!product || !locId) return 0;
     const s = (product.stores || []).find(
-      (st) => String(st.storeId) === String(locId) || String(st.storeName).toLowerCase().trim() === String(locId).toLowerCase().trim(),
+      (st) =>
+        String(st.storeId) === String(locId) ||
+        String(st.storeName).toLowerCase().trim() ===
+          String(locId).toLowerCase().trim(),
     );
     return s ? s.quantity : 0;
   };
@@ -2531,217 +2548,250 @@ export default function Warehouse() {
           </Button>
 
           <AdminOnly>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                {t("warehouse.add_product")}
-              </Button>
-            </DialogTrigger>
-            <DialogContent
-              className="max-w-2xl"
-              onPointerDownOutside={(e) => e.preventDefault()}
-              onEscapeKeyDown={(e) => e.preventDefault()}
-            >
-              <DialogHeader>
-                <DialogTitle>{t("warehouse.add_new_product")}</DialogTitle>
-                <DialogDescription>
-                  {t("warehouse.enter_product_details")}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">
-                      {t("warehouse.product_name")} *
-                    </Label>
-                    <Input
-                      id="name"
-                      placeholder={t("warehouse.enter_product_name")}
-                      value={newProduct.name}
-                      onChange={(e) =>
-                        setNewProduct({ ...newProduct, name: e.target.value })
-                      }
-                    />
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  {t("warehouse.add_product")}
+                </Button>
+              </DialogTrigger>
+              <DialogContent
+                className="max-w-2xl"
+                onPointerDownOutside={(e) => e.preventDefault()}
+                onEscapeKeyDown={(e) => e.preventDefault()}
+              >
+                <DialogHeader>
+                  <DialogTitle>{t("warehouse.add_new_product")}</DialogTitle>
+                  <DialogDescription>
+                    {t("warehouse.enter_product_details")}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">
+                        {t("warehouse.product_name")} *
+                      </Label>
+                      <Input
+                        id="name"
+                        placeholder={t("warehouse.enter_product_name")}
+                        value={newProduct.name}
+                        onChange={(e) =>
+                          setNewProduct({ ...newProduct, name: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="sku">SKU *</Label>
+                      <Input
+                        id="sku"
+                        placeholder="APL-IP15P-128"
+                        value={newProduct.sku}
+                        onChange={(e) =>
+                          setNewProduct({ ...newProduct, sku: e.target.value })
+                        }
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="sku">SKU *</Label>
-                    <Input
-                      id="sku"
-                      placeholder="APL-IP15P-128"
-                      value={newProduct.sku}
-                      onChange={(e) =>
-                        setNewProduct({ ...newProduct, sku: e.target.value })
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="category">
-                      {t("warehouse.category")} *
-                    </Label>
-                    <Select
-                      value={newProduct.category}
-                      onValueChange={(value) =>
-                        setNewProduct({ ...newProduct, category: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder={t("warehouse.select_category")}
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.length > 0 ? (
-                          categories.map((cat) => (
-                            <SelectItem key={cat.id} value={cat.name}>
-                              {cat.name}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="category">
+                        {t("warehouse.category")} *
+                      </Label>
+                      <Select
+                        value={newProduct.category}
+                        onValueChange={(value) =>
+                          setNewProduct({ ...newProduct, category: value })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue
+                            placeholder={t("warehouse.select_category")}
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.length > 0 ? (
+                            categories.map((cat) => (
+                              <SelectItem key={cat.id} value={cat.name}>
+                                {cat.name}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="" disabled>
+                              {t("warehouse.no_categories")}
                             </SelectItem>
-                          ))
-                        ) : (
-                          <SelectItem value="" disabled>
-                            {t("warehouse.no_categories")}
-                          </SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="brand">{t("warehouse.brand")}</Label>
+                      <Input
+                        id="brand"
+                        placeholder={t("warehouse.enter_brand_name")}
+                        value={newProduct.brand}
+                        onChange={(e) =>
+                          setNewProduct({
+                            ...newProduct,
+                            brand: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="brand">{t("warehouse.brand")}</Label>
-                    <Input
-                      id="brand"
-                      placeholder={t("warehouse.enter_brand_name")}
-                      value={newProduct.brand}
-                      onChange={(e) =>
-                        setNewProduct({ ...newProduct, brand: e.target.value })
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">{t("common.description")}</Label>
-                  <Textarea
-                    id="description"
-                    placeholder={t("warehouse.product_description_placeholder")}
-                    value={newProduct.description}
-                    onChange={(e) =>
-                      setNewProduct({
-                        ...newProduct,
-                        description: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="minStock">{t("warehouse.min_stock")}</Label>
-                    <Input
-                      id="minStock"
-                      type="number"
-                      min="0"
-                      value={newProduct.minStock}
-                      onChange={(e) =>
-                        setNewProduct({
-                          ...newProduct,
-                          minStock: parseInt(e.target.value) || 0,
-                        })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="maxStock">{t("warehouse.max_stock")}</Label>
-                    <Input
-                      id="maxStock"
-                      type="number"
-                      min="0"
-                      value={newProduct.maxStock}
-                      onChange={(e) =>
-                        setNewProduct({
-                          ...newProduct,
-                          maxStock: parseInt(e.target.value) || 0,
-                        })
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="costPrice">
-                      {t("warehouse.cost_price")}
+                    <Label htmlFor="description">
+                      {t("common.description")}
                     </Label>
-                    <Input
-                      id="costPrice"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={newProduct.costPrice}
+                    <Textarea
+                      id="description"
+                      placeholder={t(
+                        "warehouse.product_description_placeholder",
+                      )}
+                      value={newProduct.description}
                       onChange={(e) =>
                         setNewProduct({
                           ...newProduct,
-                          costPrice: parseFloat(e.target.value) || 0,
+                          description: e.target.value,
                         })
                       }
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="sellingPrice">
-                      {t("warehouse.selling_price")}
-                    </Label>
-                    <Input
-                      id="sellingPrice"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={newProduct.sellingPrice}
-                      onChange={(e) =>
-                        setNewProduct({
-                          ...newProduct,
-                          sellingPrice: parseFloat(e.target.value) || 0,
-                        })
-                      }
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="minStock">
+                        {t("warehouse.min_stock")}
+                      </Label>
+                      <Input
+                        id="minStock"
+                        type="number"
+                        min="0"
+                        value={newProduct.minStock}
+                        onChange={(e) =>
+                          setNewProduct({
+                            ...newProduct,
+                            minStock: parseInt(e.target.value) || 0,
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="maxStock">
+                        {t("warehouse.max_stock")}
+                      </Label>
+                      <Input
+                        id="maxStock"
+                        type="number"
+                        min="0"
+                        value={newProduct.maxStock}
+                        onChange={(e) =>
+                          setNewProduct({
+                            ...newProduct,
+                            maxStock: parseInt(e.target.value) || 0,
+                          })
+                        }
+                      />
+                    </div>
                   </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="supplier">{t("warehouse.suppliers")}</Label>
-                    <div className="flex flex-col">
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {(newProduct.suppliers || []).map((s, i) => (
-                          <span
-                            key={i}
-                            className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-sm"
-                          >
-                            <span>{s}</span>
-                            <button
-                              type="button"
-                              className="text-xs text-muted-foreground"
-                              onClick={() => {
-                                const copy = (
-                                  newProduct.suppliers || []
-                                ).slice();
-                                copy.splice(i, 1);
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="costPrice">
+                        {t("warehouse.cost_price")}
+                      </Label>
+                      <Input
+                        id="costPrice"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={newProduct.costPrice}
+                        onChange={(e) =>
+                          setNewProduct({
+                            ...newProduct,
+                            costPrice: parseFloat(e.target.value) || 0,
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="sellingPrice">
+                        {t("warehouse.selling_price")}
+                      </Label>
+                      <Input
+                        id="sellingPrice"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={newProduct.sellingPrice}
+                        onChange={(e) =>
+                          setNewProduct({
+                            ...newProduct,
+                            sellingPrice: parseFloat(e.target.value) || 0,
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="supplier">
+                        {t("warehouse.suppliers")}
+                      </Label>
+                      <div className="flex flex-col">
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {(newProduct.suppliers || []).map((s, i) => (
+                            <span
+                              key={i}
+                              className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-sm"
+                            >
+                              <span>{s}</span>
+                              <button
+                                type="button"
+                                className="text-xs text-muted-foreground"
+                                onClick={() => {
+                                  const copy = (
+                                    newProduct.suppliers || []
+                                  ).slice();
+                                  copy.splice(i, 1);
+                                  setNewProduct({
+                                    ...newProduct,
+                                    suppliers: copy,
+                                  });
+                                }}
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                        <div className="flex gap-2">
+                          <Input
+                            id="supplier"
+                            placeholder={t(
+                              "warehouse.add_supplier_placeholder",
+                            )}
+                            value={supplierInput}
+                            onChange={(e) => setSupplierInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                const v = supplierInput.trim();
+                                if (!v) return;
                                 setNewProduct({
                                   ...newProduct,
-                                  suppliers: copy,
+                                  suppliers: Array.from(
+                                    new Set([
+                                      ...(newProduct.suppliers || []),
+                                      v,
+                                    ]),
+                                  ),
                                 });
-                              }}
-                            >
-                              ×
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                      <div className="flex gap-2">
-                        <Input
-                          id="supplier"
-                          placeholder={t("warehouse.add_supplier_placeholder")}
-                          value={supplierInput}
-                          onChange={(e) => setSupplierInput(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
+                                setSupplierInput("");
+                              }
+                            }}
+                          />
+                          <Button
+                            variant="default"
+                            onClick={() => {
                               const v = supplierInput.trim();
                               if (!v) return;
                               setNewProduct({
@@ -2751,73 +2801,60 @@ export default function Warehouse() {
                                 ),
                               });
                               setSupplierInput("");
-                            }
-                          }}
-                        />
-                        <Button
-                          variant="default"
-                          onClick={() => {
-                            const v = supplierInput.trim();
-                            if (!v) return;
-                            setNewProduct({
-                              ...newProduct,
-                              suppliers: Array.from(
-                                new Set([...(newProduct.suppliers || []), v]),
-                              ),
-                            });
-                            setSupplierInput("");
-                          }}
-                        >
-                          {t("common.add")}
-                        </Button>
+                            }}
+                          >
+                            {t("common.add")}
+                          </Button>
+                        </div>
                       </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="location">
+                        {t("warehouse.location")}
+                      </Label>
+                      <Input
+                        id="location"
+                        placeholder="A1-B2"
+                        value={newProduct.location}
+                        onChange={(e) =>
+                          setNewProduct({
+                            ...newProduct,
+                            location: e.target.value,
+                          })
+                        }
+                      />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="location">{t("warehouse.location")}</Label>
+                    <Label htmlFor="expiryDate">
+                      {t("warehouse.expiry_date")}
+                    </Label>
                     <Input
-                      id="location"
-                      placeholder="A1-B2"
-                      value={newProduct.location}
+                      id="expiryDate"
+                      type="date"
+                      value={newProduct.expiryDate || ""}
                       onChange={(e) =>
                         setNewProduct({
                           ...newProduct,
-                          location: e.target.value,
+                          expiryDate: e.target.value,
                         })
                       }
                     />
                   </div>
+                  <div className="flex gap-2">
+                    <Button className="flex-1" onClick={addProduct}>
+                      {t("warehouse.add_product")}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsAddDialogOpen(false)}
+                    >
+                      {t("common.cancel")}
+                    </Button>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="expiryDate">
-                    {t("warehouse.expiry_date")}
-                  </Label>
-                  <Input
-                    id="expiryDate"
-                    type="date"
-                    value={newProduct.expiryDate || ""}
-                    onChange={(e) =>
-                      setNewProduct({
-                        ...newProduct,
-                        expiryDate: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Button className="flex-1" onClick={addProduct}>
-                    {t("warehouse.add_product")}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsAddDialogOpen(false)}
-                  >
-                    {t("common.cancel")}
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
           </AdminOnly>
         </div>
       </div>
@@ -2882,7 +2919,13 @@ export default function Warehouse() {
           <CardContent>
             <div className="text-2xl font-bold">{products.length}</div>
             <p className="text-xs text-muted-foreground">
-              {products.filter((p) => calculateStatus(getVisibleQuantity(p), p.minStock) === "in-stock").length}{" "}
+              {
+                products.filter(
+                  (p) =>
+                    calculateStatus(getVisibleQuantity(p), p.minStock) ===
+                    "in-stock",
+                ).length
+              }{" "}
               {t("warehouse.in_stock")}
             </p>
           </CardContent>
@@ -2897,7 +2940,13 @@ export default function Warehouse() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">
-              {products.filter((p) => calculateStatus(getVisibleQuantity(p), p.minStock) === "low-stock").length}
+              {
+                products.filter(
+                  (p) =>
+                    calculateStatus(getVisibleQuantity(p), p.minStock) ===
+                    "low-stock",
+                ).length
+              }
             </div>
             <p className="text-xs text-muted-foreground">
               {t("warehouse.need_immediate_attention")}
@@ -2914,7 +2963,13 @@ export default function Warehouse() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              {products.filter((p) => calculateStatus(getVisibleQuantity(p), p.minStock) === "out-of-stock").length}
+              {
+                products.filter(
+                  (p) =>
+                    calculateStatus(getVisibleQuantity(p), p.minStock) ===
+                    "out-of-stock",
+                ).length
+              }
             </div>
             <p className="text-xs text-muted-foreground">
               {t("warehouse.require_restocking")}
@@ -3036,7 +3091,9 @@ export default function Warehouse() {
                         </TableCell>
                         <TableCell>{product.category}</TableCell>
                         <TableCell>
-                          <div className="font-medium">{getVisibleQuantity(product)}</div>
+                          <div className="font-medium">
+                            {getVisibleQuantity(product)}
+                          </div>
                           <div className="text-xs text-muted-foreground">
                             {t("warehouse.min_stock")}: {product.minStock} |{" "}
                             {t("warehouse.max_stock")}: {product.maxStock}
@@ -3044,11 +3101,14 @@ export default function Warehouse() {
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-col gap-1">
-                            {isProductExpired(product.expiryDate) ? (
-                              getExpiredBadge()
-                            ) : (
-                              getStatusBadge(calculateStatus(getVisibleQuantity(product), product.minStock))
-                            )}
+                            {isProductExpired(product.expiryDate)
+                              ? getExpiredBadge()
+                              : getStatusBadge(
+                                  calculateStatus(
+                                    getVisibleQuantity(product),
+                                    product.minStock,
+                                  ),
+                                )}
                           </div>
                         </TableCell>
                         <TableCell>
@@ -3712,15 +3772,15 @@ export default function Warehouse() {
             <ArrowDown className="h-5 w-5" />
           </Button>
           <AdminOnly>
-          <Button
-            className="shadow-business-lg"
-            size="icon"
-            aria-label="Add Product"
-            onClick={() => setIsAddDialogOpen(true)}
-          >
-            <Plus className="h-5 w-5" />
-          </Button>
-        </AdminOnly>
+            <Button
+              className="shadow-business-lg"
+              size="icon"
+              aria-label="Add Product"
+              onClick={() => setIsAddDialogOpen(true)}
+            >
+              <Plus className="h-5 w-5" />
+            </Button>
+          </AdminOnly>
         </div>
       </div>
 
@@ -4170,13 +4230,17 @@ export default function Warehouse() {
                 <div className="text-sm text-muted-foreground">
                   {t("warehouse.current_stock")}:{" "}
                   <span className="font-medium">
-                    {selectedProduct ? getQuantityAtLocation(selectedProduct, stockLocation) : 0}
+                    {selectedProduct
+                      ? getQuantityAtLocation(selectedProduct, stockLocation)
+                      : 0}
                   </span>
                 </div>
                 <div className="text-sm text-muted-foreground">
                   {t("warehouse.new_stock")}:{" "}
                   <span className="font-medium">
-                    {(selectedProduct ? getQuantityAtLocation(selectedProduct, stockLocation) : 0) + stockQuantity}
+                    {(selectedProduct
+                      ? getQuantityAtLocation(selectedProduct, stockLocation)
+                      : 0) + stockQuantity}
                   </span>
                 </div>
               </div>
@@ -4253,7 +4317,11 @@ export default function Warehouse() {
                 id="stockOutQuantity"
                 type="number"
                 min="1"
-                max={selectedProduct ? getQuantityAtLocation(selectedProduct, stockLocation) : 0}
+                max={
+                  selectedProduct
+                    ? getQuantityAtLocation(selectedProduct, stockLocation)
+                    : 0
+                }
                 value={stockQuantity}
                 onChange={(e) =>
                   setStockQuantity(parseInt(e.target.value) || 0)
@@ -4413,20 +4481,29 @@ export default function Warehouse() {
                 <div className="text-sm text-muted-foreground">
                   {t("warehouse.current_stock")}:{" "}
                   <span className="font-medium">
-                    {selectedProduct ? getQuantityAtLocation(selectedProduct, stockLocation) : 0}
+                    {selectedProduct
+                      ? getQuantityAtLocation(selectedProduct, stockLocation)
+                      : 0}
                   </span>
                 </div>
                 <div className="text-sm text-muted-foreground">
                   {t("warehouse.remaining_stock")}:{" "}
                   <span className="font-medium">
-                    {Math.max(0, (selectedProduct ? getQuantityAtLocation(selectedProduct, stockLocation) : 0) - stockQuantity)}
+                    {Math.max(
+                      0,
+                      (selectedProduct
+                        ? getQuantityAtLocation(selectedProduct, stockLocation)
+                        : 0) - stockQuantity,
+                    )}
                   </span>
                 </div>
-                {selectedProduct && stockQuantity > getQuantityAtLocation(selectedProduct, stockLocation) && (
-                  <div className="text-sm text-red-600 mt-1">
-                    ⚠️ {t("warehouse.cannot_remove_more_than_available")}
-                  </div>
-                )}
+                {selectedProduct &&
+                  stockQuantity >
+                    getQuantityAtLocation(selectedProduct, stockLocation) && (
+                    <div className="text-sm text-red-600 mt-1">
+                      ⚠️ {t("warehouse.cannot_remove_more_than_available")}
+                    </div>
+                  )}
               </div>
             )}
             <div className="flex gap-2">
@@ -4638,7 +4715,8 @@ export default function Warehouse() {
                   </div>
                   {selectedProduct.expiryDate && (
                     <div>
-                      ⏰ {t("warehouse.expiry_date")}: {selectedProduct.expiryDate}
+                      ⏰ {t("warehouse.expiry_date")}:{" "}
+                      {selectedProduct.expiryDate}
                     </div>
                   )}
                 </div>
