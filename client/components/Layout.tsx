@@ -369,10 +369,12 @@ export default function Layout({ children }: LayoutProps) {
         onClick={handleMainAreaClick}
       >
         {/* Enhanced Header */}
-        <header className={cn(
-          "sticky top-0 z-40 backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 border-b border-gray-200/50 dark:border-gray-700/50 shadow-business transition-transform duration-300 ease-in-out",
-          !showHeader ? "-translate-y-full" : "translate-y-0"
-        )}>
+        <header
+          className={cn(
+            "sticky top-0 z-40 backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 border-b border-gray-200/50 dark:border-gray-700/50 shadow-business transition-transform duration-300 ease-in-out",
+            !showHeader ? "-translate-y-full" : "translate-y-0",
+          )}
+        >
           <div className="flex items-center gap-6 px-6 py-4">
             <Button
               variant="ghost"
@@ -455,19 +457,23 @@ export default function Layout({ children }: LayoutProps) {
         </header>
 
         {/* Page content - mobile-optimized padding */}
-        <main className={cn(
-          "overflow-x-hidden transition-all duration-300",
-          "p-4 pb-24 md:p-6 md:pb-6",
-          !showHeader && "lg:hidden" ? "pb-6" : ""
-        )}>
+        <main
+          className={cn(
+            "overflow-x-hidden transition-all duration-300",
+            "p-4 pb-24 md:p-6 md:pb-6",
+            !showHeader && "lg:hidden" ? "pb-6" : "",
+          )}
+        >
           {children}
         </main>
 
         {/* Mobile bottom navigation */}
-        <footer className={cn(
-          "fixed inset-x-0 bottom-0 z-40 border-t border-gray-200/60 dark:border-gray-700/60 bg-white/90 dark:bg-gray-900/90 backdrop-blur supports-[backdrop-filter]:bg-white/60 lg:hidden transition-transform duration-300 ease-in-out",
-          !showHeader ? "translate-y-full" : "translate-y-0"
-        )}>
+        <footer
+          className={cn(
+            "fixed inset-x-0 bottom-0 z-40 border-t border-gray-200/60 dark:border-gray-700/60 bg-white/90 dark:bg-gray-900/90 backdrop-blur supports-[backdrop-filter]:bg-white/60 lg:hidden transition-transform duration-300 ease-in-out",
+            !showHeader ? "translate-y-full" : "translate-y-0",
+          )}
+        >
           <nav className="grid grid-cols-5 h-16">
             {[
               {
