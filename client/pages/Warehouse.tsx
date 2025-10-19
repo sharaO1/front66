@@ -2978,11 +2978,11 @@ export default function Warehouse() {
                     <SelectItem value="all">
                       {t("warehouse.all_categories")}
                     </SelectItem>
-                    <SelectItem value="Smartphones">Smartphones</SelectItem>
-                    <SelectItem value="Laptops">Laptops</SelectItem>
-                    <SelectItem value="Tablets">Tablets</SelectItem>
-                    <SelectItem value="Accessories">Accessories</SelectItem>
-                    <SelectItem value="Footwear">Footwear</SelectItem>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.name}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
