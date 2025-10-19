@@ -163,6 +163,56 @@ export default function Settings() {
     setShowChangePassword(false);
   };
 
+  const addCategory = async () => {
+    if (!categoryForm.name.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a category name.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsAddingCategory(true);
+    try {
+      const response = await fetch("http://192.168.1.28:5002/api/categories", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+        },
+        body: JSON.stringify({
+          name: categoryForm.name,
+          description: categoryForm.description,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add category");
+      }
+
+      const data = await response.json();
+
+      toast({
+        title: "Success",
+        description: `Category "${categoryForm.name}" has been added successfully.`,
+      });
+
+      setCategoryForm({
+        name: "",
+        description: "",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add category. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAddingCategory(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
