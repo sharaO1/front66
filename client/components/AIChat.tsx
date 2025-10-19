@@ -833,7 +833,6 @@ export default function AIChat({
                       onKeyDown={onKeyDown}
                       placeholder="Type your message…"
                       className="min-h-[48px] max-h-[200px] rounded-xl py-3 px-4 shadow-sm resize-none border-2 border-primary bg-white dark:bg-gray-900"
-                      style={{ fontSize: isMobile ? "16px" : "inherit" }}
                       disabled={isSending || isTyping}
                       rows={1}
                     />
