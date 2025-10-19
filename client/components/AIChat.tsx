@@ -568,24 +568,28 @@ export default function AIChat({
       // Get current scroll position
       const scrollY = window.scrollY;
 
-      // Lock scrolling completely
+      // Lock scrolling on body/html
       body.style.overflow = "hidden";
       html.style.overflow = "hidden";
       body.style.position = "fixed";
       body.style.top = `-${scrollY}px`;
       body.style.width = "100%";
-      body.style.height = "100%";
 
-      // Prevent all scroll events
-      const preventDefault = (e: Event) => {
-        e.preventDefault();
-        return false;
+      // Prevent scroll events that bubble up from outside the message list
+      const handleWheel = (e: WheelEvent) => {
+        if (listRef.current && !listRef.current.contains(e.target as Node)) {
+          e.preventDefault();
+        }
       };
 
-      document.addEventListener("scroll", preventDefault, { passive: false });
-      document.addEventListener("wheel", preventDefault, { passive: false });
-      document.addEventListener("touchmove", preventDefault, { passive: false });
-      window.addEventListener("scroll", preventDefault, { passive: false });
+      const handleTouchMove = (e: TouchEvent) => {
+        if (listRef.current && !listRef.current.contains(e.target as Node)) {
+          e.preventDefault();
+        }
+      };
+
+      document.addEventListener("wheel", handleWheel, { passive: false });
+      document.addEventListener("touchmove", handleTouchMove, { passive: false });
 
       return () => {
         body.style.overflow = prevBodyOverflow;
@@ -595,10 +599,8 @@ export default function AIChat({
         body.style.height = prevBodyHeight;
         body.style.top = prevBodyTop;
 
-        document.removeEventListener("scroll", preventDefault);
-        document.removeEventListener("wheel", preventDefault);
-        document.removeEventListener("touchmove", preventDefault);
-        window.removeEventListener("scroll", preventDefault);
+        document.removeEventListener("wheel", handleWheel);
+        document.removeEventListener("touchmove", handleTouchMove);
 
         // Restore scroll position
         window.scrollTo(0, scrollY);
