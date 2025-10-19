@@ -183,21 +183,9 @@ function getInitials(name?: string | null, email?: string | null) {
   return source.slice(0, 2).toUpperCase();
 }
 
-const ENV_URL = (import.meta as any)?.env?.VITE_CHAT_API_URL as
-  | string
-  | undefined;
 const getCandidateApiUrls = () => {
-  const origin =
-    typeof window !== "undefined" ? window.location.origin : undefined;
-  const list = [
-    ENV_URL?.trim(),
-    "/chat",
-    "/api/chat",
-    origin ? `${origin}/chat` : undefined,
-    origin ? `${origin}/api/chat` : undefined,
-    "http://localhost:5002/api/chat",
-  ].filter(Boolean) as string[];
-  return Array.from(new Set(list));
+  const chatUrl = API_BASE.replace(/\/api\/?$/, '/chat');
+  return [chatUrl];
 };
 
 const getCandidateResetUrls = () =>
