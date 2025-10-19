@@ -49,7 +49,7 @@ import { useToast } from "@/hooks/use-toast";
 import { categoryNameToId, categoryIdToName } from "@/lib/categories";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DetailCard from "@/components/DetailCard";
-import { useMemo, useEffect, useRef } from "react";
+import { useMemo, useEffect, useRef, useState as useStateHook } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { API_BASE } from "@/lib/api";
 import { useTranslation } from "react-i18next";
