@@ -615,6 +615,32 @@ export default function Warehouse() {
   const authUser = useAuthStore((s) => s.user);
   const { t } = useTranslation();
 
+  const fetchCategoriesFromApi = async () => {
+    try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (accessToken) headers["Authorization"] = `Bearer ${accessToken}`;
+      const res = await fetch(`${API_BASE}/categories`, {
+        headers,
+      });
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.ok || !Array.isArray(json.result)) return;
+      const mapped = json.result.map((c: any) => ({
+        id: String(c.id),
+        name: String(c.name || ""),
+        description: c.description ? String(c.description) : undefined,
+      }));
+      setCategories(mapped);
+    } catch (e) {
+      toast({
+        title: t("common.error"),
+        description: t("warehouse.errors.load_categories"),
+        variant: "destructive",
+      });
+    }
+  };
+
   const fetchProductsFromApi = async () => {
     try {
       const headers: Record<string, string> = {
