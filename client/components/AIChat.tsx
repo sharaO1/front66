@@ -684,6 +684,10 @@ export default function AIChat({
                   style={{
                     WebkitOverflowScrolling: "touch",
                     overscrollBehavior: "contain",
+                    WebkitTouchCallout: "none",
+                  }}
+                  onTouchMove={(e) => {
+                    e.stopPropagation();
                   }}
                 >
                   {messages.map((m) => (
