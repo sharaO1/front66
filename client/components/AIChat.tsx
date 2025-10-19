@@ -589,7 +589,9 @@ export default function AIChat({
       };
 
       document.addEventListener("wheel", handleWheel, { passive: false });
-      document.addEventListener("touchmove", handleTouchMove, { passive: false });
+      document.addEventListener("touchmove", handleTouchMove, {
+        passive: false,
+      });
 
       return () => {
         body.style.overflow = prevBodyOverflow;
