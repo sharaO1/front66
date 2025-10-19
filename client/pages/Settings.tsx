@@ -53,9 +53,14 @@ interface SecuritySettings {
   maxLoginAttempts: number;
 }
 
+interface CategoryForm {
+  name: string;
+  description: string;
+}
+
 export default function Settings() {
   const { theme, toggleTheme } = useThemeStore();
-  const { user } = useAuthStore();
+  const { user, accessToken } = useAuthStore();
   const { toast } = useToast();
   const { t } = useTranslation();
 
@@ -88,6 +93,13 @@ export default function Settings() {
     newPassword: "",
     confirmPassword: "",
   });
+
+  const [categoryForm, setCategoryForm] = useState<CategoryForm>({
+    name: "",
+    description: "",
+  });
+
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
 
   const saveSystemSettings = () => {
     toast({
