@@ -703,20 +703,10 @@ export default function AIChat({
                 <div className="h-2 bg-gradient-to-b from-transparent to-black/0 dark:to-white/0" />
                 <div
                   ref={listRef}
-                  className="flex-1 overflow-y-auto overscroll-none pt-[76px] px-[11px] pb-0 space-y-3 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950"
+                  className="flex-1 overflow-y-auto overscroll-contain pt-[76px] px-[11px] pb-0 space-y-3 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950"
                   style={{
                     WebkitOverflowScrolling: "touch",
                     overscrollBehavior: "contain",
-                  }}
-                  onWheel={(e) => {
-                    if (page || isFullScreen) {
-                      e.stopPropagation();
-                    }
-                  }}
-                  onTouchMove={(e) => {
-                    if (page || isFullScreen) {
-                      e.stopPropagation();
-                    }
                   }}
                 >
                   {messages.map((m) => (
