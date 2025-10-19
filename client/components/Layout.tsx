@@ -130,6 +130,28 @@ export default function Layout({ children }: LayoutProps) {
     }
   }, [openChat]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+
+      if (isDesktop) {
+        setShowHeader(true);
+        return;
+      }
+
+      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        setShowHeader(false);
+      } else {
+        setShowHeader(true);
+      }
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
+
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Enhanced Sidebar with Glassmorphism */}
