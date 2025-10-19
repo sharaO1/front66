@@ -403,7 +403,7 @@ export default function Layout({ children }: LayoutProps) {
                     onClick={() => handleLanguageChange("en")}
                     className={language === "en" ? "bg-accent" : ""}
                   >
-                    ��🇸 English
+                    🇺🇸 English
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => handleLanguageChange("tg")}
@@ -455,12 +455,19 @@ export default function Layout({ children }: LayoutProps) {
         </header>
 
         {/* Page content - mobile-optimized padding */}
-        <main className="p-4 pb-24 md:p-6 md:pb-6 overflow-x-hidden">
+        <main className={cn(
+          "overflow-x-hidden transition-all duration-300",
+          "p-4 pb-24 md:p-6 md:pb-6",
+          !showHeader && "lg:hidden" ? "pb-6" : ""
+        )}>
           {children}
         </main>
 
         {/* Mobile bottom navigation */}
-        <footer className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200/60 dark:border-gray-700/60 bg-white/90 dark:bg-gray-900/90 backdrop-blur supports-[backdrop-filter]:bg-white/60 lg:hidden">
+        <footer className={cn(
+          "fixed inset-x-0 bottom-0 z-40 border-t border-gray-200/60 dark:border-gray-700/60 bg-white/90 dark:bg-gray-900/90 backdrop-blur supports-[backdrop-filter]:bg-white/60 lg:hidden transition-transform duration-300 ease-in-out",
+          !showHeader ? "translate-y-full" : "translate-y-0"
+        )}>
           <nav className="grid grid-cols-5 h-16">
             {[
               {
