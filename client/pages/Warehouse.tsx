@@ -4559,6 +4559,11 @@ export default function Warehouse() {
                   <div>
                     📅 {t("warehouse.created")}: {selectedProduct.createdAt}
                   </div>
+                  {selectedProduct.expiryDate && (
+                    <div>
+                      ⏰ {t("warehouse.expiry_date")}: {selectedProduct.expiryDate}
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-1">
                   <div>
