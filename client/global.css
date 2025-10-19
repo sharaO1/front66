@@ -311,6 +311,22 @@
     cursor: not-allowed;
   }
 
+  /* Prevent mobile zoom on dashboard */
+  main {
+    touch-action: manipulation;
+  }
+
+  /* Disable double-tap zoom on all interactive elements */
+  @media (max-width: 768px) {
+    button,
+    a,
+    input,
+    textarea,
+    select {
+      touch-action: manipulation;
+    }
+  }
+
   /* Glass Effect Utility */
   .glass {
     background: rgba(255, 255, 255, 0.1);
