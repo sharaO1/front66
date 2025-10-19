@@ -556,26 +556,52 @@ export default function AIChat({
     if (shouldLock) {
       const body = document.body;
       const html = document.documentElement;
-      const main = document.querySelector("main");
 
       // Store previous styles
       const prevBodyOverflow = body.style.overflow;
       const prevHtmlOverflow = html.style.overflow;
-      const prevMainOverflow = main?.style.overflow;
+      const prevBodyPosition = body.style.position;
+      const prevBodyWidth = body.style.width;
+      const prevBodyHeight = body.style.height;
+      const prevBodyTop = body.style.top;
 
-      // Lock scrolling
+      // Get current scroll position
+      const scrollY = window.scrollY;
+
+      // Lock scrolling completely
       body.style.overflow = "hidden";
       html.style.overflow = "hidden";
-      if (main) {
-        main.style.overflow = "hidden";
-      }
+      body.style.position = "fixed";
+      body.style.top = `-${scrollY}px`;
+      body.style.width = "100%";
+      body.style.height = "100%";
+
+      // Prevent all scroll events
+      const preventDefault = (e: Event) => {
+        e.preventDefault();
+        return false;
+      };
+
+      document.addEventListener("scroll", preventDefault, { passive: false });
+      document.addEventListener("wheel", preventDefault, { passive: false });
+      document.addEventListener("touchmove", preventDefault, { passive: false });
+      window.addEventListener("scroll", preventDefault, { passive: false });
 
       return () => {
         body.style.overflow = prevBodyOverflow;
         html.style.overflow = prevHtmlOverflow;
-        if (main) {
-          main.style.overflow = prevMainOverflow || "";
-        }
+        body.style.position = prevBodyPosition;
+        body.style.width = prevBodyWidth;
+        body.style.height = prevBodyHeight;
+        body.style.top = prevBodyTop;
+
+        document.removeEventListener("scroll", preventDefault);
+        document.removeEventListener("wheel", preventDefault);
+        document.removeEventListener("touchmove", preventDefault);
+        window.removeEventListener("scroll", preventDefault);
+
+        // Restore scroll position
+        window.scrollTo(0, scrollY);
       };
     }
   }, [isOpen, isFullScreen, page]);
