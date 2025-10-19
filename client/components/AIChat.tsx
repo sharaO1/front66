@@ -618,22 +618,10 @@ export default function AIChat({
           style={
             page || isFullScreen
               ? {
-                  overscrollBehavior: "none",
-                  WebkitTouchCallout: "none",
-                  WebkitUserSelect: "none",
+                  overscrollBehavior: "contain",
                 }
               : undefined
           }
-          onTouchMove={(e) => {
-            if (page || isFullScreen) {
-              e.preventDefault();
-            }
-          }}
-          onWheel={(e) => {
-            if (page || isFullScreen) {
-              e.preventDefault();
-            }
-          }}
         >
           <Card
             className={cn(
