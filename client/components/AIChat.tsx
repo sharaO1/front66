@@ -184,8 +184,7 @@ function getInitials(name?: string | null, email?: string | null) {
 }
 
 const getCandidateApiUrls = () => {
-  const chatUrl = API_BASE.replace(/\/api\/?$/, "/chat");
-  return [chatUrl];
+  return [joinApi("chat")];
 };
 
 const getCandidateResetUrls = () =>
