@@ -4452,6 +4452,17 @@ export default function Warehouse() {
               {t("warehouse.product_details_desc")}
             </DialogDescription>
           </DialogHeader>
+          {selectedProduct && isProductExpired(selectedProduct.expiryDate) && (
+            <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-md p-3 flex items-start gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+              <div className="text-sm text-red-800 dark:text-red-200">
+                <div className="font-semibold">{t("warehouse.expired")}</div>
+                <div className="text-xs mt-0.5">
+                  {t("warehouse.expiry_date")}: {selectedProduct.expiryDate}
+                </div>
+              </div>
+            </div>
+          )}
           {selectedProduct && (
             <DetailCard
               title={selectedProduct.name}
