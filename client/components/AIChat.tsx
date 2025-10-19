@@ -532,7 +532,8 @@ export default function AIChat({
         const target = e.currentTarget;
         const start = target.selectionStart ?? 0;
         const end = target.selectionEnd ?? 0;
-        const newValue = input.substring(0, start) + "\n" + input.substring(end);
+        const newValue =
+          input.substring(0, start) + "\n" + input.substring(end);
         setInput(newValue);
         setTimeout(() => {
           target.selectionStart = target.selectionEnd = start + 1;
@@ -551,7 +552,8 @@ export default function AIChat({
     setInput(e.target.value);
     if (inputRef.current) {
       inputRef.current.style.height = "auto";
-      inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 200) + "px";
+      inputRef.current.style.height =
+        Math.min(inputRef.current.scrollHeight, 200) + "px";
     }
   };
 
