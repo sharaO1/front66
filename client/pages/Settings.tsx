@@ -141,8 +141,8 @@ export default function Settings() {
 
   const saveSystemSettings = () => {
     toast({
-      title: "Settings saved",
-      description: "System settings have been updated successfully.",
+      title: t("settings.settings_saved"),
+      description: t("settings.settings_saved_desc"),
     });
   };
 
@@ -167,8 +167,8 @@ export default function Settings() {
       !passwordForm.confirmPassword
     ) {
       toast({
-        title: "Error",
-        description: "Please fill in all password fields.",
+        title: t("settings.error"),
+        description: t("settings.fill_all_fields"),
         variant: "destructive",
       });
       return;
@@ -176,8 +176,8 @@ export default function Settings() {
 
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       toast({
-        title: "Error",
-        description: "New passwords do not match.",
+        title: t("settings.error"),
+        description: t("settings.passwords_not_match"),
         variant: "destructive",
       });
       return;
@@ -185,16 +185,16 @@ export default function Settings() {
 
     if (passwordForm.newPassword.length < 6) {
       toast({
-        title: "Error",
-        description: "Password must be at least 6 characters long.",
+        title: t("settings.error"),
+        description: t("settings.password_too_short"),
         variant: "destructive",
       });
       return;
     }
 
     toast({
-      title: "Password changed",
-      description: "Your password has been updated successfully.",
+      title: t("settings.password_changed"),
+      description: t("settings.password_changed_desc"),
     });
 
     setPasswordForm({
@@ -225,8 +225,8 @@ export default function Settings() {
       }
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: "Failed to load categories.",
+        title: t("settings.error"),
+        description: t("settings.failed_load_categories"),
         variant: "destructive",
       });
     } finally {
@@ -237,8 +237,8 @@ export default function Settings() {
   const addCategory = async () => {
     if (!categoryForm.name.trim()) {
       toast({
-        title: "Error",
-        description: "Please enter a category name.",
+        title: t("settings.error"),
+        description: t("settings.enter_category_name"),
         variant: "destructive",
       });
       return;
@@ -269,8 +269,10 @@ export default function Settings() {
 
       const isUpdate = editingCategoryId;
       toast({
-        title: "Success",
-        description: `Category "${categoryForm.name}" has been ${isUpdate ? "updated" : "added"} successfully.`,
+        title: t("common.success"),
+        description: isUpdate
+          ? t("settings.category_updated", { name: categoryForm.name })
+          : t("settings.category_created", { name: categoryForm.name }),
       });
 
       setCategoryForm({
@@ -281,9 +283,9 @@ export default function Settings() {
       fetchCategories();
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: t("settings.error"),
         description:
-          error.message || "Failed to save category. Please try again.",
+          error.message || t("settings.failed_save_category"),
         variant: "destructive",
       });
     } finally {
@@ -314,16 +316,16 @@ export default function Settings() {
       }
 
       toast({
-        title: "Success",
-        description: "Category has been deleted successfully.",
+        title: t("common.success"),
+        description: t("settings.category_deleted"),
       });
 
       fetchCategories();
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: t("settings.error"),
         description:
-          error.message || "Failed to delete category. Please try again.",
+          error.message || t("settings.failed_delete_category"),
         variant: "destructive",
       });
     }
@@ -356,10 +358,10 @@ export default function Settings() {
 
       <Tabs defaultValue="general" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="account">Account</TabsTrigger>
+          <TabsTrigger value="general">{t("settings.general")}</TabsTrigger>
+          <TabsTrigger value="notifications">{t("settings.notifications")}</TabsTrigger>
+          <TabsTrigger value="security">{t("settings.security")}</TabsTrigger>
+          <TabsTrigger value="account">{t("settings.account")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="space-y-4">
@@ -368,13 +370,13 @@ export default function Settings() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Building className="h-5 w-5" />
-                  Company Information
+                  {t("settings.company_information")}
                 </CardTitle>
-                <CardDescription>Basic company details</CardDescription>
+                <CardDescription>{t("settings.basic_company_details")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="companyName">Company Name</Label>
+                  <Label htmlFor="companyName">{t("settings.company_name")}</Label>
                   <Input
                     id="companyName"
                     value={systemSettings.companyName}
@@ -387,7 +389,7 @@ export default function Settings() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="companyEmail">Company Email</Label>
+                  <Label htmlFor="companyEmail">{t("settings.company_email")}</Label>
                   <Input
                     id="companyEmail"
                     type="email"
@@ -401,7 +403,7 @@ export default function Settings() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="companyPhone">Phone</Label>
+                  <Label htmlFor="companyPhone">{t("settings.company_phone")}</Label>
                   <Input
                     id="companyPhone"
                     value={systemSettings.companyPhone}
@@ -415,7 +417,7 @@ export default function Settings() {
                 </div>
                 <Button onClick={saveSystemSettings} className="w-full">
                   <Save className="mr-2 h-4 w-4" />
-                  Save Company Info
+                  {t("settings.save_company_info")}
                 </Button>
               </CardContent>
             </Card>
@@ -427,21 +429,21 @@ export default function Settings() {
                 <CardTitle className="flex items-center gap-2">
                   <Tag className="h-5 w-5" />
                   {editingCategoryId
-                    ? "Edit Product Category"
-                    : "Add Product Category"}
+                    ? t("settings.edit_product_category")
+                    : t("settings.add_product_category")}
                 </CardTitle>
                 <CardDescription>
                   {editingCategoryId
-                    ? "Update category details"
-                    : "Create a new product category for your inventory"}
+                    ? t("settings.update_category_details")
+                    : t("settings.create_new_product_category")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="categoryName">Category Name *</Label>
+                  <Label htmlFor="categoryName">{t("settings.category_name")}</Label>
                   <Input
                     id="categoryName"
-                    placeholder="e.g., Transport, Electronics, Clothing"
+                    placeholder={t("settings.category_name_placeholder")}
                     value={categoryForm.name}
                     onChange={(e) =>
                       setCategoryForm({ ...categoryForm, name: e.target.value })
@@ -450,10 +452,10 @@ export default function Settings() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="categoryDescription">Description</Label>
+                  <Label htmlFor="categoryDescription">{t("settings.description")}</Label>
                   <Textarea
                     id="categoryDescription"
-                    placeholder="e.g., This category is about transports"
+                    placeholder={t("settings.category_description_placeholder")}
                     value={categoryForm.description}
                     onChange={(e) =>
                       setCategoryForm({
@@ -474,12 +476,12 @@ export default function Settings() {
                     {editingCategoryId ? (
                       <>
                         <Save className="mr-2 h-4 w-4" />
-                        {isAddingCategory ? "Updating..." : "Update Category"}
+                        {isAddingCategory ? t("settings.updating") : t("settings.update_category")}
                       </>
                     ) : (
                       <>
                         <Plus className="mr-2 h-4 w-4" />
-                        {isAddingCategory ? "Adding..." : "Add Category"}
+                        {isAddingCategory ? t("settings.adding") : t("settings.add_category")}
                       </>
                     )}
                   </Button>
@@ -489,7 +491,7 @@ export default function Settings() {
                       variant="outline"
                       disabled={isAddingCategory}
                     >
-                      Cancel
+                      {t("settings.cancel")}
                     </Button>
                   )}
                 </div>
@@ -498,19 +500,19 @@ export default function Settings() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Manage Categories</CardTitle>
+                <CardTitle>{t("settings.manage_categories")}</CardTitle>
                 <CardDescription>
-                  View, edit, and delete existing product categories
+                  {t("settings.manage_categories_desc")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {isLoadingCategories ? (
                   <div className="text-center py-8 text-muted-foreground">
-                    Loading categories...
+                    {t("settings.loading_categories")}
                   </div>
                 ) : categories.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
-                    No categories yet. Create one above.
+                    {t("settings.no_categories")}
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -534,7 +536,7 @@ export default function Settings() {
                             size="sm"
                             variant="outline"
                             onClick={() => editCategory(category)}
-                            title="Edit category"
+                            title={t("settings.edit_category")}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -543,7 +545,7 @@ export default function Settings() {
                               <Button
                                 size="sm"
                                 variant="destructive"
-                                title="Delete category"
+                                title={t("settings.delete_category")}
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -552,21 +554,21 @@ export default function Settings() {
                               <AlertDialogHeader>
                                 <AlertDialogTitle className="flex items-center gap-2">
                                   <AlertCircle className="h-5 w-5 text-destructive" />
-                                  Delete Category
+                                  {t("settings.delete_category_title")}
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Are you sure you want to delete the category "
-                                  {category.name}"? This action cannot be
-                                  undone.
+                                  {t("settings.delete_category_desc", {
+                                    name: category.name,
+                                  })}
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <div className="flex gap-3 justify-end">
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() => deleteCategory(category.id)}
                                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 >
-                                  Delete
+                                  {t("common.delete")}
                                 </AlertDialogAction>
                               </div>
                             </AlertDialogContent>
