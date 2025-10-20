@@ -155,8 +155,8 @@ export default function Settings() {
 
   const saveSecuritySettings = () => {
     toast({
-      title: "Security updated",
-      description: "Security settings have been applied.",
+      title: t("settings.security_updated"),
+      description: t("settings.security_updated_desc"),
     });
   };
 
@@ -694,18 +694,18 @@ export default function Settings() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Shield className="h-5 w-5" />
-                  Security Settings
+                  {t("settings.security_settings")}
                 </CardTitle>
                 <CardDescription>
-                  Configure login and access security
+                  {t("settings.security_settings_desc")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label>Two-Factor Authentication</Label>
+                    <Label>{t("settings.two_factor_auth")}</Label>
                     <p className="text-sm text-muted-foreground">
-                      Add an extra layer of security to your account
+                      {t("settings.two_factor_auth_desc")}
                     </p>
                   </div>
                   <Switch
@@ -720,7 +720,7 @@ export default function Settings() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="sessionTimeout">
-                    Session Timeout (minutes)
+                    {t("settings.session_timeout")}
                   </Label>
                   <Input
                     id="sessionTimeout"
@@ -735,7 +735,7 @@ export default function Settings() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="maxLoginAttempts">Max Login Attempts</Label>
+                  <Label htmlFor="maxLoginAttempts">{t("settings.max_login_attempts")}</Label>
                   <Input
                     id="maxLoginAttempts"
                     type="number"
@@ -750,7 +750,7 @@ export default function Settings() {
                 </div>
                 <Button onClick={saveSecuritySettings} className="w-full">
                   <Save className="mr-2 h-4 w-4" />
-                  Save Security
+                  {t("settings.save_security")}
                 </Button>
               </CardContent>
             </Card>
@@ -759,32 +759,32 @@ export default function Settings() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Key className="h-5 w-5" />
-                  Change Password
+                  {t("settings.change_password")}
                 </CardTitle>
-                <CardDescription>Update your account password</CardDescription>
+                <CardDescription>{t("settings.change_password_desc")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Password Requirements</Label>
+                  <Label>{t("settings.password_requirements")}</Label>
                   <div className="space-y-2 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-green-600" />
-                      Minimum 6 characters
+                      {t("settings.min_6_chars")}
                     </div>
                     <div className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-green-600" />
-                      At least one uppercase letter
+                      {t("settings.one_uppercase")}
                     </div>
                     <div className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-green-600" />
-                      At least one number
+                      {t("settings.one_number")}
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <Label>Change Password</Label>
+                    <Label>{t("settings.change_password_label")}</Label>
                     <Button
                       variant="outline"
                       size="sm"
@@ -802,7 +802,7 @@ export default function Settings() {
                     <div className="space-y-3">
                       <Input
                         type="password"
-                        placeholder="Current password"
+                        placeholder={t("settings.current_password")}
                         value={passwordForm.currentPassword}
                         onChange={(e) =>
                           setPasswordForm({
@@ -813,7 +813,7 @@ export default function Settings() {
                       />
                       <Input
                         type="password"
-                        placeholder="New password"
+                        placeholder={t("settings.new_password")}
                         value={passwordForm.newPassword}
                         onChange={(e) =>
                           setPasswordForm({
@@ -824,7 +824,7 @@ export default function Settings() {
                       />
                       <Input
                         type="password"
-                        placeholder="Confirm new password"
+                        placeholder={t("settings.confirm_new_password")}
                         value={passwordForm.confirmPassword}
                         onChange={(e) =>
                           setPasswordForm({
@@ -839,7 +839,7 @@ export default function Settings() {
                         size="sm"
                       >
                         <Lock className="mr-2 h-4 w-4" />
-                        Change Password
+                        {t("settings.change_password")}
                       </Button>
                     </div>
                   )}
@@ -854,10 +854,10 @@ export default function Settings() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
-                Account Information
+                {t("settings.account_information")}
               </CardTitle>
               <CardDescription>
-                Your account details and profile
+                {t("settings.manage_account_details")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -884,11 +884,11 @@ export default function Settings() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <Label className="text-muted-foreground">User ID</Label>
+                    <Label className="text-muted-foreground">{t("settings.user_id")}</Label>
                     <p className="font-medium">{user?.id || "N/A"}</p>
                   </div>
                   <div>
-                    <Label className="text-muted-foreground">Role</Label>
+                    <Label className="text-muted-foreground">{t("settings.role")}</Label>
                     <p className="font-medium capitalize">
                       {user?.role.replace("_", " ") || "N/A"}
                     </p>
