@@ -148,8 +148,8 @@ export default function Settings() {
 
   const saveNotificationSettings = () => {
     toast({
-      title: "Notifications updated",
-      description: "Your notification preferences have been saved.",
+      title: t("settings.notifications_updated"),
+      description: t("settings.notifications_updated_desc"),
     });
   };
 
@@ -588,18 +588,18 @@ export default function Settings() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bell className="h-5 w-5" />
-                Notification Settings
+                {t("settings.notification_settings")}
               </CardTitle>
               <CardDescription>
-                Choose which notifications you want to receive
+                {t("settings.choose_notifications")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Email Notifications</Label>
+                  <Label>{t("settings.email_notifications")}</Label>
                   <p className="text-sm text-muted-foreground">
-                    Receive notifications via email
+                    {t("settings.receive_via_email")}
                   </p>
                 </div>
                 <Switch
@@ -614,9 +614,9 @@ export default function Settings() {
               </div>
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Low Stock Alerts</Label>
+                  <Label>{t("settings.low_stock_alerts")}</Label>
                   <p className="text-sm text-muted-foreground">
-                    When inventory falls below minimum levels
+                    {t("settings.low_stock_desc")}
                   </p>
                 </div>
                 <Switch
@@ -631,9 +631,9 @@ export default function Settings() {
               </div>
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Payment Reminders</Label>
+                  <Label>{t("settings.payment_reminders")}</Label>
                   <p className="text-sm text-muted-foreground">
-                    Overdue invoice and payment notifications
+                    {t("settings.payment_reminders_desc")}
                   </p>
                 </div>
                 <Switch
@@ -648,9 +648,9 @@ export default function Settings() {
               </div>
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>System Updates</Label>
+                  <Label>{t("settings.system_updates")}</Label>
                   <p className="text-sm text-muted-foreground">
-                    Software updates and maintenance notices
+                    {t("settings.system_updates_desc")}
                   </p>
                 </div>
                 <Switch
@@ -665,9 +665,9 @@ export default function Settings() {
               </div>
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>Security Alerts</Label>
+                  <Label>{t("settings.security_alerts")}</Label>
                   <p className="text-sm text-muted-foreground">
-                    Failed login attempts and security events
+                    {t("settings.security_alerts_desc")}
                   </p>
                 </div>
                 <Switch
@@ -682,7 +682,7 @@ export default function Settings() {
               </div>
               <Button onClick={saveNotificationSettings} className="w-full">
                 <Save className="mr-2 h-4 w-4" />
-                Save Notifications
+                {t("settings.save_notifications")}
               </Button>
             </CardContent>
           </Card>
