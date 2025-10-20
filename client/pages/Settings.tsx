@@ -284,8 +284,7 @@ export default function Settings() {
     } catch (error: any) {
       toast({
         title: t("settings.error"),
-        description:
-          error.message || t("settings.failed_save_category"),
+        description: error.message || t("settings.failed_save_category"),
         variant: "destructive",
       });
     } finally {
@@ -324,8 +323,7 @@ export default function Settings() {
     } catch (error: any) {
       toast({
         title: t("settings.error"),
-        description:
-          error.message || t("settings.failed_delete_category"),
+        description: error.message || t("settings.failed_delete_category"),
         variant: "destructive",
       });
     }
@@ -359,7 +357,9 @@ export default function Settings() {
       <Tabs defaultValue="general" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="general">{t("settings.general")}</TabsTrigger>
-          <TabsTrigger value="notifications">{t("settings.notifications")}</TabsTrigger>
+          <TabsTrigger value="notifications">
+            {t("settings.notifications")}
+          </TabsTrigger>
           <TabsTrigger value="security">{t("settings.security")}</TabsTrigger>
           <TabsTrigger value="account">{t("settings.account")}</TabsTrigger>
         </TabsList>
@@ -372,11 +372,15 @@ export default function Settings() {
                   <Building className="h-5 w-5" />
                   {t("settings.company_information")}
                 </CardTitle>
-                <CardDescription>{t("settings.basic_company_details")}</CardDescription>
+                <CardDescription>
+                  {t("settings.basic_company_details")}
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="companyName">{t("settings.company_name")}</Label>
+                  <Label htmlFor="companyName">
+                    {t("settings.company_name")}
+                  </Label>
                   <Input
                     id="companyName"
                     value={systemSettings.companyName}
@@ -389,7 +393,9 @@ export default function Settings() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="companyEmail">{t("settings.company_email")}</Label>
+                  <Label htmlFor="companyEmail">
+                    {t("settings.company_email")}
+                  </Label>
                   <Input
                     id="companyEmail"
                     type="email"
@@ -403,7 +409,9 @@ export default function Settings() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="companyPhone">{t("settings.company_phone")}</Label>
+                  <Label htmlFor="companyPhone">
+                    {t("settings.company_phone")}
+                  </Label>
                   <Input
                     id="companyPhone"
                     value={systemSettings.companyPhone}
@@ -440,7 +448,9 @@ export default function Settings() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="categoryName">{t("settings.category_name")}</Label>
+                  <Label htmlFor="categoryName">
+                    {t("settings.category_name")}
+                  </Label>
                   <Input
                     id="categoryName"
                     placeholder={t("settings.category_name_placeholder")}
@@ -452,7 +462,9 @@ export default function Settings() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="categoryDescription">{t("settings.description")}</Label>
+                  <Label htmlFor="categoryDescription">
+                    {t("settings.description")}
+                  </Label>
                   <Textarea
                     id="categoryDescription"
                     placeholder={t("settings.category_description_placeholder")}
@@ -476,12 +488,16 @@ export default function Settings() {
                     {editingCategoryId ? (
                       <>
                         <Save className="mr-2 h-4 w-4" />
-                        {isAddingCategory ? t("settings.updating") : t("settings.update_category")}
+                        {isAddingCategory
+                          ? t("settings.updating")
+                          : t("settings.update_category")}
                       </>
                     ) : (
                       <>
                         <Plus className="mr-2 h-4 w-4" />
-                        {isAddingCategory ? t("settings.adding") : t("settings.add_category")}
+                        {isAddingCategory
+                          ? t("settings.adding")
+                          : t("settings.add_category")}
                       </>
                     )}
                   </Button>
@@ -563,7 +579,9 @@ export default function Settings() {
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <div className="flex gap-3 justify-end">
-                                <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+                                <AlertDialogCancel>
+                                  {t("common.cancel")}
+                                </AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() => deleteCategory(category.id)}
                                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
@@ -735,7 +753,9 @@ export default function Settings() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="maxLoginAttempts">{t("settings.max_login_attempts")}</Label>
+                  <Label htmlFor="maxLoginAttempts">
+                    {t("settings.max_login_attempts")}
+                  </Label>
                   <Input
                     id="maxLoginAttempts"
                     type="number"
@@ -761,7 +781,9 @@ export default function Settings() {
                   <Key className="h-5 w-5" />
                   {t("settings.change_password")}
                 </CardTitle>
-                <CardDescription>{t("settings.change_password_desc")}</CardDescription>
+                <CardDescription>
+                  {t("settings.change_password_desc")}
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -884,21 +906,29 @@ export default function Settings() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <Label className="text-muted-foreground">{t("settings.user_id")}</Label>
+                    <Label className="text-muted-foreground">
+                      {t("settings.user_id")}
+                    </Label>
                     <p className="font-medium">{user?.id || "N/A"}</p>
                   </div>
                   <div>
-                    <Label className="text-muted-foreground">{t("settings.role")}</Label>
+                    <Label className="text-muted-foreground">
+                      {t("settings.role")}
+                    </Label>
                     <p className="font-medium capitalize">
                       {user?.role.replace("_", " ") || "N/A"}
                     </p>
                   </div>
                   <div>
-                    <Label className="text-muted-foreground">{t("common.email")}</Label>
+                    <Label className="text-muted-foreground">
+                      {t("common.email")}
+                    </Label>
                     <p className="font-medium">{user?.email || "N/A"}</p>
                   </div>
                   <div>
-                    <Label className="text-muted-foreground">{t("settings.status")}</Label>
+                    <Label className="text-muted-foreground">
+                      {t("settings.status")}
+                    </Label>
                     <p className="font-medium">{t("settings.active")}</p>
                   </div>
                 </div>
