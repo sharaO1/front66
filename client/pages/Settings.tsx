@@ -894,12 +894,12 @@ export default function Settings() {
                     </p>
                   </div>
                   <div>
-                    <Label className="text-muted-foreground">Email</Label>
+                    <Label className="text-muted-foreground">{t("common.email")}</Label>
                     <p className="font-medium">{user?.email || "N/A"}</p>
                   </div>
                   <div>
-                    <Label className="text-muted-foreground">Status</Label>
-                    <p className="font-medium">Active</p>
+                    <Label className="text-muted-foreground">{t("settings.status")}</Label>
+                    <p className="font-medium">{t("settings.active")}</p>
                   </div>
                 </div>
               </div>
