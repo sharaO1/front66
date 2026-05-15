@@ -30,14 +30,10 @@ export function formatCurrency(
     (typeof i18n?.language === "string" && i18n.language) ||
     (typeof navigator !== "undefined" ? navigator.language : "en");
 
-  try {
-    return new Intl.NumberFormat(lng, {
-      style: "currency",
-      currency,
-      minimumFractionDigits,
-      maximumFractionDigits,
-    }).format(amount);
-  } catch {
-    return `$${(Number.isFinite(amount) ? amount : 0).toLocaleString()}`;
-  }
+  const formatted = (Number.isFinite(amount) ? amount : 0).toLocaleString(lng, {
+    minimumFractionDigits,
+    maximumFractionDigits,
+  });
+
+  return `${formatted}c`;
 }

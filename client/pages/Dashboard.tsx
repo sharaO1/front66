@@ -1140,13 +1140,13 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
             </div>
           </CardHeader>
           <CardContent className="pt-0 relative z-10">
-            <div className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">
+            <div className="text-3xl font-bold text-gray-900 mb-2 tracking-tight text-nowrap text-sm">
               {typeof totalRevenue === "number"
-                ? `$${totalRevenue.toLocaleString()}`
+                ? `${totalRevenue.toLocaleString()}c`
                 : derivedSales
-                  ? `$${derivedSales.totals.revenue.toLocaleString()}`
+                  ? `${derivedSales.totals.revenue.toLocaleString()}c`
                   : salesSummary
-                    ? `$${salesSummary.totals.revenue.toLocaleString()}`
+                    ? `${salesSummary.totals.revenue.toLocaleString()}c`
                     : "—"}
             </div>
             <div className="flex items-center gap-2">

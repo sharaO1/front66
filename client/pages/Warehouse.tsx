@@ -3136,11 +3136,11 @@ export default function Warehouse() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="font-medium">
-                            ${product.sellingPrice.toLocaleString()}
+                          <div className="font-medium text-sm">
+                            {product.sellingPrice.toLocaleString()}c
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            @${product.costPrice}
+                            @{product.costPrice}c
                           </div>
                         </TableCell>
                         <TableCell>
@@ -4717,16 +4717,16 @@ export default function Warehouse() {
                   <div className="text-xs text-muted-foreground">
                     {t("warehouse.cost_price_label")}
                   </div>
-                  <div className="text-sm font-semibold">
-                    ${selectedProduct.costPrice}
+                  <div className="text-sm font-semibold text-nowrap">
+                    {selectedProduct.costPrice}c
                   </div>
                 </div>
                 <div>
                   <div className="text-xs text-muted-foreground">
                     {t("warehouse.selling_price_label")}
                   </div>
-                  <div className="text-sm font-semibold text-green-600">
-                    ${selectedProduct.sellingPrice}
+                  <div className="text-sm font-semibold text-green-600 text-nowrap">
+                    {selectedProduct.sellingPrice}c
                   </div>
                 </div>
               </div>

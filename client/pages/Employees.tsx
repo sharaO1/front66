@@ -1421,7 +1421,7 @@ export default function Employees() {
     csv += `Sales Team,${data.summary.salesTeam}\n`;
     csv += `Today's Sales,$${data.summary.todaysSales.toLocaleString()}\n`;
     csv += `Today's Commissions,$${data.summary.todaysCommissions.toFixed(2)}\n`;
-    csv += `Average Salary,$${data.summary.avgSalary.toLocaleString()}\n`;
+    csv += `Average Salary,${data.summary.avgSalary.toLocaleString()}c\n`;
     csv += "\n";
 
     // Department Data
@@ -2179,7 +2179,7 @@ export default function Employees() {
                       </TableCell>
                       <TableCell>{getRoleBadge(employee.role)}</TableCell>
                       <TableCell className="font-medium">
-                        <div>${employee.salary.toLocaleString()}</div>
+                        <div>{employee.salary.toLocaleString()}c</div>
                         <div className="text-xs text-muted-foreground">
                           {employee.commission}% {t("employees.commission")}
                         </div>
@@ -2888,7 +2888,7 @@ export default function Employees() {
                         </TableCell>
                         <TableCell>{dept.employees}</TableCell>
                         <TableCell>
-                          ${Math.round(avgSalary).toLocaleString()}
+                          {Math.round(avgSalary).toLocaleString()}c
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
@@ -2953,7 +2953,7 @@ export default function Employees() {
                             })}
                           </div>
                           <div className="font-medium">
-                            ${avgSalary.toLocaleString()}
+                            {avgSalary.toLocaleString()}c
                           </div>
                         </div>
                       </div>
@@ -3021,7 +3021,7 @@ export default function Employees() {
                 },
                 {
                   label: t("employees.salary"),
-                  value: `$${selectedEmployee.salary.toLocaleString()}`,
+                  value: `${selectedEmployee.salary.toLocaleString()}c`,
                 },
                 selectedEmployee.commission > 0
                   ? {
@@ -3386,7 +3386,7 @@ export default function Employees() {
                           ${sale.amount.toLocaleString()}
                         </TableCell>
                         <TableCell className="font-medium text-blue-600">
-                          ${sale.commission.toFixed(2)}
+                          {sale.commission.toFixed(2)}c
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {sale.notes || "-"}
