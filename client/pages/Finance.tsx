@@ -1366,7 +1366,7 @@ export default function Finance() {
   };
 
   const buildFinanceReportHTML = (data: any) => {
-    const money = (n: number) => `$${Number(n || 0).toLocaleString()}`;
+    const money = (n: number) => `${Number(n || 0).toLocaleString()}c`;
     const sanitize = (s: string) => {
       if (!s) return s;
       return String(s).replace(/[A-Z0-9_-]{8,}/g, "•••��••");
@@ -1723,7 +1723,7 @@ ${data.cashFlowData.map((item: any) => `${item.month}: ${t("finance.income")} $$
 
 ${t("finance.expense_breakdown")}
 =================
-${data.expenseBreakdown.map((cat: any) => `${cat.name}: $${cat.value.toLocaleString()}`).join("\n")}
+${data.expenseBreakdown.map((cat: any) => `${cat.name}: ${cat.value.toLocaleString()}c`).join("\n")}
 
 ${t("finance.financial_goals")}
 ===============
@@ -1735,7 +1735,7 @@ ${data.transactions
   .slice(0, 20)
   .map(
     (t: any) =>
-      `${t.date} - ${t.type.toUpperCase()}: ${t.description} - $${t.amount.toLocaleString()}`,
+      `${t.date} - ${t.type.toUpperCase()}: ${t.description} - ${t.amount.toLocaleString()}c`,
   )
   .join("\n")}
     `;
@@ -1772,7 +1772,7 @@ ${data.transactions
     csv += `${t("finance.expense_breakdown")}\n`;
     csv += `${t("warehouse.category")},${t("common.amount")}\n`;
     data.expenseBreakdown.forEach((cat: any) => {
-      csv += `${cat.name},$${cat.value.toLocaleString()}\n`;
+      csv += `${cat.name},${cat.value.toLocaleString()}c\n`;
     });
     csv += "\n";
 

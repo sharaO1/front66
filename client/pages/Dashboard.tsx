@@ -1084,7 +1084,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
     csv += "Monthly Sales Data\n";
     csv += "Month,Sales,Profit\n";
     data.salesData.forEach((item: any) => {
-      csv += `${item.name},$${item.sales.toLocaleString()},$${item.profit.toLocaleString()}\n`;
+      csv += `${item.name},${item.sales.toLocaleString()}c,${item.profit.toLocaleString()}c\n`;
     });
     csv += "\n";
 
@@ -1140,7 +1140,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
             </div>
           </CardHeader>
           <CardContent className="pt-0 relative z-10">
-            <div className="text-3xl font-bold text-gray-900 mb-2 tracking-tight text-nowrap text-sm">
+            <div className="text-3xl font-bold text-gray-900 mb-2 tracking-tight text-nowrap">
               {typeof totalRevenue === "number"
                 ? `${totalRevenue.toLocaleString()}c`
                 : derivedSales
@@ -1585,7 +1585,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
                   <div className="text-xl font-semibold">
                     {derivedSales?.totals.profit == null
                       ? "—"
-                      : `$${(derivedSales?.totals.profit || 0).toLocaleString()}`}
+                      : `${(derivedSales?.totals.profit || 0).toLocaleString()}c`}
                   </div>
                 </div>
               </div>
@@ -1632,7 +1632,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
                           <TableCell className="text-right">
                             {p.profit == null
                               ? "—"
-                              : `$${p.profit.toLocaleString()}`}
+                              : `${p.profit.toLocaleString()}c`}
                           </TableCell>
                           <TableCell className="text-right">
                             {margin == null ? "—" : `${margin.toFixed(1)}%`}

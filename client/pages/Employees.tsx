@@ -3032,7 +3032,7 @@ export default function Employees() {
                 selectedEmployee.salesTarget
                   ? {
                       label: t("employees.monthly_sales_target"),
-                      value: `$${selectedEmployee.salesTarget.toLocaleString()}`,
+                      value: `${selectedEmployee.salesTarget.toLocaleString()}c`,
                     }
                   : { label: "", value: "" },
               ].filter((k) => k.label)}
