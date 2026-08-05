@@ -514,6 +514,9 @@ export default function AIChat({
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter") {
+      // Enter creates a new line on mobile; desktop Enter submits.
+      if (isMobile && !e.ctrlKey && !e.metaKey && !e.shiftKey) return;
+
       // Ctrl+Enter or Cmd+Enter: insert new line
       if (e.ctrlKey || e.metaKey) {
         e.preventDefault();
