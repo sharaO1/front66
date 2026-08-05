@@ -653,10 +653,10 @@ export default function AIChat({
               "border-0 shadow-lg overflow-hidden flex flex-col",
               page
                 ? isFullScreen
-                  ? "h-screen w-screen rounded-none"
+                  ? "h-[100dvh] w-screen rounded-none"
                   : "h-[100dvh] w-screen rounded-none"
                 : isFullScreen
-                  ? "h-screen w-screen rounded-none"
+                  ? "h-[100dvh] w-screen rounded-none"
                   : variant === "floating"
                     ? "w-[min(92vw,384px)] sm:w-[384px] h-[560px] rounded-3xl"
                     : cn("w-full", height, "rounded-3xl"),
@@ -728,7 +728,7 @@ export default function AIChat({
                 <div className="h-2 bg-gradient-to-b from-transparent to-black/0 dark:to-white/0" />
                 <div
                   ref={listRef}
-                  className="min-h-0 flex-1 overflow-y-auto overscroll-contain pt-[76px] px-[11px] pb-0 space-y-3 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950"
+                  className="min-h-0 flex-1 overflow-y-auto overscroll-contain pt-3 px-[11px] pb-0 space-y-3 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950"
                   style={{
                     WebkitOverflowScrolling: "touch",
                     overscrollBehavior: "contain",
