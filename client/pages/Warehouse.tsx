@@ -609,7 +609,6 @@ export default function Warehouse() {
   const [supplierInput, setSupplierInput] = useState<string>("");
   const [editSupplierInput, setEditSupplierInput] = useState<string>("");
   const [skuBuffer, setSkuBuffer] = useState<string>("");
-  const [showAlertCards, setShowAlertCards] = useState(true);
   const skuTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { toast } = useToast();
@@ -1480,22 +1479,6 @@ export default function Warehouse() {
       }
     };
   }, [products, skuBuffer, toast, t]);
-
-  // Handle scroll to hide alert cards (only hide, don't show again until top)
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-
-      // Only show cards if at the very top (scrollY < 10)
-      // Once hidden by scrolling, cards stay hidden
-      setShowAlertCards(currentScrollY < 10);
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
@@ -2925,12 +2908,7 @@ export default function Warehouse() {
       </Dialog>
 
       {/* Summary Cards */}
-      <div
-        className={`transition-all duration-300 overflow-hidden ${
-          showAlertCards ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-        }`}
-      >
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -3015,7 +2993,6 @@ export default function Warehouse() {
               </p>
             </CardContent>
           </Card>
-        </div>
       </div>
 
       <Tabs defaultValue="inventory" className="space-y-4">
