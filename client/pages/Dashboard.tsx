@@ -1118,7 +1118,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
     <div className="space-y-6 sm:space-y-8 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border">
         <div className="space-y-2">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-foreground">
             {t("dashboard.title")}
           </h1>
           <p className="text-muted-foreground text-sm sm:text-base lg:text-lg">
@@ -1129,10 +1129,10 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
 
       {/* Enhanced KPI Cards with Glassmorphism */}
       <div className="grid gap-4 md:gap-6 [grid-auto-columns:85%] grid-flow-col overflow-x-auto snap-x snap-mandatory sm:[grid-auto-columns:initial] sm:grid-flow-row md:grid-cols-2 lg:grid-cols-4">
-        <Card className="snap-start relative overflow-hidden group border-0 bg-gradient-to-br from-white via-white to-green-50/30 backdrop-blur-xl shadow-business-lg hover:shadow-business-xl transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1">
+        <Card className="snap-start relative overflow-hidden group border bg-card text-card-foreground shadow-sm transition-shadow duration-300 hover:shadow-md">
           <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 relative z-10">
-            <CardTitle className="text-sm font-semibold text-gray-700 tracking-tight">
+            <CardTitle className="text-sm font-semibold text-card-foreground tracking-tight">
               {t("dashboard.total_revenue")}
             </CardTitle>
             <div className="p-3 bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl group-hover:from-green-200 group-hover:to-emerald-200 transition-all duration-300 group-hover:scale-110 shadow-sm">
@@ -1140,7 +1140,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
             </div>
           </CardHeader>
           <CardContent className="pt-0 relative z-10">
-            <div className="text-3xl font-bold text-gray-900 mb-2 tracking-tight text-nowrap">
+            <div className="text-3xl font-bold text-card-foreground mb-2 tracking-tight text-nowrap">
               {typeof totalRevenue === "number"
                 ? `${totalRevenue.toLocaleString()}c`
                 : derivedSales
@@ -1164,7 +1164,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
                 {t("dashboard.from_last_month")}
               </span>
             </div>
-            <div className="mt-3 h-1 bg-gray-100 rounded-full overflow-hidden">
+            <div className="mt-3 h-1 bg-muted rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"
                 style={{
@@ -1184,10 +1184,10 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
           </CardContent>
         </Card>
 
-        <Card className="snap-start relative overflow-hidden group border-0 bg-gradient-to-br from-white via-white to-blue-50/30 backdrop-blur-xl shadow-business-lg hover:shadow-business-xl transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1">
+        <Card className="snap-start relative overflow-hidden group border bg-card text-card-foreground shadow-sm transition-shadow duration-300 hover:shadow-md">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 relative z-10">
-            <CardTitle className="text-sm font-semibold text-gray-700 tracking-tight">
+            <CardTitle className="text-sm font-semibold text-card-foreground tracking-tight">
               {t("dashboard.products")}
             </CardTitle>
             <div className="p-3 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl group-hover:from-blue-200 group-hover:to-cyan-200 transition-all duration-300 group-hover:scale-110 shadow-sm">
@@ -1195,7 +1195,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
             </div>
           </CardHeader>
           <CardContent className="pt-0 relative z-10">
-            <div className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">
+            <div className="text-3xl font-bold text-card-foreground mb-2 tracking-tight">
               {typeof totalProducts === "number"
                 ? totalProducts.toLocaleString()
                 : "—"}
@@ -1213,7 +1213,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
                 {t("dashboard.new_this_month")}
               </span>
             </div>
-            <div className="mt-3 h-1 bg-gray-100 rounded-full overflow-hidden">
+            <div className="mt-3 h-1 bg-muted rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"
                 style={{
@@ -1234,10 +1234,10 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
           </CardContent>
         </Card>
 
-        <Card className="snap-start relative overflow-hidden group border-0 bg-gradient-to-br from-white via-white to-purple-50/30 backdrop-blur-xl shadow-business-lg hover:shadow-business-xl transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1">
+        <Card className="snap-start relative overflow-hidden group border bg-card text-card-foreground shadow-sm transition-shadow duration-300 hover:shadow-md">
           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 relative z-10">
-            <CardTitle className="text-sm font-semibold text-gray-700 tracking-tight">
+            <CardTitle className="text-sm font-semibold text-card-foreground tracking-tight">
               {t("dashboard.active_clients")}
             </CardTitle>
             <div className="p-3 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl group-hover:from-purple-200 group-hover:to-pink-200 transition-all duration-300 group-hover:scale-110 shadow-sm">
@@ -1245,7 +1245,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
             </div>
           </CardHeader>
           <CardContent className="pt-0 relative z-10">
-            <div className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">
+            <div className="text-3xl font-bold text-card-foreground mb-2 tracking-tight">
               {typeof activeClients === "number"
                 ? activeClients.toLocaleString()
                 : "—"}
@@ -1263,7 +1263,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
                 {t("dashboard.new_this_week")}
               </span>
             </div>
-            <div className="mt-3 h-1 bg-gray-100 rounded-full overflow-hidden">
+            <div className="mt-3 h-1 bg-muted rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
                 style={{
@@ -1284,10 +1284,10 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
           </CardContent>
         </Card>
 
-        <Card className="snap-start relative overflow-hidden group border-0 bg-gradient-to-br from-white via-white to-orange-50/30 backdrop-blur-xl shadow-business-lg hover:shadow-business-xl transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1">
+        <Card className="snap-start relative overflow-hidden group border bg-card text-card-foreground shadow-sm transition-shadow duration-300 hover:shadow-md">
           <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 relative z-10">
-            <CardTitle className="text-sm font-semibold text-gray-700 tracking-tight">
+            <CardTitle className="text-sm font-semibold text-card-foreground tracking-tight">
               {t("dashboard.sales_today")}
             </CardTitle>
             <div className="p-3 bg-gradient-to-br from-orange-100 to-red-100 rounded-xl group-hover:from-orange-200 group-hover:to-red-200 transition-all duration-300 group-hover:scale-110 shadow-sm">
@@ -1295,7 +1295,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
             </div>
           </CardHeader>
           <CardContent className="pt-0 relative z-10">
-            <div className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">
+            <div className="text-3xl font-bold text-card-foreground mb-2 tracking-tight">
               {typeof salesTodayCount === "number"
                 ? salesTodayCount.toLocaleString()
                 : "—"}
@@ -1313,7 +1313,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
                 {t("dashboard.from_yesterday")}
               </span>
             </div>
-            <div className="mt-3 h-1 bg-gray-100 rounded-full overflow-hidden">
+            <div className="mt-3 h-1 bg-muted rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-orange-500 to-red-500 rounded-full"
                 style={{
@@ -1335,7 +1335,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
       </div>
 
       {/* Cash Flow Trend */}
-      <Card className="relative overflow-hidden group border-0 bg-gradient-to-br from-white via-white to-emerald-50/20 backdrop-blur-xl shadow-business-lg hover:shadow-business-xl transition-all duration-500 hover:-translate-y-1">
+      <Card className="relative overflow-hidden group border bg-card text-card-foreground shadow-sm transition-shadow duration-300 hover:shadow-md">
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/3 to-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         <CardHeader className="pb-6 relative z-10">
           <div className="flex items-center gap-3">
@@ -1343,10 +1343,10 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
               <DollarSign className="h-5 w-5 text-emerald-600" />
             </div>
             <div>
-              <CardTitle className="text-2xl font-bold text-gray-900 tracking-tight">
+              <CardTitle className="text-2xl font-bold text-card-foreground tracking-tight">
                 {t("finance.cash_flow_trend") || "Cash Flow Trend"}
               </CardTitle>
-              <CardDescription className="text-gray-600 mt-1">
+              <CardDescription className="text-muted-foreground mt-1">
                 {t("finance.income_expenses_profit")}
               </CardDescription>
             </div>
@@ -1404,7 +1404,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
 
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-7">
         {/* Enhanced Sales Chart */}
-        <Card className="col-span-4 relative overflow-hidden group border-0 bg-gradient-to-br from-white via-white to-blue-50/20 backdrop-blur-xl shadow-business-lg hover:shadow-business-xl transition-all duration-500 hover:-translate-y-1">
+        <Card className="col-span-4 relative overflow-hidden group border bg-card text-card-foreground shadow-sm transition-shadow duration-300 hover:shadow-md">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/3 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           <CardHeader className="pb-8 relative z-10">
             <div className="flex items-center gap-3">
@@ -1412,10 +1412,10 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
                 <TrendingUp className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <CardTitle className="text-2xl font-bold text-gray-900 tracking-tight">
+                <CardTitle className="text-2xl font-bold text-card-foreground tracking-tight">
                   {t("dashboard.sales_overview")}
                 </CardTitle>
-                <CardDescription className="text-gray-600 mt-1">
+                <CardDescription className="text-muted-foreground mt-1">
                   {t("dashboard.monthly_sales_profit")}
                 </CardDescription>
               </div>
@@ -1437,7 +1437,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
         </Card>
 
         {/* Enhanced Product Categories */}
-        <Card className="col-span-3 relative overflow-hidden group border-0 bg-gradient-to-br from-white via-white to-green-50/20 backdrop-blur-xl shadow-business-lg hover:shadow-business-xl transition-all duration-500 hover:-translate-y-1">
+        <Card className="col-span-3 relative overflow-hidden group border bg-card text-card-foreground shadow-sm transition-shadow duration-300 hover:shadow-md">
           <div className="absolute inset-0 bg-gradient-to-br from-green-500/3 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           <CardHeader className="pb-8 relative z-10">
             <div className="flex items-center gap-3">
@@ -1445,10 +1445,10 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
                 <Package className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <CardTitle className="text-2xl font-bold text-gray-900 tracking-tight">
+                <CardTitle className="text-2xl font-bold text-card-foreground tracking-tight">
                   {t("dashboard.product_categories")}
                 </CardTitle>
-                <CardDescription className="text-gray-600 mt-1">
+                <CardDescription className="text-muted-foreground mt-1">
                   {t("dashboard.distribution_by_category")}
                 </CardDescription>
               </div>
@@ -1507,7 +1507,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
                       {t("dashboard.required")}: {item.minRequired}
                     </p>
                     <div className="flex items-center gap-1 mt-1">
-                      <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
                         <div
                           className={`h-full transition-all ${
                             item.stock / item.minRequired < 0.3
@@ -1553,7 +1553,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
           {(derivedSales || salesSummary) && (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-                <div className="p-3 rounded-lg border bg-white">
+                <div className="p-3 rounded-lg border bg-card">
                   <div className="text-xs text-muted-foreground">
                     {t("dashboard.products_sold")}
                   </div>
@@ -1565,7 +1565,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
                     ).toLocaleString()}
                   </div>
                 </div>
-                <div className="p-3 rounded-lg border bg-white">
+                <div className="p-3 rounded-lg border bg-card">
                   <div className="text-xs text-muted-foreground">
                     {t("finance.sales_revenue")}
                   </div>
@@ -1578,7 +1578,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
                     ).toLocaleString()}
                   </div>
                 </div>
-                <div className="p-3 rounded-lg border bg-white">
+                <div className="p-3 rounded-lg border bg-card">
                   <div className="text-xs text-muted-foreground">
                     {t("finance.profit")}
                   </div>
