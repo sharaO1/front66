@@ -3085,7 +3085,7 @@ export default function Warehouse() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="-mx-2 sm:mx-0 overflow-x-auto overscroll-none">
+              <div className="-mx-2 sm:mx-0 overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
