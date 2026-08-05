@@ -1553,11 +1553,11 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
           {(derivedSales || salesSummary) && (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-                <div className="p-3 rounded-lg border bg-card">
-                  <div className="text-xs text-muted-foreground">
+                <div className="p-3 rounded-lg border bg-card text-card-foreground dark:bg-slate-900 dark:text-slate-100">
+                  <div className="text-xs text-muted-foreground dark:text-slate-300">
                     {t("dashboard.products_sold")}
                   </div>
-                  <div className="text-xl font-semibold">
+                  <div className="text-xl font-semibold text-foreground dark:text-slate-100">
                     {(
                       derivedSales?.totals.units ??
                       salesSummary?.totals.units ??
@@ -1565,11 +1565,11 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
                     ).toLocaleString()}
                   </div>
                 </div>
-                <div className="p-3 rounded-lg border bg-card">
-                  <div className="text-xs text-muted-foreground">
+                <div className="p-3 rounded-lg border bg-card text-card-foreground dark:bg-slate-900 dark:text-slate-100">
+                  <div className="text-xs text-muted-foreground dark:text-slate-300">
                     {t("finance.sales_revenue")}
                   </div>
-                  <div className="text-xl font-semibold">
+                  <div className="text-xl font-semibold text-foreground dark:text-slate-100">
                     $
                     {(
                       (derivedSales?.totals.revenue ??
@@ -1578,11 +1578,11 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
                     ).toLocaleString()}
                   </div>
                 </div>
-                <div className="p-3 rounded-lg border bg-card">
-                  <div className="text-xs text-muted-foreground">
+                <div className="p-3 rounded-lg border bg-card text-card-foreground dark:bg-slate-900 dark:text-slate-100">
+                  <div className="text-xs text-muted-foreground dark:text-slate-300">
                     {t("finance.profit")}
                   </div>
-                  <div className="text-xl font-semibold">
+                  <div className="text-xl font-semibold text-foreground dark:text-slate-100">
                     {derivedSales?.totals.profit == null
                       ? "—"
                       : `${(derivedSales?.totals.profit || 0).toLocaleString()}c`}
