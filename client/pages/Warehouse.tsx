@@ -3227,14 +3227,14 @@ export default function Warehouse() {
                   type="date"
                   value={movementFrom || ""}
                   onChange={(e) => setMovementFrom(e.target.value || null)}
-                  className="h-9 rounded-md border px-2 w-full sm:w-auto"
+                  className="h-9 rounded-md border bg-background text-foreground px-2 w-full sm:w-auto"
                 />
                 <input
                   id="movementTo"
                   type="date"
                   value={movementTo || ""}
                   onChange={(e) => setMovementTo(e.target.value || null)}
-                  className="h-9 rounded-md border px-2 w-full sm:w-auto"
+                  className="h-9 rounded-md border bg-background text-foreground px-2 w-full sm:w-auto"
                 />
                 <Button
                   variant="ghost"
@@ -3497,14 +3497,14 @@ export default function Warehouse() {
                     type="date"
                     value={historyFrom || ""}
                     onChange={(e) => setHistoryFrom(e.target.value || null)}
-                    className="h-9 rounded-md border px-2 w-full sm:w-auto"
+                    className="h-9 rounded-md border bg-background text-foreground px-2 w-full sm:w-auto"
                   />
                   <input
                     id="historyTo"
                     type="date"
                     value={historyTo || ""}
                     onChange={(e) => setHistoryTo(e.target.value || null)}
-                    className="h-9 rounded-md border px-2 w-full sm:w-auto"
+                    className="h-9 rounded-md border bg-background text-foreground px-2 w-full sm:w-auto"
                   />
                   <Button
                     variant="ghost"

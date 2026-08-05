@@ -3783,7 +3783,7 @@ export default function Sales() {
 
               {/* Employee Information */}
               {selectedInvoice.employeeName && (
-                <div className="p-4 bg-blue-50 rounded-lg text-sm">
+                <div className="p-4 bg-blue-50 dark:bg-blue-950/40 text-blue-950 dark:text-blue-100 rounded-lg text-sm">
                   <h3 className="font-semibold mb-2">
                     {t("employees.sales_team")}
                   </h3>
