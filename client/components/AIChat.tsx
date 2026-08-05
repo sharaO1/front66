@@ -47,6 +47,61 @@ function formatMessage(t: string): string {
   return s;
 }
 
+function renderInlineMarkdown(text: string) {
+  return text
+    .split(/(\*\*[^*]+\*\*|__[^_]+__|`[^`]+`|\*[^*]+\*|_[^_]+_)/g)
+    .map((part, index) => {
+      if (/^\*\*[^*]+\*\*$/.test(part) || /^__[^_]+__$/.test(part)) {
+        return <strong key={index}>{part.slice(2, -2)}</strong>;
+      }
+      if (/^`[^`]+`$/.test(part)) {
+        return (
+          <code key={index} className="rounded bg-muted px-1 py-0.5 text-[0.9em]">
+            {part.slice(1, -1)}
+          </code>
+        );
+      }
+      if (/^\*[^*]+\*$/.test(part) || /^_[^_]+_$/.test(part)) {
+        return <em key={index}>{part.slice(1, -1)}</em>;
+      }
+      return <span key={index}>{part}</span>;
+    });
+}
+
+function renderMarkdownText(text: string) {
+  const lines = text.replace(/\r\n/g, "\n").split("\n");
+  const nodes: JSX.Element[] = [];
+
+  lines.forEach((line, index) => {
+    const heading = line.match(/^#{1,6}\s+(.+)$/);
+    const bullet = line.match(/^\s*[-*]\s+(.+)$/);
+    const ordered = line.match(/^\s*\d+[.)]\s+(.+)$/);
+
+    if (heading) {
+      nodes.push(
+        <strong key={`line-${index}`} className="block mt-2 first:mt-0">
+          {renderInlineMarkdown(heading[1])}
+        </strong>,
+      );
+    } else if (bullet || ordered) {
+      nodes.push(
+        <span key={`line-${index}`} className="flex gap-2">
+          <span>{bullet ? "•" : "•"}</span>
+          <span>{renderInlineMarkdown((bullet || ordered)![1])}</span>
+        </span>,
+      );
+    } else {
+      nodes.push(
+        <span key={`line-${index}`}>{renderInlineMarkdown(line)}</span>,
+      );
+    }
+
+    if (index < lines.length - 1) nodes.push(<br key={`break-${index}`} />);
+  });
+
+  return nodes;
+}
+
 // Try to extract a JSON object/array from text (plain or fenced code block)
 function extractJsonFromText(text: string): any | null {
   if (!text) return null;
@@ -173,7 +228,7 @@ function renderMessageContent(text: string) {
       </div>
     );
   }
-  return <>{formatMessage(text)}</>;
+  return <>{renderMarkdownText(text)}</>;
 }
 
 function getInitials(name?: string | null, email?: string | null) {
