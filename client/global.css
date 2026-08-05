@@ -189,6 +189,7 @@
 
   html {
     scroll-behavior: smooth;
+    overscroll-behavior-y: none;
     transition: all 300ms ease;
     font-feature-settings: "cv11", "ss01";
     font-variant-ligatures: contextual;
@@ -199,6 +200,7 @@
 
   body {
     @apply bg-background text-foreground;
+    overscroll-behavior-y: none;
     font-family:
       "Inter",
       system-ui,
