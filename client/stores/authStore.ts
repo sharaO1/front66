@@ -76,35 +76,6 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true });
 
-          // Mock admin login (works without backend)
-          if (
-            email === "admin@stockmind.local" &&
-            password === "admin123"
-          ) {
-            const user: User = {
-              id: "mock-admin-1",
-              email,
-              name: "Admin User",
-              role: "super_admin",
-              avatar: null,
-              department: "Information Technology",
-              title: "System Administrator",
-              phone: "+1 (555) 000-0000",
-              location: "Main Warehouse",
-              filialId: "store1",
-            };
-            set({
-              user,
-              accessToken: "mock-admin-token",
-              refreshToken: "mock-admin-refresh",
-              isAuthenticated: true,
-              isLoading: false,
-            });
-            const { useRBACStore } = await import("./rbacStore");
-            useRBACStore.getState().initializeFromAuth(user);
-            return true;
-          }
-
           const res = await fetch(joinApi("/auth/sign-in"), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
