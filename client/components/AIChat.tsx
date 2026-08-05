@@ -761,9 +761,7 @@ export default function AIChat({
                             : "bg-white dark:bg-gray-800 border rounded-bl-md",
                         )}
                       >
-                        {m.role === "ai"
-                          ? renderMessageContent(m.text)
-                          : formatMessage(m.text)}
+                        {m.role === "ai" ? renderMessageContent(m.text) : m.text}
                       </div>
                       {m.role === "user" && (
                         <Avatar className="mt-1 h-8 w-8">
