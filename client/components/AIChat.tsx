@@ -49,7 +49,7 @@ function formatMessage(t: string): string {
 
 function renderInlineMarkdown(text: string) {
   return text
-    .split(/(\*\*[^*]+\*\*|__[^_]+__|`[^`]+`|\*[^*]+\*|_[^_]+_)/g)
+    .split(/(\*\*[^*]+\*\*|__[^_]+__|`[^`]+`|\*[^*]+\*|_[^_]+_|~~[^~]+~~|\[[^\]]+\]\(https?:\/\/[^\s)]+\))/g)
     .map((part, index) => {
       if (/^\*\*[^*]+\*\*$/.test(part) || /^__[^_]+__$/.test(part)) {
         return <strong key={index}>{part.slice(2, -2)}</strong>;
@@ -64,6 +64,23 @@ function renderInlineMarkdown(text: string) {
       if (/^\*[^*]+\*$/.test(part) || /^_[^_]+_$/.test(part)) {
         return <em key={index}>{part.slice(1, -1)}</em>;
       }
+      if (/^~~[^~]+~~$/.test(part)) {
+        return <del key={index}>{part.slice(2, -2)}</del>;
+      }
+      const link = part.match(/^\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)$/);
+      if (link) {
+        return (
+          <a
+            key={index}
+            href={link[2]}
+            target="_blank"
+            rel="noreferrer"
+            className="text-primary underline underline-offset-2"
+          >
+            {link[1]}
+          </a>
+        );
+      }
       return <span key={index}>{part}</span>;
     });
 }
@@ -71,11 +88,40 @@ function renderInlineMarkdown(text: string) {
 function renderMarkdownText(text: string) {
   const lines = text.replace(/\r\n/g, "\n").split("\n");
   const nodes: JSX.Element[] = [];
+  let codeLines: string[] = [];
+  let codeStart = 0;
+
+  const pushCodeBlock = (index: number) => {
+    nodes.push(
+      <pre key={`code-${codeStart}`} className="my-2 overflow-x-auto rounded-md bg-muted p-3 text-xs">
+        <code>{codeLines.join("\n")}</code>
+      </pre>,
+    );
+    codeLines = [];
+    if (index < lines.length - 1) nodes.push(<br key={`code-break-${index}`} />);
+  };
 
   lines.forEach((line, index) => {
+    if (line.trim().startsWith("```")) {
+      if (codeLines.length === 0) {
+        codeStart = index;
+        codeLines = ["__OPEN__"];
+      } else {
+        codeLines.shift();
+        pushCodeBlock(index);
+      }
+      return;
+    }
+
+    if (codeLines.length > 0) {
+      codeLines.push(line);
+      return;
+    }
+
     const heading = line.match(/^#{1,6}\s+(.+)$/);
-    const bullet = line.match(/^\s*[-*]\s+(.+)$/);
-    const ordered = line.match(/^\s*\d+[.)]\s+(.+)$/);
+    const quote = line.match(/^\s*>\s?(.*)$/);
+    const bullet = line.match(/^(\s*)[-*+]\s+(.+)$/);
+    const ordered = line.match(/^(\s*)\d+[.)]\s+(.+)$/);
 
     if (heading) {
       nodes.push(
@@ -83,11 +129,19 @@ function renderMarkdownText(text: string) {
           {renderInlineMarkdown(heading[1])}
         </strong>,
       );
-    } else if (bullet || ordered) {
+    } else if (quote) {
       nodes.push(
-        <span key={`line-${index}`} className="flex gap-2">
-          <span>{bullet ? "•" : "•"}</span>
-          <span>{renderInlineMarkdown((bullet || ordered)![1])}</span>
+        <span key={`line-${index}`} className="block border-l-2 border-primary/50 pl-3 italic text-muted-foreground">
+          {renderInlineMarkdown(quote[1])}
+        </span>,
+      );
+    } else if (bullet || ordered) {
+      const match = bullet || ordered;
+      const indent = Math.min(12, Math.floor(match![1].length / 2) * 4);
+      nodes.push(
+        <span key={`line-${index}`} className="flex gap-2" style={{ paddingLeft: indent }}>
+          <span>{ordered ? `${index + 1}.` : "•"}</span>
+          <span>{renderInlineMarkdown(match![2])}</span>
         </span>,
       );
     } else {
@@ -98,6 +152,11 @@ function renderMarkdownText(text: string) {
 
     if (index < lines.length - 1) nodes.push(<br key={`break-${index}`} />);
   });
+
+  if (codeLines.length > 0) {
+    codeLines.shift();
+    pushCodeBlock(lines.length - 1);
+  }
 
   return nodes;
 }
