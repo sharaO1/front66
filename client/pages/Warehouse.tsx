@@ -2166,13 +2166,12 @@ export default function Warehouse() {
         maxStock: newProduct.maxStock || 0,
         costPrice: newProduct.costPrice || 0,
         sellingPrice: newProduct.sellingPrice || 0,
-        // send supplier as a string
         supplier:
           newProduct.suppliers && newProduct.suppliers.length
-            ? newProduct.suppliers.join(", ")
+            ? newProduct.suppliers
             : newProduct.supplier
-              ? String(newProduct.supplier)
-              : "",
+              ? [String(newProduct.supplier)]
+              : [],
         location: newProduct.location || "",
         expiryDate: newProduct.expiryDate || null,
         categoryId: categoryNameToId(newProduct.category || ""),
