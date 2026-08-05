@@ -650,7 +650,7 @@ export default function AIChat({
         >
           <Card
             className={cn(
-              "border-0 shadow-lg overflow-hidden",
+              "border-0 shadow-lg overflow-hidden flex flex-col",
               page
                 ? isFullScreen
                   ? "h-screen w-screen rounded-none"
@@ -723,12 +723,12 @@ export default function AIChat({
               </div>
             </CardHeader>
 
-            <CardContent className="p-0 h-full">
-              <div className="flex h-full flex-col overflow-hidden">
+            <CardContent className="p-0 flex-1 min-h-0">
+              <div className="flex h-full min-h-0 flex-col overflow-hidden">
                 <div className="h-2 bg-gradient-to-b from-transparent to-black/0 dark:to-white/0" />
                 <div
                   ref={listRef}
-                  className="flex-1 overflow-y-auto overscroll-contain pt-[76px] px-[11px] pb-0 space-y-3 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950"
+                  className="min-h-0 flex-1 overflow-y-auto overscroll-contain pt-[76px] px-[11px] pb-0 space-y-3 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950"
                   style={{
                     WebkitOverflowScrolling: "touch",
                     overscrollBehavior: "contain",
@@ -798,7 +798,7 @@ export default function AIChat({
 
                 <div
                   className={cn(
-                    "border-t bg-background py-5 px-3",
+                    "flex-none border-t bg-background py-5 px-3",
                     containerFixed ? "sticky bottom-0" : "",
                   )}
                   style={
