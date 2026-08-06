@@ -56,8 +56,8 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const sidebarCollapsed = false;
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [showHeader, setShowHeader] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const location = useLocation();
@@ -356,7 +356,11 @@ export default function Layout({ children }: LayoutProps) {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
+              onClick={() => {
+                const nextOpen = !sidebarOpen;
+                setSidebarOpen(nextOpen);
+                if (nextOpen) setSidebarCollapsed(false);
+              }}
               className="lg:hidden h-10 w-10 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 hover:scale-110"
             >
               <Menu className="h-5 w-5" />
