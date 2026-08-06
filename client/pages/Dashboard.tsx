@@ -1654,8 +1654,8 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
           <CardTitle>{t("dashboard.quick_statistics")}</CardTitle>
           <CardDescription>{t("dashboard.kpi_at_glance")}</CardDescription>
         </CardHeader>
-        <CardContent>
-          <Table>
+        <CardContent className="overflow-x-auto">
+          <Table className="min-w-[640px]">
             <TableHeader>
               <TableRow>
                 <TableHead>{t("dashboard.metric")}</TableHead>

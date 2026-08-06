@@ -2268,7 +2268,7 @@ export default function Employees() {
 
         <TabsContent value="sales" className="space-y-4">
           {/* Daily Sales Tracking */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h3 className="text-lg font-semibold">
                 {t("employees.sales_performance_header")}
@@ -2278,14 +2278,14 @@ export default function Employees() {
               </p>
             </div>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
+              <div className="flex w-full items-center gap-2 sm:w-auto">
                 <Label htmlFor="salesDate">{t("common.date")}:</Label>
                 <Input
                   id="salesDate"
                   type="date"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-auto"
+                  className="w-full sm:w-auto"
                 />
               </div>
             </div>
@@ -2436,7 +2436,7 @@ export default function Employees() {
 
         <TabsContent value="attendance" className="space-y-4">
           {/* Attendance Tracking */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h3 className="text-lg font-semibold">
                 {t("employees.employee_attendance_header")}
@@ -2446,14 +2446,14 @@ export default function Employees() {
               </p>
             </div>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
+              <div className="flex w-full items-center gap-2 sm:w-auto">
                 <Label htmlFor="attendanceDate">{t("common.date")}:</Label>
                 <Input
                   id="attendanceDate"
                   type="date"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-auto"
+                  className="w-full sm:w-auto"
                 />
               </div>
             </div>

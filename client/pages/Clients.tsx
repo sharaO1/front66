@@ -486,7 +486,7 @@ export default function Clients() {
                   rows={2}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="type">{t("clients.client_type")}</Label>
                   <Select
@@ -1015,7 +1015,7 @@ export default function Clients() {
                   }
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="editType">{t("clients.client_type")}</Label>
                   <Select
@@ -1071,7 +1071,7 @@ export default function Clients() {
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="editCreditLimit">
                     {t("clients.credit_limit")}

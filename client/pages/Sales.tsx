@@ -2472,19 +2472,20 @@ export default function Sales() {
                       <h3 className="font-semibold">
                         {t("sales.invoice_items")}
                       </h3>
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>{t("sales.product_name")}</TableHead>
+                      <div className="overflow-x-auto">
+                        <Table className="min-w-[640px]">
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>{t("sales.product_name")}</TableHead>
                             <TableHead>{t("sales.qty")}</TableHead>
                             <TableHead>{t("sales.unit_price")}</TableHead>
                             <TableHead>{t("sales.discount")}</TableHead>
                             <TableHead>{t("common.total")}</TableHead>
                             <TableHead>{t("common.actions")}</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {newInvoice.items.map((item) => (
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {newInvoice.items.map((item) => (
                             <TableRow key={item.id}>
                               <TableCell>{item.productName}</TableCell>
                               <TableCell>{item.quantity}</TableCell>
@@ -2505,8 +2506,9 @@ export default function Sales() {
                               </TableCell>
                             </TableRow>
                           ))}
-                        </TableBody>
-                      </Table>
+                          </TableBody>
+                        </Table>
+                      </div>
 
                       <div className="border rounded-lg p-4 space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -2972,19 +2974,20 @@ export default function Sales() {
                       <h3 className="font-semibold">
                         {t("sales.invoice_items")}
                       </h3>
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>{t("sales.product_name")}</TableHead>
+                      <div className="overflow-x-auto">
+                        <Table className="min-w-[640px]">
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>{t("sales.product_name")}</TableHead>
                             <TableHead>{t("sales.qty")}</TableHead>
                             <TableHead>{t("sales.unit_price")}</TableHead>
                             <TableHead>{t("sales.discount")}</TableHead>
                             <TableHead>{t("common.total")}</TableHead>
                             <TableHead>{t("common.actions")}</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {newInvoice.items.map((item) => (
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {newInvoice.items.map((item) => (
                             <TableRow key={item.id}>
                               <TableCell>{item.productName}</TableCell>
                               <TableCell>{item.quantity}</TableCell>
@@ -3005,8 +3008,9 @@ export default function Sales() {
                               </TableCell>
                             </TableRow>
                           ))}
-                        </TableBody>
-                      </Table>
+                          </TableBody>
+                        </Table>
+                      </div>
 
                       <div className="border rounded-lg p-4 space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
