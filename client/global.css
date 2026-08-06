@@ -398,3 +398,11 @@
     }
   }
 }
+
+.mobile-bottom-nav {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.mobile-main-content {
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+}

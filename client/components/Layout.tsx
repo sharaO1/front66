@@ -456,9 +456,8 @@ export default function Layout({ children }: LayoutProps) {
         {/* Page content - mobile-optimized padding */}
         <main
           className={cn(
-            "overflow-x-hidden transition-all duration-300",
-            "p-4 pb-24 md:p-6 md:pb-6",
-            !showHeader && "lg:hidden" ? "pb-6" : "",
+            "overflow-x-hidden transition-all duration-300 mobile-main-content",
+            "p-4 md:p-6 md:pb-6",
           )}
         >
           {children}
@@ -467,8 +466,7 @@ export default function Layout({ children }: LayoutProps) {
         {/* Mobile bottom navigation */}
         <footer
           className={cn(
-            "fixed inset-x-0 bottom-0 z-40 border-t border-gray-200/60 dark:border-gray-700/60 bg-white/90 dark:bg-gray-900/90 backdrop-blur supports-[backdrop-filter]:bg-white/60 lg:hidden transition-transform duration-300 ease-in-out",
-            !showHeader ? "translate-y-full" : "translate-y-0",
+            "fixed inset-x-0 bottom-0 z-40 border-t border-gray-200/60 dark:border-gray-700/60 bg-white/90 dark:bg-gray-900/90 backdrop-blur supports-[backdrop-filter]:bg-white/60 lg:hidden mobile-bottom-nav",
           )}
         >
           <nav className="grid grid-cols-5 h-16">
@@ -502,11 +500,12 @@ export default function Layout({ children }: LayoutProps) {
                   key={item.href}
                   to={item.href}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-1 text-xs font-medium",
+                    "flex min-h-16 touch-manipulation flex-col items-center justify-center gap-1 text-xs font-medium",
                     active
-                      ? "text-primary"
+                      ? "bg-primary/10 text-primary"
                       : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white",
                   )}
+                  aria-current={active ? "page" : undefined}
                 >
                   <Icon className={cn("h-5 w-5", active && "text-primary")} />
                   <span className="truncate max-w-[68px]">{item.label}</span>
