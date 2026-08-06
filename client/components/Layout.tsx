@@ -362,10 +362,7 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Main content */}
       <div
-        className={cn(
-          "transition-all duration-300 overflow-x-hidden",
-          sidebarOpen ? (sidebarCollapsed ? "lg:ml-16" : "lg:ml-64") : "",
-        )}
+        className="overflow-x-hidden"
         onClick={handleMainAreaClick}
       >
         {/* Enhanced Header */}
