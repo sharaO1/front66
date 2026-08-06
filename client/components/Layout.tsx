@@ -362,7 +362,7 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Main content */}
       <div
-        className="overflow-x-hidden"
+        className="overflow-x-hidden lg:pl-16"
         onClick={handleMainAreaClick}
       >
         {/* Enhanced Header */}
