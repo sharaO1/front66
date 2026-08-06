@@ -466,10 +466,11 @@ export default function Layout({ children }: LayoutProps) {
         {/* Mobile bottom navigation */}
         <footer
           className={cn(
-            "fixed inset-x-0 bottom-0 z-40 border-t border-gray-200/60 dark:border-gray-700/60 bg-white/90 dark:bg-gray-900/90 backdrop-blur supports-[backdrop-filter]:bg-white/60 lg:hidden mobile-bottom-nav",
+            "fixed bottom-3 left-3 right-3 z-40 rounded-2xl border border-gray-200/60 bg-white/90 shadow-business-xl backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:border-gray-700/60 dark:bg-gray-900/90 lg:hidden mobile-bottom-nav transition-transform duration-300 ease-out",
+            !showHeader && "mobile-bottom-nav-hidden",
           )}
         >
-          <nav className="grid grid-cols-5 h-16">
+          <nav className="grid h-16 grid-cols-5 gap-1 p-1">
             {[
               {
                 href: "/dashboard",
@@ -500,10 +501,10 @@ export default function Layout({ children }: LayoutProps) {
                   key={item.href}
                   to={item.href}
                   className={cn(
-                    "flex min-h-16 touch-manipulation flex-col items-center justify-center gap-1 text-xs font-medium",
+                    "flex min-h-14 touch-manipulation flex-col items-center justify-center gap-1 rounded-xl text-xs font-medium transition-colors",
                     active
                       ? "bg-primary/10 text-primary"
-                      : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white",
+                      : "text-gray-600 dark:text-gray-300 hover:bg-muted/70 hover:text-gray-900 dark:hover:text-white",
                   )}
                   aria-current={active ? "page" : undefined}
                 >

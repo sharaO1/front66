@@ -403,6 +403,10 @@
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+.mobile-bottom-nav-hidden {
+  transform: translateY(calc(100% + 1rem));
+}
+
 .mobile-main-content {
   padding-bottom: calc(4rem + env(safe-area-inset-bottom));
 }
