@@ -57,7 +57,7 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const sidebarCollapsed = false;
   const [showHeader, setShowHeader] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const location = useLocation();
@@ -114,10 +114,8 @@ export default function Layout({ children }: LayoutProps) {
   const handleMainAreaClick = () => {
     if (typeof window === "undefined") return;
     const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
-    if (isDesktop) {
-      if (!sidebarCollapsed) setSidebarCollapsed(true);
-    } else {
-      if (sidebarOpen) setSidebarOpen(false);
+    if (!isDesktop && sidebarOpen) {
+      setSidebarOpen(false);
     }
   };
 
@@ -182,24 +180,6 @@ export default function Layout({ children }: LayoutProps) {
                 </p>
               </div>
             )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className={cn(
-                "absolute hidden lg:flex w-8 h-8 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-business hover:shadow-business-md transition-all duration-300 hover:scale-110",
-                sidebarCollapsed
-                  ? "right-0 translate-x-1/2 top-4"
-                  : "-right-4 top-6",
-              )}
-            >
-              <Menu
-                className={cn(
-                  "h-4 w-4 transition-transform duration-300",
-                  sidebarCollapsed && "rotate-180",
-                )}
-              />
-            </Button>
           </div>
 
           {/* Enhanced Navigation */}
