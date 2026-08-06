@@ -150,12 +150,28 @@ export default function Layout({ children }: LayoutProps) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
+  useEffect(() => {
+    if (!sidebarOpen || window.matchMedia("(min-width: 1024px)").matches) {
+      return;
+    }
+
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousDocumentOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousDocumentOverflow;
+    };
+  }, [sidebarOpen]);
+
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Enhanced Sidebar with Glassmorphism */}
       <div
         className={cn(
-          "fixed inset-y-0 left-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 border-r border-gray-200/50 dark:border-gray-700/50 transform transition-all duration-500 ease-in-out shadow-business-xl",
+          "fixed inset-y-0 left-0 z-50 overflow-hidden backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 border-r border-gray-200/50 dark:border-gray-700/50 transform transition-all duration-500 ease-in-out shadow-business-xl",
           sidebarCollapsed ? "w-16" : "w-72",
           sidebarOpen ? "translate-x-0" : "-translate-x-full",
           "lg:translate-x-0",
@@ -184,7 +200,7 @@ export default function Layout({ children }: LayoutProps) {
 
           {/* Enhanced Navigation */}
           <TooltipProvider>
-            <nav className="flex-1 px-4 py-6 space-y-2">
+            <nav className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6 space-y-2">
               {navigation.map((item, index) => {
                 const isActive = location.pathname === item.href;
                 const NavItem = (
