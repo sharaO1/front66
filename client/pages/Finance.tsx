@@ -2038,7 +2038,7 @@ ${data.transactions
       </div>
 
       <Tabs defaultValue="transactions" className="space-y-4">
-        <TabsList className="w-full overflow-x-auto justify-start sm:justify-center">
+        <TabsList className="flex w-full max-w-full justify-start overflow-x-auto sm:justify-center">
           <TabsTrigger value="transactions">
             {t("finance.transactions")}
           </TabsTrigger>

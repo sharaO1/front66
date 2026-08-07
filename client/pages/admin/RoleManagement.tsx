@@ -194,7 +194,7 @@ export default function RoleManagement() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="permissions" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="flex w-full max-w-full justify-start overflow-x-auto">
               <TabsTrigger value="permissions">
                 {t("admin.roles.tabs.permissions")}
               </TabsTrigger>
