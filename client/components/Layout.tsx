@@ -3,10 +3,8 @@ import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useThemeStore } from "@/stores/themeStore";
 import { useAuthStore } from "@/stores/authStore";
 import { useRBACStore } from "@/stores/rbacStore";
-import { useLanguageStore } from "@/stores/languageStore";
 import RoleBadge from "@/components/ui/role-badge";
 import PermissionGate, { AdminOnly } from "@/components/PermissionGate";
 import {
@@ -21,13 +19,10 @@ import {
   Shield,
   UserCheck,
   Menu,
-  Moon,
-  Sun,
   Bell,
   Search,
   LogOut,
   ChevronDown,
-  Globe,
   User,
 } from "lucide-react";
 import {
@@ -61,10 +56,8 @@ export default function Layout({ children }: LayoutProps) {
   const [showHeader, setShowHeader] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const location = useLocation();
-  const { theme, toggleTheme } = useThemeStore();
   const { user, logout } = useAuthStore();
   const { currentUser, canAccessRoute } = useRBACStore();
-  const { language, setLanguage } = useLanguageStore();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -97,10 +90,6 @@ export default function Layout({ children }: LayoutProps) {
       description: "You have been successfully logged out.",
     });
     navigate("/auth/login");
-  };
-
-  const handleLanguageChange = (newLanguage: string) => {
-    setLanguage(newLanguage);
   };
 
   const handleAvatarUpdate = (avatarUrl: string) => {
@@ -383,59 +372,6 @@ export default function Layout({ children }: LayoutProps) {
             </Button>
 
             <div className="flex items-center gap-2">
-              {/* Enhanced Language Switcher */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-10 w-10 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 hover:scale-110 relative group"
-                  >
-                    <Globe className="h-4 w-4 transition-transform group-hover:rotate-12" />
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Language</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => handleLanguageChange("en")}
-                    className={language === "en" ? "bg-accent" : ""}
-                  >
-                    🇺🇸 English
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => handleLanguageChange("tg")}
-                    className={language === "tg" ? "bg-accent" : ""}
-                  >
-                    🇹🇯 Тоҷикӣ
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => handleLanguageChange("ru")}
-                    className={language === "ru" ? "bg-accent" : ""}
-                  >
-                    🇷🇺 Русский
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              {/* Enhanced Theme Toggle */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleTheme}
-                className="h-10 w-10 rounded-xl relative overflow-hidden group hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 hover:scale-110"
-              >
-                <div className="relative z-10">
-                  {theme === "light" ? (
-                    <Moon className="h-4 w-4 rotate-0 scale-100 transition-all duration-500 group-hover:rotate-12" />
-                  ) : (
-                    <Sun className="h-4 w-4 rotate-0 scale-100 transition-all duration-500 group-hover:rotate-180" />
-                  )}
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/10 to-orange-400/10 dark:from-blue-400/10 dark:to-purple-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
-              </Button>
-
               {/* Enhanced Notifications */}
               <Button
                 variant="ghost"

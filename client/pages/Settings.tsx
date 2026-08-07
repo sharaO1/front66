@@ -22,6 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useThemeStore } from "@/stores/themeStore";
+import { useLanguageStore } from "@/stores/languageStore";
 import { useAuthStore } from "@/stores/authStore";
 import {
   Settings as SettingsIcon,
@@ -92,6 +93,7 @@ interface Category {
 
 export default function Settings() {
   const { theme, toggleTheme } = useThemeStore();
+  const { language, setLanguage } = useLanguageStore();
   const { user, accessToken } = useAuthStore();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -427,6 +429,60 @@ export default function Settings() {
                   <Save className="mr-2 h-4 w-4" />
                   {t("settings.save_company_info")}
                 </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <SettingsIcon className="h-5 w-5" />
+                  {t("settings.appearance", "Appearance")}
+                </CardTitle>
+                <CardDescription>
+                  {t("settings.appearance_desc", "Choose your language and theme")}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="language">{t("settings.language", "Language")}</Label>
+                  <Select
+                    value={language}
+                    onValueChange={(value) =>
+                      setLanguage(value as "en" | "ru" | "tg")
+                    }
+                  >
+                    <SelectTrigger id="language">
+                      <Globe className="mr-2 h-4 w-4" />
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="tg">Тоҷикӣ</SelectItem>
+                      <SelectItem value="ru">Русский</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <Label>{t("settings.theme", "Theme")}</Label>
+                    <p className="text-sm text-muted-foreground">
+                      {theme === "light"
+                        ? t("settings.light_mode", "Light mode")
+                        : t("settings.dark_mode", "Dark mode")}
+                    </p>
+                  </div>
+                  <Button variant="outline" onClick={toggleTheme}>
+                    {theme === "light" ? (
+                      <Moon className="mr-2 h-4 w-4" />
+                    ) : (
+                      <Sun className="mr-2 h-4 w-4" />
+                    )}
+                    {theme === "light"
+                      ? t("settings.dark_mode", "Dark mode")
+                      : t("settings.light_mode", "Light mode")}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
