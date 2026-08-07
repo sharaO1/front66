@@ -73,6 +73,7 @@ import {
   Package2,
 } from "lucide-react";
 import { AdminOnly } from "@/components/PermissionGate";
+import { PaginationControls } from "@/components/ui/pagination";
 
 interface Store {
   id: string;
@@ -529,6 +530,9 @@ const mockWarehouseHistory: WarehouseHistory[] = [
 export default function Warehouse() {
   const [products, setProducts] = useState<Product[]>(mockProducts);
   const [stockMovements, setStockMovements] = useState(mockStockMovements);
+  const [productPage, setProductPage] = useState(1);
+  const [movementPage, setMovementPage] = useState(1);
+  const [historyPage, setHistoryPage] = useState(1);
   const [warehouseHistory, setWarehouseHistory] =
     useState(mockWarehouseHistory);
   const [usersFilialMap, setUsersFilialMap] = useState<Record<string, string>>(
@@ -1480,6 +1484,10 @@ export default function Warehouse() {
     };
   }, [products, skuBuffer, toast, t]);
 
+  useEffect(() => {
+    setProductPage(1);
+  }, [searchTerm, categoryFilter, statusFilter]);
+
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -1556,6 +1564,13 @@ export default function Warehouse() {
     return matchesFilter && matchesFilial;
   });
 
+  useEffect(() => {
+    setMovementPage(1);
+  }, [appliedMovementFrom, appliedMovementTo]);
+  useEffect(() => {
+    setHistoryPage(1);
+  }, [historyFilter, appliedHistoryFrom, appliedHistoryTo]);
+
   const filteredMovements = stockMovements.filter((m: any) => {
     if (!isScoped) return true;
     const performerId = m.performedById;
@@ -1563,6 +1578,10 @@ export default function Warehouse() {
     const fid = usersFilialMap[performerId];
     return fid ? String(fid) === String(scopedFilial.id) : false;
   });
+
+  const paginatedProducts = filteredProducts.slice((productPage - 1) * 10, productPage * 10);
+  const paginatedMovements = filteredMovements.slice((movementPage - 1) * 10, movementPage * 10);
+  const paginatedHistory = filteredHistory.slice((historyPage - 1) * 10, historyPage * 10);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -2886,7 +2905,7 @@ export default function Warehouse() {
               />
             </div>
             <div className="max-h-60 overflow-y-auto space-y-2 mt-3 min-h-[180px]">
-              {filteredProducts.map((product) => (
+              {paginatedProducts.map((product) => (
                 <Button
                   key={product.id}
                   variant="outline"
@@ -3076,7 +3095,7 @@ export default function Warehouse() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredProducts.map((product) => (
+                    {paginatedProducts.map((product) => (
                       <TableRow key={product.id}>
                         <TableCell>
                           <div>
@@ -3209,6 +3228,7 @@ export default function Warehouse() {
                   </TableBody>
                 </Table>
               </div>
+              <PaginationControls page={productPage} totalItems={filteredProducts.length} onPageChange={setProductPage} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -3277,7 +3297,7 @@ export default function Warehouse() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredMovements.map((movement) => (
+                    {paginatedMovements.map((movement) => (
                       <TableRow key={movement.id}>
                         <TableCell>
                           <div>
@@ -3445,6 +3465,7 @@ export default function Warehouse() {
                   </TableBody>
                 </Table>
               </div>
+              <PaginationControls page={movementPage} totalItems={filteredMovements.length} onPageChange={setMovementPage} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -3550,7 +3571,7 @@ export default function Warehouse() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredHistory.map((history) => (
+                    {paginatedHistory.map((history) => (
                       <TableRow key={history.id}>
                         <TableCell>
                           <div className="flex items-center gap-2">
@@ -3747,6 +3768,7 @@ export default function Warehouse() {
                   </TableBody>
                 </Table>
               </div>
+              <PaginationControls page={historyPage} totalItems={filteredHistory.length} onPageChange={setHistoryPage} />
             </CardContent>
           </Card>
         </TabsContent>

@@ -52,6 +52,7 @@ import {
   Send,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { PaginationControls } from "@/components/ui/pagination";
 
 interface Client {
   id: string;
@@ -98,6 +99,7 @@ export default function Clients() {
 
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+  const [clientPage, setClientPage] = useState(1);
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -148,6 +150,10 @@ export default function Clients() {
     return matchesSearch && matchesType && matchesStatus;
   });
 
+  useEffect(() => {
+    setClientPage(1);
+  }, [searchTerm, typeFilter, statusFilter, sortKey, sortOrder]);
+
   const statusOrder: Record<Client["status"], number> = {
     active: 0,
     inactive: 1,
@@ -171,6 +177,8 @@ export default function Clients() {
         return 0;
     }
   });
+
+  const paginatedClients = sortedClients.slice((clientPage - 1) * 10, clientPage * 10);
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -679,7 +687,7 @@ export default function Clients() {
         </CardHeader>
         <CardContent>
           <div className="sm:hidden space-y-3">
-            {sortedClients.map((client) => (
+            {paginatedClients.map((client) => (
               <div
                 key={client.id}
                 className="rounded-xl border bg-card p-3 shadow-sm"
@@ -824,7 +832,7 @@ export default function Clients() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortedClients.map((client) => (
+                {paginatedClients.map((client) => (
                   <TableRow key={client.id}>
                     <TableCell>
                       <div>
@@ -907,6 +915,7 @@ export default function Clients() {
               </TableBody>
             </Table>
           </div>
+          <PaginationControls page={clientPage} totalItems={sortedClients.length} onPageChange={setClientPage} />
         </CardContent>
       </Card>
 

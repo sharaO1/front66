@@ -48,6 +48,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { API_BASE } from "@/lib/api";
 import { SalesSummaryResponse } from "@shared/api";
 import { useNavigate } from "react-router-dom";
+import { PaginationControls } from "@/components/ui/pagination";
 
 const salesData = [
   { name: "Jan", sales: 4000, profit: 2400 },
@@ -100,6 +101,13 @@ export default function Dashboard() {
   const [salesSummary, setSalesSummary] = useState<
     SalesSummaryResponse["result"] | null
   >(null);
+  const [salesProductPage, setSalesProductPage] = useState(1);
+
+  const paginatedSalesProducts = (derivedSales?.products || salesSummary?.products || []).slice((salesProductPage - 1) * 10, salesProductPage * 10);
+
+  useEffect(() => {
+    setSalesProductPage(1);
+  }, [derivedSales, salesSummary]);
 
   const [salesTodayCount, setSalesTodayCount] = useState<number | null>(null);
   const [salesTodayChange, setSalesTodayChange] = useState<number | null>(null);
@@ -1610,9 +1618,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
                   </TableHeader>
                   <TableBody>
                     {(
-                      derivedSales?.products ||
-                      salesSummary?.products ||
-                      []
+                      paginatedSalesProducts
                     ).map((p) => {
                       const margin =
                         p.revenue && p.profit != null
@@ -1643,6 +1649,11 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
                   </TableBody>
                 </Table>
               </div>
+              <PaginationControls
+                page={salesProductPage}
+                totalItems={(derivedSales?.products || salesSummary?.products || []).length}
+                onPageChange={setSalesProductPage}
+              />
             </>
           )}
         </CardContent>

@@ -79,6 +79,7 @@ import {
 } from "lucide-react";
 import DetailCard from "@/components/DetailCard";
 import { useTranslation } from "react-i18next";
+import { PaginationControls } from "@/components/ui/pagination";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -308,6 +309,7 @@ const departmentData = [
 export default function Employees() {
   const { t } = useTranslation();
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [employeePage, setEmployeePage] = useState(1);
   const [dailySales, setDailySales] = useState(mockDailySales);
   const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([]);
   const [attendanceEntries, setAttendanceEntries] = useState<AttendanceEntry[]>(
@@ -391,6 +393,10 @@ export default function Employees() {
       ? employees.filter((e) => (e as any).filialId === authUser.filialId)
       : employees;
 
+  useEffect(() => {
+    setEmployeePage(1);
+  }, [searchTerm, departmentFilter, statusFilter]);
+
   const filteredEmployees = scopedEmployees.filter((employee) => {
     const term = searchTerm.toLowerCase();
     const fullName = `${employee.firstName} ${employee.lastName}`.toLowerCase();
@@ -404,6 +410,8 @@ export default function Employees() {
       statusFilter === "all" || employee.status === statusFilter;
     return matchesSearch && matchesDepartment && matchesStatus;
   });
+
+  const paginatedEmployees = filteredEmployees.slice((employeePage - 1) * 10, employeePage * 10);
 
   useEffect(() => {
     loadUsers().catch(() => {});
@@ -2132,7 +2140,7 @@ export default function Employees() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredEmployees.map((employee) => (
+                  {paginatedEmployees.map((employee) => (
                     <TableRow key={employee.id}>
                       <TableCell>
                         <div className="flex items-center gap-3">
@@ -2246,7 +2254,7 @@ export default function Employees() {
                 </TableBody>
               </Table>
               <div className="md:hidden space-y-3 mt-3">
-                {filteredEmployees.map((employee) => (
+                {paginatedEmployees.map((employee) => (
                   <MobileEmployeeCard
                     key={employee.id}
                     employee={employee as any}
@@ -2262,6 +2270,7 @@ export default function Employees() {
                   />
                 ))}
               </div>
+              <PaginationControls page={employeePage} totalItems={filteredEmployees.length} onPageChange={setEmployeePage} />
             </CardContent>
           </Card>
         </TabsContent>

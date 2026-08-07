@@ -60,6 +60,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { PaginationControls } from "@/components/ui/pagination";
 
 export default function UserManagement() {
   const {
@@ -74,6 +75,7 @@ export default function UserManagement() {
   } = useRBACStore();
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [userPage, setUserPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState<RBACUser | null>(null);
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
   const [isPermissionDialogOpen, setIsPermissionDialogOpen] = useState(false);
@@ -100,12 +102,18 @@ export default function UserManagement() {
       ? users.filter((u) => (u as any).filialId === authUser.filialId)
       : users;
 
+  useEffect(() => {
+    setUserPage(1);
+  }, [searchQuery]);
+
   const filteredUsers = scopedUsers.filter(
     (user) =>
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.role.toLowerCase().includes(searchQuery.toLowerCase()),
   );
+
+  const paginatedUsers = filteredUsers.slice((userPage - 1) * 10, userPage * 10);
 
   const handleRoleChange = async (userId: string, newRole: Role) => {
     const success = await updateUserRole(userId, newRole);
@@ -310,7 +318,7 @@ export default function UserManagement() {
               {/* Users List/Table */}
               {isMobile ? (
                 <div className="space-y-3">
-                  {filteredUsers.map((user) => (
+                  {paginatedUsers.map((user) => (
                     <div
                       key={user.id}
                       className="border rounded-lg p-3 bg-card"
@@ -459,7 +467,7 @@ export default function UserManagement() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredUsers.map((user) => (
+                      {paginatedUsers.map((user) => (
                         <TableRow key={user.id}>
                           <TableCell>
                             <div className="flex items-center gap-3">
@@ -592,6 +600,7 @@ export default function UserManagement() {
                   </Table>
                 </div>
               )}
+              <PaginationControls page={userPage} totalItems={filteredUsers.length} onPageChange={setUserPage} />
             </CardContent>
           </Card>
 

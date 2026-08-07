@@ -75,6 +75,7 @@ import {
   DrawerFooter,
 } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { PaginationControls } from "@/components/ui/pagination";
 
 interface InvoiceItem {
   id: string;
@@ -263,6 +264,7 @@ const mockInvoices: Invoice[] = [
 export default function Sales() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [invoicePage, setInvoicePage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
   const [startDate, setStartDate] = useState(""); // applied values
@@ -1258,6 +1260,10 @@ export default function Sales() {
     return { revenue, pending, cancelled };
   }, [invoices]);
 
+  useEffect(() => {
+    setInvoicePage(1);
+  }, [searchTerm, statusFilter, dateFilter, startDate, endDate]);
+
   const filteredInvoices = invoices.filter((invoice) => {
     const matchesSearch =
       invoice.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -1347,6 +1353,8 @@ export default function Sales() {
         ),
     [filteredInvoices],
   );
+
+  const paginatedInvoices = sortedInvoices.slice((invoicePage - 1) * 10, invoicePage * 10);
 
   const getStatusBadge = (status: string, borrow?: boolean) => {
     if (status === "borrow") {
@@ -3428,7 +3436,7 @@ export default function Sales() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sortedInvoices.map((invoice) => (
+                  {paginatedInvoices.map((invoice) => (
                     <TableRow key={invoice.id}>
                       <TableCell className="font-medium">
                         {invoice.invoiceNumber}
@@ -3594,7 +3602,7 @@ export default function Sales() {
           </div>
 
           <div className="md:hidden space-y-3">
-            {sortedInvoices.map((invoice) => (
+            {paginatedInvoices.map((invoice) => (
               <div
                 key={invoice.id}
                 className="rounded-xl border p-4 bg-card shadow-business"
@@ -3717,6 +3725,7 @@ export default function Sales() {
               </div>
             ))}
           </div>
+          <PaginationControls page={invoicePage} totalItems={sortedInvoices.length} onPageChange={setInvoicePage} />
         </CardContent>
       </Card>
 

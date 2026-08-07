@@ -55,6 +55,7 @@ import {
 } from "lucide-react";
 import DetailCard from "@/components/DetailCard";
 import { useTranslation } from "react-i18next";
+import { PaginationControls } from "@/components/ui/pagination";
 
 interface Filial {
   id: string;
@@ -183,6 +184,7 @@ export default function Filials() {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [filialPage, setFilialPage] = useState(1);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
@@ -538,6 +540,10 @@ export default function Filials() {
     };
   }, [filials, accessToken, managerNames]);
 
+  useEffect(() => {
+    setFilialPage(1);
+  }, [searchTerm, typeFilter, statusFilter]);
+
   const filteredFilials = filials.filter((filial) => {
     const matchesSearch =
       filial.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -548,6 +554,8 @@ export default function Filials() {
       statusFilter === "all" || filial.status === statusFilter;
     return matchesSearch && matchesType && matchesStatus;
   });
+
+  const paginatedFilials = filteredFilials.slice((filialPage - 1) * 10, filialPage * 10);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -1105,7 +1113,7 @@ export default function Filials() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredFilials.map((filial) => (
+              {paginatedFilials.map((filial) => (
                 <TableRow key={filial.id}>
                   <TableCell>
                     <div>
@@ -1203,6 +1211,7 @@ export default function Filials() {
               ))}
             </TableBody>
           </Table>
+          <PaginationControls page={filialPage} totalItems={filteredFilials.length} onPageChange={setFilialPage} />
         </CardContent>
       </Card>
 

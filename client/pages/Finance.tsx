@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { PaginationControls } from "@/components/ui/pagination";
 import {
   Card,
   CardContent,
@@ -755,6 +756,8 @@ export default function Finance() {
       }));
   }, [transactions, i18n.language]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [transactionPage, setTransactionPage] = useState(1);
+  const [loanPage, setLoanPage] = useState(1);
   const [typeFilter, setTypeFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false);
@@ -935,6 +938,13 @@ export default function Finance() {
     }
   }, [isExportDialogOpen]);
 
+  useEffect(() => {
+    setTransactionPage(1);
+  }, [searchTerm, typeFilter, categoryFilter, timeFilter]);
+  useEffect(() => {
+    setLoanPage(1);
+  }, [loans.length]);
+
   const filteredTransactions = transactions
     .filter((transaction) => {
       const matchesSearch =
@@ -975,6 +985,9 @@ export default function Finance() {
       );
     })
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  const paginatedTransactions = filteredTransactions.slice((transactionPage - 1) * 10, transactionPage * 10);
+  const paginatedLoans = loans.slice((loanPage - 1) * 10, loanPage * 10);
 
   const totalIncome = transactions
     .filter((t) => t.type === "income" && t.status === "completed")
@@ -2131,7 +2144,7 @@ ${data.transactions
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredTransactions.map((transaction) => (
+                    {paginatedTransactions.map((transaction) => (
                       <TableRow key={transaction.id}>
                         <TableCell>{transaction.date}</TableCell>
                         <TableCell>
@@ -2248,7 +2261,7 @@ ${data.transactions
               </div>
               {/* Mobile list (Transactions) */}
               <div className="md:hidden space-y-3 mt-3">
-                {filteredTransactions.map((transaction) => (
+                {paginatedTransactions.map((transaction) => (
                   <div
                     key={transaction.id}
                     className="rounded-xl border p-4 bg-card shadow-business"
@@ -2328,6 +2341,7 @@ ${data.transactions
                   </div>
                 ))}
               </div>
+              <PaginationControls page={transactionPage} totalItems={filteredTransactions.length} onPageChange={setTransactionPage} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -2510,7 +2524,7 @@ ${data.transactions
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {loans.map((loan) => (
+                  {paginatedLoans.map((loan) => (
                     <TableRow key={loan.id}>
                       <TableCell>
                         {new Intl.DateTimeFormat(i18n.language || "en", {
@@ -2639,7 +2653,7 @@ ${data.transactions
               </Table>
               {/* Mobile list (Debts & Lends) */}
               <div className="md:hidden space-y-3 mt-3">
-                {loans.map((loan) => (
+                {paginatedLoans.map((loan) => (
                   <div
                     key={loan.id}
                     className="rounded-xl border p-4 bg-card shadow-business"
@@ -2721,6 +2735,7 @@ ${data.transactions
                   {t("finance.no_borrow_lend")}
                 </div>
               )}
+              <PaginationControls page={loanPage} totalItems={loans.length} onPageChange={setLoanPage} />
             </CardContent>
           </Card>
         </TabsContent>

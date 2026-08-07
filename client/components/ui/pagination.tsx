@@ -91,6 +91,83 @@ const PaginationNext = ({
 );
 PaginationNext.displayName = "PaginationNext";
 
+const PaginationControls = ({
+  page,
+  totalItems,
+  pageSize = 10,
+  onPageChange,
+}: {
+  page: number;
+  totalItems: number;
+  pageSize?: number;
+  onPageChange: (page: number) => void;
+}) => {
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+
+  React.useEffect(() => {
+    if (page > totalPages) onPageChange(totalPages);
+  }, [onPageChange, page, totalPages]);
+
+  if (totalItems <= pageSize) return null;
+
+  const visiblePages = Array.from(
+    new Set([1, page - 1, page, page + 1, totalPages].filter((pageNumber) =>
+      pageNumber >= 1 && pageNumber <= totalPages,
+    )),
+  ).sort((a, b) => a - b);
+
+  return (
+    <Pagination className="mt-4">
+      <PaginationContent>
+        <PaginationItem>
+          <PaginationPrevious
+            href="#"
+            aria-disabled={page === 1}
+            className={page === 1 ? "pointer-events-none opacity-50" : undefined}
+            onClick={(event) => {
+              event.preventDefault();
+              if (page > 1) onPageChange(page - 1);
+            }}
+          />
+        </PaginationItem>
+        {visiblePages.map((pageNumber, index) => (
+          <React.Fragment key={pageNumber}>
+            {index > 0 && pageNumber - visiblePages[index - 1] > 1 && (
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+            )}
+            <PaginationItem>
+              <PaginationLink
+                href="#"
+                isActive={pageNumber === page}
+                onClick={(event) => {
+                  event.preventDefault();
+                  onPageChange(pageNumber);
+                }}
+              >
+                {pageNumber}
+              </PaginationLink>
+            </PaginationItem>
+          </React.Fragment>
+        ))}
+        <PaginationItem>
+          <PaginationNext
+            href="#"
+            aria-disabled={page === totalPages}
+            className={page === totalPages ? "pointer-events-none opacity-50" : undefined}
+            onClick={(event) => {
+              event.preventDefault();
+              if (page < totalPages) onPageChange(page + 1);
+            }}
+          />
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
+  );
+};
+PaginationControls.displayName = "PaginationControls";
+
 const PaginationEllipsis = ({
   className,
   ...props
@@ -114,4 +191,5 @@ export {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
+  PaginationControls,
 };
