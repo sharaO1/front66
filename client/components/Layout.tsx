@@ -160,7 +160,7 @@ export default function Layout({ children }: LayoutProps) {
       {/* Enhanced Sidebar with Glassmorphism */}
       <div
         className={cn(
-          "fixed inset-y-0 left-0 z-50 overflow-hidden backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 border-r border-gray-200/50 dark:border-gray-700/50 transform transition-all duration-500 ease-in-out shadow-business-xl",
+          "fixed inset-y-0 left-0 z-50 overflow-hidden backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 border-r border-gray-200/50 dark:border-gray-700/50 transform transition-[width,transform] duration-300 ease-out shadow-business-xl will-change-[width,transform]",
           sidebarCollapsed ? "w-16" : "w-72",
           sidebarOpen ? "translate-x-0" : "-translate-x-full",
           "lg:translate-x-0",
@@ -178,7 +178,7 @@ export default function Layout({ children }: LayoutProps) {
       >
         <div className="flex flex-col h-full">
           {/* Enhanced Logo Section */}
-          <div className="flex items-center gap-3 px-6 py-6 border-b border-gray-200/30 dark:border-gray-700/30 relative">
+          <div className="flex h-24 shrink-0 items-center gap-3 border-b border-gray-200/30 px-6 py-6 dark:border-gray-700/30 relative">
             <div className="relative group">
               <div className="w-12 h-12 bg-gradient-to-br from-blue-600 via-blue-700 to-purple-700 rounded-xl flex items-center justify-center shadow-business-lg hover:shadow-business-xl transition-all duration-300 hover:scale-110 animate-glow">
                 <Package className="h-6 w-6 text-white group-hover:rotate-12 transition-transform duration-300" />
