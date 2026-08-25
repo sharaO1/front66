@@ -95,6 +95,21 @@
     "settings": "Settings",
     "filials": "Filials"
   },
+  "notifications": {
+    "open": "Open notifications",
+    "title": "Notifications",
+    "unread": "{{count}} unread",
+    "all_read": "All caught up",
+    "mark_all_read": "Mark all read",
+    "empty": "No notifications",
+    "empty_description": "Important inventory updates will appear here.",
+    "out_of_stock": "Out of stock",
+    "low_stock": "Low stock",
+    "stock_level": "{{count}} left · minimum {{minimum}}",
+    "new": "New",
+    "view_inventory": "View inventory",
+    "unknown_product": "Unknown product"
+  },
   "dashboard": {
     "title": "Dashboard",
     "subtitle": "Business overview and key metrics",

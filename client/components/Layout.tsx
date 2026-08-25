@@ -19,7 +19,6 @@ import {
   Shield,
   UserCheck,
   Menu,
-  Bell,
   Search,
   LogOut,
   ChevronDown,
@@ -45,6 +44,7 @@ import { useTranslation } from "react-i18next";
 import AvatarUpload from "@/components/AvatarUpload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import AIChat from "@/components/AIChat";
+import NotificationCenter from "@/components/NotificationCenter";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -397,19 +397,7 @@ export default function Layout({ children }: LayoutProps) {
             </Button>
 
             <div className="flex items-center gap-2">
-              {/* Enhanced Notifications */}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-10 w-10 rounded-xl relative group hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 hover:scale-110"
-              >
-                <Bell className="h-4 w-4 group-hover:animate-pulse" />
-                {/* Enhanced Notification Badge */}
-                <span className="absolute -top-1 -right-1 h-3 w-3 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center text-[10px] text-white font-bold animate-pulse shadow-business">
-                  3
-                </span>
-                <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-orange-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </Button>
+              <NotificationCenter />
             </div>
           </div>
         </header>
