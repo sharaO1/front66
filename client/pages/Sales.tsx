@@ -2149,7 +2149,7 @@ export default function Sales() {
                   {t("sales.new_invoice")}
                 </Button>
               </DrawerTrigger>
-              <DrawerContent className="h-[85vh]">
+              <DrawerContent className="max-h-[90vh]">
                 <DrawerHeader>
                   <DrawerTitle>{t("sales.create_new_invoice")}</DrawerTitle>
                   <DrawerDescription>
@@ -2159,7 +2159,7 @@ export default function Sales() {
                 <div className="px-4 pb-4 overflow-y-auto space-y-6">
                   {/* Client Information */}
                   <div className="space-y-4">
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-lg bg-muted/40 p-3">
                       <input
                         type="radio"
                         id="existing-client"
@@ -2226,7 +2226,7 @@ export default function Sales() {
                               }
                             }}
                           >
-                            <SelectTrigger>
+                            <SelectTrigger id="client">
                               <SelectValue
                                 placeholder={t("sales.choose_client")}
                               />
@@ -2302,7 +2302,7 @@ export default function Sales() {
                             })
                           }
                         >
-                          <SelectTrigger>
+                          <SelectTrigger id="paymentMethod">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -2330,8 +2330,8 @@ export default function Sales() {
                       <Plus className="h-4 w-4" />
                       {t("sales.add_invoice_item")}
                     </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                      <div className="space-y-2">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+                      <div className="space-y-2 sm:col-span-2">
                         <Label htmlFor="product">
                           {t("sales.select_product")} *
                         </Label>
@@ -2356,7 +2356,7 @@ export default function Sales() {
                             }
                           }}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger id="product">
                             <SelectValue
                               placeholder={t("sales.choose_product")}
                             />
@@ -2498,10 +2498,10 @@ export default function Sales() {
                               <TableCell>{item.productName}</TableCell>
                               <TableCell>{item.quantity}</TableCell>
                               <TableCell>
-                                {item.unitPrice.toFixed(2)}c
+                                ${item.unitPrice.toFixed(2)}
                               </TableCell>
                               <TableCell>{item.discount}%</TableCell>
-                              <TableCell>{item.total.toFixed(2)}c</TableCell>
+                              <TableCell>${item.total.toFixed(2)}</TableCell>
                               <TableCell>
                                 <Button
                                   variant="outline"
@@ -2615,7 +2615,7 @@ export default function Sales() {
                     />
                   </div>
                 </div>
-                <DrawerFooter className="border-t">
+                <DrawerFooter className="border-t bg-background/95 pb-[calc(1rem+env(safe-area-inset-bottom))] backdrop-blur">
                   <Button
                     className="w-full"
                     onClick={createInvoice}
@@ -2650,7 +2650,7 @@ export default function Sales() {
                   {t("sales.new_invoice")}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="w-[100vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="w-[calc(100vw-2rem)] max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>{t("sales.create_new_invoice")}</DialogTitle>
                   <DialogDescription>
@@ -2661,7 +2661,7 @@ export default function Sales() {
                 <div className="space-y-6 px-1 sm:px-0">
                   {/* Client Information */}
                   <div className="space-y-4">
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-lg bg-muted/40 p-3">
                       <input
                         type="radio"
                         id="existing-client"
@@ -2728,7 +2728,7 @@ export default function Sales() {
                               }
                             }}
                           >
-                            <SelectTrigger>
+                            <SelectTrigger id="client">
                               <SelectValue
                                 placeholder={t("sales.choose_client")}
                               />
@@ -2804,7 +2804,7 @@ export default function Sales() {
                             })
                           }
                         >
-                          <SelectTrigger>
+                          <SelectTrigger id="paymentMethod">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -2832,8 +2832,8 @@ export default function Sales() {
                       <Plus className="h-4 w-4" />
                       {t("sales.add_invoice_item")}
                     </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                      <div className="space-y-2">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+                      <div className="space-y-2 sm:col-span-2">
                         <Label htmlFor="product">
                           {t("sales.select_product")} *
                         </Label>
@@ -2858,7 +2858,7 @@ export default function Sales() {
                             }
                           }}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger id="product">
                             <SelectValue
                               placeholder={t("sales.choose_product")}
                             />
@@ -3000,10 +3000,10 @@ export default function Sales() {
                               <TableCell>{item.productName}</TableCell>
                               <TableCell>{item.quantity}</TableCell>
                               <TableCell>
-                                {item.unitPrice.toFixed(2)}c
+                                ${item.unitPrice.toFixed(2)}
                               </TableCell>
                               <TableCell>{item.discount}%</TableCell>
-                              <TableCell>{item.total.toFixed(2)}c</TableCell>
+                              <TableCell>${item.total.toFixed(2)}</TableCell>
                               <TableCell>
                                 <Button
                                   variant="outline"
@@ -3117,7 +3117,7 @@ export default function Sales() {
                     />
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="sticky bottom-0 -mx-1 flex gap-2 border-t bg-background/95 px-1 py-3 backdrop-blur">
                     <Button
                       className="flex-1"
                       onClick={createInvoice}
@@ -3833,7 +3833,7 @@ export default function Sales() {
                         <div className="text-right">{item.discount}%</div>
                         <div className="font-medium">{t("common.total")}</div>
                         <div className="text-right font-semibold">
-                          {item.total.toFixed(2)}c
+                          ${item.total.toFixed(2)}
                         </div>
                       </div>
                     </div>
