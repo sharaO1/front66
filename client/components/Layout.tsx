@@ -165,6 +165,16 @@ export default function Layout({ children }: LayoutProps) {
           sidebarOpen ? "translate-x-0" : "-translate-x-full",
           "lg:translate-x-0",
         )}
+        onMouseEnter={() => {
+          if (window.matchMedia("(min-width: 1024px)").matches) {
+            setSidebarCollapsed(false);
+          }
+        }}
+        onMouseLeave={() => {
+          if (window.matchMedia("(min-width: 1024px)").matches) {
+            setSidebarCollapsed(true);
+          }
+        }}
       >
         <div className="flex flex-col h-full">
           {/* Enhanced Logo Section */}
