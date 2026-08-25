@@ -50,9 +50,15 @@ export const useLanguageStore = create<LanguageState>()(
     {
       name: "language-storage",
       partialize: (state) => ({ language: state.language }),
+      onRehydrateStorage: () => (state) => {
+        if (state) i18n.changeLanguage(state.language);
+      },
     },
   ),
 );
 
-// Ensure i18n reflects detected language on startup
+// Ensure i18n reflects the persisted language after startup
+i18n.on("initialized", () => {
+  i18n.changeLanguage(useLanguageStore.getState().language);
+});
 i18n.changeLanguage(useLanguageStore.getState().language);
