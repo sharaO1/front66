@@ -1,9 +1,13 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import i18n from "../lib/i18n";
 
 interface LanguageState {
-  language: string;
+  language: "en" | "ru" | "tg";
+  activeUserId: string | null;
   setLanguage: (language: "en" | "ru" | "tg") => void;
+  setUserId: (userId: string | null) => void;
+  restoreForUser: (userId: string) => void;
 }
 
 function detectDeviceLanguage(): "en" | "ru" | "tg" {
@@ -21,13 +25,34 @@ function detectDeviceLanguage(): "en" | "ru" | "tg" {
 
 const initial = detectDeviceLanguage();
 
-export const useLanguageStore = create<LanguageState>()((set) => ({
-  language: initial,
-  setLanguage: (language) => {
-    set({ language });
-    i18n.changeLanguage(language);
-  },
-}));
+export const useLanguageStore = create<LanguageState>()(
+  persist(
+    (set, get) => ({
+      language: initial,
+      activeUserId: null,
+      setLanguage: (language) => {
+        set({ language });
+        i18n.changeLanguage(language);
+        const userId = get().activeUserId;
+        if (userId) localStorage.setItem(`language-preference:${userId}`, language);
+      },
+      setUserId: (activeUserId) => set({ activeUserId }),
+      restoreForUser: (userId) => {
+        const savedLanguage = localStorage.getItem(`language-preference:${userId}`);
+        const language =
+          savedLanguage === "en" || savedLanguage === "tg" || savedLanguage === "ru"
+            ? savedLanguage
+            : initial;
+        set({ activeUserId: userId });
+        get().setLanguage(language);
+      },
+    }),
+    {
+      name: "language-storage",
+      partialize: (state) => ({ language: state.language }),
+    },
+  ),
+);
 
 // Ensure i18n reflects detected language on startup
-i18n.changeLanguage(initial);
+i18n.changeLanguage(useLanguageStore.getState().language);

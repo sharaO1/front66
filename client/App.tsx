@@ -19,6 +19,7 @@ import Login from "./pages/auth/Login";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import NotFound from "./pages/NotFound";
 import { useThemeStore } from "./stores/themeStore";
+import { useLanguageStore } from "./stores/languageStore";
 import { useAuthStore } from "./stores/authStore";
 import { useRBACStore } from "./stores/rbacStore";
 import { useEffect, useRef } from "react";
@@ -34,22 +35,43 @@ import Chat from "./pages/Chat";
 type AccessTokenPayload = { exp?: number };
 
 const App = () => {
-  const { theme, setTheme } = useThemeStore();
+  const {
+    theme,
+    setTheme,
+    setUserId: setThemeUserId,
+    restoreForUser: restoreThemeForUser,
+  } = useThemeStore();
+  const {
+    setUserId: setLanguageUserId,
+    restoreForUser: restoreLanguageForUser,
+  } = useLanguageStore();
   const { isAuthenticated, user, accessToken, logout } = useAuthStore();
   const { initializeFromAuth } = useRBACStore();
   const { toast } = useToast();
   const expiryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    setTheme(theme);
-
     if (user) {
       initializeFromAuth(user);
+      restoreThemeForUser(user.id);
+      restoreLanguageForUser(user.id);
+    } else {
+      setThemeUserId(null);
+      setLanguageUserId(null);
+      setTheme(theme);
     }
-
     suppressDefaultPropsWarnings();
     suppressResizeObserverErrors();
-  }, [user, initializeFromAuth]);
+  }, [
+    user,
+    theme,
+    initializeFromAuth,
+    setTheme,
+    setThemeUserId,
+    setLanguageUserId,
+    restoreThemeForUser,
+    restoreLanguageForUser,
+  ]);
 
   useEffect(() => {
     if (expiryTimerRef.current) {
