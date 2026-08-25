@@ -2480,7 +2480,34 @@ export default function Sales() {
                       <h3 className="font-semibold">
                         {t("sales.invoice_items")}
                       </h3>
-                      <div className="overflow-x-auto">
+                      <div className="space-y-2 md:hidden">
+                        {newInvoice.items.map((item) => (
+                          <div key={item.id} className="rounded-lg border bg-card p-3 shadow-sm">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="truncate font-medium">{item.productName}</p>
+                                <p className="mt-1 text-sm text-muted-foreground">
+                                  {t("sales.qty")}: {item.quantity} · {t("sales.unit_price")}: ${item.unitPrice.toFixed(2)}
+                                </p>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => removeItemFromInvoice(item.id)}
+                                aria-label={`${t("common.delete")} ${item.productName}`}
+                                className="shrink-0 text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/30"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            <div className="mt-3 flex items-center justify-between border-t pt-2 text-sm">
+                              <span className="text-muted-foreground">{t("sales.discount")}: {item.discount}%</span>
+                              <span className="font-semibold">${item.total.toFixed(2)}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="hidden overflow-x-auto md:block">
                         <Table className="min-w-[640px]">
                           <TableHeader>
                             <TableRow>
@@ -2982,7 +3009,34 @@ export default function Sales() {
                       <h3 className="font-semibold">
                         {t("sales.invoice_items")}
                       </h3>
-                      <div className="overflow-x-auto">
+                      <div className="space-y-2 md:hidden">
+                        {newInvoice.items.map((item) => (
+                          <div key={item.id} className="rounded-lg border bg-card p-3 shadow-sm">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="truncate font-medium">{item.productName}</p>
+                                <p className="mt-1 text-sm text-muted-foreground">
+                                  {t("sales.qty")}: {item.quantity} · {t("sales.unit_price")}: ${item.unitPrice.toFixed(2)}
+                                </p>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => removeItemFromInvoice(item.id)}
+                                aria-label={`${t("common.delete")} ${item.productName}`}
+                                className="shrink-0 text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/30"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            <div className="mt-3 flex items-center justify-between border-t pt-2 text-sm">
+                              <span className="text-muted-foreground">{t("sales.discount")}: {item.discount}%</span>
+                              <span className="font-semibold">${item.total.toFixed(2)}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="hidden overflow-x-auto md:block">
                         <Table className="min-w-[640px]">
                           <TableHeader>
                             <TableRow>
