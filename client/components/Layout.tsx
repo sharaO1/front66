@@ -53,6 +53,7 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [showHeader, setShowHeader] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const location = useLocation();
@@ -171,7 +172,10 @@ export default function Layout({ children }: LayoutProps) {
           }
         }}
         onMouseLeave={() => {
-          if (window.matchMedia("(min-width: 1024px)").matches) {
+          if (
+            window.matchMedia("(min-width: 1024px)").matches &&
+            !profileMenuOpen
+          ) {
             setSidebarCollapsed(true);
           }
         }}
@@ -277,7 +281,18 @@ export default function Layout({ children }: LayoutProps) {
 
           {/* User section */}
           <div className="p-2 border-t">
-            <DropdownMenu>
+            <DropdownMenu
+              open={profileMenuOpen}
+              onOpenChange={(open) => {
+                setProfileMenuOpen(open);
+                if (
+                  !open &&
+                  window.matchMedia("(min-width: 1024px)").matches
+                ) {
+                  setSidebarCollapsed(true);
+                }
+              }}
+            >
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
