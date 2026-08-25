@@ -349,7 +349,7 @@ export default function Sales() {
   const { toast } = useToast();
 
   const handleBarcodeScanned = useCallback(
-    (sku: string) => {
+    (sku: string, addImmediately = false) => {
       const normalizedCode = sku.trim().toLowerCase();
       const product = products.find(
         (p) =>
@@ -376,14 +376,18 @@ export default function Sales() {
         justScannedRef.current = false;
       }, 500);
 
-      // Set current item (this will select it in the product dropdown)
-      setCurrentItem({
+      const scannedItem: Partial<InvoiceItem> = {
         productId: product.id,
         productName: product.name,
         quantity: 1,
         unitPrice: product.unitPrice,
         discount: 0,
-      });
+      };
+
+      setCurrentItem(scannedItem);
+      if (addImmediately) {
+        addItemToInvoice(scannedItem);
+      }
 
       if (wasDialogClosed) {
         setIsCreateDialogOpen(true);
@@ -449,7 +453,7 @@ export default function Sales() {
             const value = results[0]?.rawValue?.trim();
             if (value) {
               setIsScannerOpen(false);
-              handleBarcodeScanned(value);
+              handleBarcodeScanned(value, true);
               return;
             }
           } catch {
@@ -2298,9 +2302,9 @@ export default function Sales() {
                     {t("sales.generate_invoice")}
                   </DrawerDescription>
                 </DrawerHeader>
-                <div className="px-4 pb-4 overflow-y-auto space-y-6">
+                <div className="px-4 pb-4 overflow-y-auto flex flex-col gap-6">
                   {/* Client Information */}
-                  <div className="space-y-4">
+                  <div className="order-2 space-y-4">
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-lg bg-muted/40 p-3">
                       <input
                         type="radio"
@@ -2429,7 +2433,7 @@ export default function Sales() {
                   </div>
 
                   {/* Payment */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="order-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {!forBorrow && (
                       <div className="space-y-2">
                         <Label htmlFor="paymentMethod">
@@ -2467,7 +2471,7 @@ export default function Sales() {
                   </div>
 
                   {/* Add Item Section */}
-                  <div className="border rounded-lg p-4 space-y-4">
+                  <div className="order-1 rounded-lg border border-primary/20 bg-primary/[0.03] p-4 space-y-4">
                     <h3 className="font-semibold flex items-center gap-2">
                       <Plus className="h-4 w-4" />
                       {t("sales.add_invoice_item")}
@@ -2635,7 +2639,7 @@ export default function Sales() {
                   </div>
 
                   {newInvoice.items && newInvoice.items.length > 0 && (
-                    <div className="space-y-4">
+                    <div className="order-4 space-y-4">
                       <h3 className="font-semibold">
                         {t("sales.invoice_items")}
                       </h3>
@@ -2786,7 +2790,7 @@ export default function Sales() {
                     </div>
                   )}
 
-                  <div className="space-y-2">
+                  <div className="order-5 space-y-2">
                     <Label htmlFor="notes">{t("common.notes")}</Label>
                     <Textarea
                       id="notes"
@@ -2975,7 +2979,7 @@ export default function Sales() {
                   </div>
 
                   {/* Payment */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="order-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {!forBorrow && (
                       <div className="space-y-2">
                         <Label htmlFor="paymentMethod">
@@ -3013,7 +3017,7 @@ export default function Sales() {
                   </div>
 
                   {/* Add Item Section */}
-                  <div className="border rounded-lg p-4 space-y-4">
+                  <div className="order-1 rounded-lg border border-primary/20 bg-primary/[0.03] p-4 space-y-4">
                     <h3 className="font-semibold flex items-center gap-2">
                       <Plus className="h-4 w-4" />
                       {t("sales.add_invoice_item")}
@@ -3181,7 +3185,7 @@ export default function Sales() {
                   </div>
 
                   {newInvoice.items && newInvoice.items.length > 0 && (
-                    <div className="space-y-4">
+                    <div className="order-4 space-y-4">
                       <h3 className="font-semibold">
                         {t("sales.invoice_items")}
                       </h3>
@@ -3332,7 +3336,7 @@ export default function Sales() {
                     </div>
                   )}
 
-                  <div className="space-y-2">
+                  <div className="order-5 space-y-2">
                     <Label htmlFor="notes">{t("common.notes")}</Label>
                     <Textarea
                       id="notes"
