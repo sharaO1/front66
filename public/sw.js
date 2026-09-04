@@ -1,4 +1,5 @@
-const CACHE_NAME = 'business-dashboard-v1';
+const CACHE_NAME = 'business-dashboard-v2';
+
 const urlsToCache = [
   '/',
   '/manifest.json',
