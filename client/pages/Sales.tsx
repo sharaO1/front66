@@ -2579,10 +2579,11 @@ export default function Sales() {
                           type="number"
                           min="1"
                           value={currentItem.quantity ?? 1}
+                          onFocus={(e) => e.currentTarget.select()}
                           onChange={(e) =>
                             setCurrentItem({
                               ...currentItem,
-                              quantity: parseInt(e.target.value) || 1,
+                              quantity: e.target.value === "" ? 0 : parseInt(e.target.value, 10),
                             })
                           }
                           onKeyDown={(e) => {
@@ -3143,10 +3144,11 @@ export default function Sales() {
                           type="number"
                           min="1"
                           value={currentItem.quantity ?? 1}
+                          onFocus={(e) => e.currentTarget.select()}
                           onChange={(e) =>
                             setCurrentItem({
                               ...currentItem,
-                              quantity: parseInt(e.target.value) || 1,
+                              quantity: e.target.value === "" ? 0 : parseInt(e.target.value, 10),
                             })
                           }
                           onKeyDown={(e) => {
