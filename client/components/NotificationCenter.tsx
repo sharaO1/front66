@@ -39,35 +39,57 @@ export default function NotificationCenter() {
   const [products, setProducts] = useState<InventoryProduct[]>([]);
   const [readIds, setReadIds] = useState<string[]>([]);
 
+  const normalizeProducts = useCallback(
+    (result: any[]): InventoryProduct[] =>
+      result.map((product) => ({
+        id: String(product.id),
+        name: product.name || product.title || t("notifications.unknown_product"),
+        stock: getNumber(
+          product.stock,
+          product.count,
+          product.quantity,
+          product.stockQuantity,
+          product.inventory?.quantity,
+        ),
+        minStock: getNumber(
+          product.minStock,
+          product.min_stock,
+          product.reorderPoint,
+          product.reorder_point,
+          product.settings?.minStock,
+        ),
+      })),
+    [t],
+  );
+
   const loadNotifications = useCallback(async () => {
     try {
       const response = await fetch(`${API_BASE}/products`);
       const data = await response.json();
       const result = Array.isArray(data?.result) ? data.result : [];
-      setProducts(
-        result.map((product: any) => ({
-          id: String(product.id),
-          name: product.name || product.title || t("notifications.unknown_product"),
-          stock: getNumber(
-            product.stock,
-            product.count,
-            product.quantity,
-            product.stockQuantity,
-            product.inventory?.quantity,
-          ),
-          minStock: getNumber(
-            product.minStock,
-            product.min_stock,
-            product.reorderPoint,
-            product.reorder_point,
-            product.settings?.minStock,
-          ),
-        })),
-      );
+      setProducts(normalizeProducts(result));
     } catch {
       setProducts([]);
     }
-  }, [t]);
+  }, [normalizeProducts]);
+
+  useEffect(() => {
+    if (typeof EventSource === "undefined") return;
+
+    const source = new EventSource(`${API_BASE}/notifications/stream`);
+    source.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (Array.isArray(data?.products)) {
+          setProducts(normalizeProducts(data.products));
+        }
+      } catch {
+        // Ignore malformed events and keep the polling fallback active.
+      }
+    };
+
+    return () => source.close();
+  }, [normalizeProducts]);
 
   useEffect(() => {
     try {
