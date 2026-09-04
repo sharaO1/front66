@@ -281,6 +281,9 @@ export default function Sales() {
   const [cancellationReason, setCancellationReason] = useState("");
   const [useExistingClient, setUseExistingClient] = useState(true);
   const [forBorrow, setForBorrow] = useState(false);
+  const [showCustomerDetails, setShowCustomerDetails] = useState(false);
+  const [showPaymentDetails, setShowPaymentDetails] = useState(false);
+  const [showNotes, setShowNotes] = useState(false);
 
   // Default return date for borrowed items: 7 days from today
   const defaultReturnDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
@@ -1337,6 +1340,9 @@ export default function Sales() {
     clearCurrentItem();
     setUseExistingClient(true);
     setForBorrow(false);
+    setShowCustomerDetails(false);
+    setShowPaymentDetails(false);
+    setShowNotes(false);
     setBorrowReturnDate(defaultReturnDate);
   };
 
@@ -2303,8 +2309,17 @@ export default function Sales() {
                   </DrawerDescription>
                 </DrawerHeader>
                 <div className="px-4 pb-4 overflow-y-auto flex flex-col gap-6">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="order-2 flex w-full items-center justify-between"
+                    onClick={() => setShowCustomerDetails((visible) => !visible)}
+                  >
+                    <span>{t("sales.customer_details", "Customer & borrowing (optional)")}</span>
+                    <span className="text-lg leading-none">{showCustomerDetails ? "−" : "+"}</span>
+                  </Button>
                   {/* Client Information */}
-                  <div className="order-2 space-y-4">
+                  <div className={`order-2 space-y-4 ${showCustomerDetails ? "" : "hidden"}`}>
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-lg bg-muted/40 p-3">
                       <input
                         type="radio"
@@ -2432,8 +2447,17 @@ export default function Sales() {
                     )}
                   </div>
 
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="order-3 flex w-full items-center justify-between md:hidden"
+                    onClick={() => setShowPaymentDetails((visible) => !visible)}
+                  >
+                    <span>{t("sales.payment_method", "Payment method")}</span>
+                    <span className="text-lg leading-none">{showPaymentDetails ? "−" : "+"}</span>
+                  </Button>
                   {/* Payment */}
-                  <div className="order-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className={`order-3 grid grid-cols-1 sm:grid-cols-2 gap-4 ${showPaymentDetails ? "" : "hidden md:grid"}`}>
                     {!forBorrow && (
                       <div className="space-y-2">
                         <Label htmlFor="paymentMethod">
@@ -2790,7 +2814,16 @@ export default function Sales() {
                     </div>
                   )}
 
-                  <div className="order-5 space-y-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="order-5 flex w-full items-center justify-between md:hidden"
+                    onClick={() => setShowNotes((visible) => !visible)}
+                  >
+                    <span>{t("common.notes")}</span>
+                    <span className="text-lg leading-none">{showNotes ? "−" : "+"}</span>
+                  </Button>
+                  <div className={`order-5 space-y-2 ${showNotes ? "" : "hidden md:block"}`}>
                     <Label htmlFor="notes">{t("common.notes")}</Label>
                     <Textarea
                       id="notes"
@@ -2978,8 +3011,17 @@ export default function Sales() {
                     )}
                   </div>
 
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="order-3 flex w-full items-center justify-between md:hidden"
+                    onClick={() => setShowPaymentDetails((visible) => !visible)}
+                  >
+                    <span>{t("sales.payment_method", "Payment method")}</span>
+                    <span className="text-lg leading-none">{showPaymentDetails ? "−" : "+"}</span>
+                  </Button>
                   {/* Payment */}
-                  <div className="order-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className={`order-3 grid grid-cols-1 sm:grid-cols-2 gap-4 ${showPaymentDetails ? "" : "hidden md:grid"}`}>
                     {!forBorrow && (
                       <div className="space-y-2">
                         <Label htmlFor="paymentMethod">
@@ -3336,7 +3378,16 @@ export default function Sales() {
                     </div>
                   )}
 
-                  <div className="order-5 space-y-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="order-5 flex w-full items-center justify-between md:hidden"
+                    onClick={() => setShowNotes((visible) => !visible)}
+                  >
+                    <span>{t("common.notes")}</span>
+                    <span className="text-lg leading-none">{showNotes ? "−" : "+"}</span>
+                  </Button>
+                  <div className={`order-5 space-y-2 ${showNotes ? "" : "hidden md:block"}`}>
                     <Label htmlFor="notes">{t("common.notes")}</Label>
                     <Textarea
                       id="notes"

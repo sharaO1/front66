@@ -466,6 +466,7 @@
     "title": "Sales Management",
     "subtitle": "Create invoices and manage sales transactions",
     "new_invoice": "New Invoice",
+    "customer_details": "Customer & borrowing (optional)",
     "total_invoices": "Total Invoices",
     "total_revenue": "Total Revenue",
     "pending_amount": "Pending Amount",
