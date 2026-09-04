@@ -77,6 +77,7 @@ import {
 } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PaginationControls } from "@/components/ui/pagination";
+import { BrowserMultiFormatReader } from "@zxing/browser";
 
 interface InvoiceItem {
   id: string;
@@ -305,7 +306,7 @@ export default function Sales() {
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [scannerStatus, setScannerStatus] = useState<"starting" | "scanning" | "unsupported" | "denied" | "error">("starting");
   const scannerVideoRef = useRef<HTMLVideoElement | null>(null);
-  const scannerStreamRef = useRef<MediaStream | null>(null);
+  const scannerControlsRef = useRef<{ stop: () => void } | null>(null);
   const barcodeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const barcodeScanTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const justScannedRef = useRef(false);
@@ -408,64 +409,44 @@ export default function Sales() {
 
   useEffect(() => {
     if (!isScannerOpen) {
-      scannerStreamRef.current?.getTracks().forEach((track) => track.stop());
-      scannerStreamRef.current = null;
+      scannerControlsRef.current?.stop();
+      scannerControlsRef.current = null;
       if (scannerVideoRef.current) scannerVideoRef.current.srcObject = null;
       return;
     }
 
     let cancelled = false;
-    let frameId = 0;
+    let detected = false;
+    const reader = new BrowserMultiFormatReader();
 
     const startScanner = async () => {
-      const BarcodeDetectorConstructor = (
-        window as Window & {
-          BarcodeDetector?: new (options?: { formats?: string[] }) => {
-            detect: (source: HTMLVideoElement) => Promise<Array<{ rawValue: string }>>;
-          };
-        }
-      ).BarcodeDetector;
-
-      if (!BarcodeDetectorConstructor || !navigator.mediaDevices?.getUserMedia) {
+      if (!navigator.mediaDevices?.getUserMedia || !scannerVideoRef.current) {
         setScannerStatus("unsupported");
         return;
       }
 
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: "environment" } },
-          audio: false,
-        });
-        if (cancelled) {
-          stream.getTracks().forEach((track) => track.stop());
-          return;
-        }
-        scannerStreamRef.current = stream;
-        if (!scannerVideoRef.current) return;
-        scannerVideoRef.current.srcObject = stream;
-        await scannerVideoRef.current.play();
-        setScannerStatus("scanning");
-        const detector = new BarcodeDetectorConstructor({
-          formats: ["ean_13", "ean_8", "upc_a", "upc_e", "code_128", "code_39", "qr_code"],
-        });
-
-        const scan = async () => {
-          if (cancelled || !scannerVideoRef.current) return;
-          try {
-            const results = await detector.detect(scannerVideoRef.current);
-            const value = results[0]?.rawValue?.trim();
-            if (value) {
+        const controls = await reader.decodeFromConstraints(
+          {
+            video: { facingMode: { ideal: "environment" } },
+            audio: false,
+          },
+          scannerVideoRef.current,
+          (result) => {
+            const value = result?.getText().trim();
+            if (!cancelled && !detected && value) {
+              detected = true;
               setIsScannerOpen(false);
               handleBarcodeScanned(value, true);
-              return;
             }
-          } catch {
-            setScannerStatus("error");
-            return;
-          }
-          frameId = requestAnimationFrame(scan);
-        };
-        frameId = requestAnimationFrame(scan);
+          },
+        );
+        if (cancelled) {
+          controls.stop();
+          return;
+        }
+        scannerControlsRef.current = controls;
+        setScannerStatus("scanning");
       } catch (error) {
         if (!cancelled) {
           setScannerStatus(
@@ -480,9 +461,9 @@ export default function Sales() {
     startScanner();
     return () => {
       cancelled = true;
-      cancelAnimationFrame(frameId);
-      scannerStreamRef.current?.getTracks().forEach((track) => track.stop());
-      scannerStreamRef.current = null;
+      scannerControlsRef.current?.stop();
+      scannerControlsRef.current = null;
+      reader.reset();
     };
   }, [isScannerOpen, handleBarcodeScanned]);
 
