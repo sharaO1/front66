@@ -490,19 +490,28 @@ export default function Sales() {
   useEffect(() => {
     if (!isCreateDialogOpen) {
       clearNewInvoice();
-    } else {
-      // When dialog opens, blur any focused input to allow barcode scanning
-      setTimeout(() => {
-        const activeElement = document.activeElement as HTMLElement;
-        if (
-          (activeElement && activeElement.tagName === "INPUT") ||
-          activeElement?.tagName === "SELECT" ||
-          activeElement?.tagName === "BUTTON"
-        ) {
-          activeElement.blur();
-        }
-      }, 100);
+      setIsScannerOpen(false);
+      const cleanupTimer = window.setTimeout(() => {
+        document.body.style.pointerEvents = "";
+        document.body.style.overflow = "";
+        document.documentElement.style.overflow = "";
+        (document.activeElement as HTMLElement | null)?.blur?.();
+      }, 0);
+      return () => window.clearTimeout(cleanupTimer);
     }
+
+    // When dialog opens, blur any focused input to allow barcode scanning
+    const blurTimer = window.setTimeout(() => {
+      const activeElement = document.activeElement as HTMLElement;
+      if (
+        (activeElement && activeElement.tagName === "INPUT") ||
+        activeElement?.tagName === "SELECT" ||
+        activeElement?.tagName === "BUTTON"
+      ) {
+        activeElement.blur();
+      }
+    }, 100);
+    return () => window.clearTimeout(blurTimer);
   }, [isCreateDialogOpen]);
 
   useEffect(() => {
@@ -639,6 +648,7 @@ export default function Sales() {
     barcodeBuffer,
     products,
     isCreateDialogOpen,
+    isSubmitting,
     currentItem,
     handleBarcodeScanned,
   ]);
@@ -1648,6 +1658,8 @@ export default function Sales() {
   };
 
   const createInvoice = async () => {
+    if (isSubmitting) return;
+
     // If this invoice is for borrow, client is required
     if (forBorrow) {
       if (
