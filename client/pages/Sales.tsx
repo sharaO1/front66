@@ -508,6 +508,18 @@ export default function Sales() {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const activeElement = document.activeElement as HTMLElement;
+      const opensInvoiceShortcut =
+        event.key === "F2" ||
+        ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "n");
+
+      if (opensInvoiceShortcut) {
+        event.preventDefault();
+        if (!isCreateDialogOpen) {
+          clearNewInvoice();
+          setIsCreateDialogOpen(true);
+        }
+        return;
+      }
       const isQuantityInput = activeElement?.id === "quantity";
       const isDiscountInput = activeElement?.id === "discount";
       const isItemRelatedInput = isQuantityInput || isDiscountInput;
@@ -1525,7 +1537,7 @@ export default function Sales() {
 
   const addItemToInvoice = (itemData?: Partial<InvoiceItem>) => {
     const itemToAdd = itemData || currentItem;
-    const quantity = itemToAdd.quantity || 1;
+    const quantity = itemToAdd.quantity ?? 0;
 
     if (!itemToAdd.productId || quantity <= 0) {
       toast({
@@ -1602,6 +1614,7 @@ export default function Sales() {
     });
 
     clearCurrentItem();
+    justScannedRef.current = false;
 
     /* no toast on item add */
   };
@@ -2296,7 +2309,7 @@ export default function Sales() {
               onOpenChange={setIsCreateDialogOpen}
             >
               <DrawerTrigger asChild>
-                <Button>
+                <Button title="F2 or Ctrl+N">
                   <Plus className="mr-2 h-4 w-4" />
                   {t("sales.new_invoice")}
                 </Button>
@@ -2869,7 +2882,7 @@ export default function Sales() {
               onOpenChange={setIsCreateDialogOpen}
             >
               <DialogTrigger asChild>
-                <Button>
+                <Button title="F2 or Ctrl+N">
                   <Plus className="mr-2 h-4 w-4" />
                   {t("sales.new_invoice")}
                 </Button>
