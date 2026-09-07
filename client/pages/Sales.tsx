@@ -2463,7 +2463,7 @@ export default function Sales() {
                     <span className="text-lg leading-none">{showPaymentDetails ? "−" : "+"}</span>
                   </Button>
                   {/* Payment */}
-                  <div className={`order-3 col-span-4 col-start-9 grid grid-cols-1 sm:grid-cols-2 gap-4 ${showPaymentDetails ? "" : "hidden md:grid"}`}>
+                  <div className={`order-3 lg:col-span-4 lg:col-start-9 grid grid-cols-1 sm:grid-cols-2 gap-4 ${showPaymentDetails ? "" : "hidden md:grid"}`}>
                     {!forBorrow && (
                       <div className="space-y-2">
                         <Label htmlFor="paymentMethod">
@@ -2501,7 +2501,7 @@ export default function Sales() {
                   </div>
 
                   {/* Add Item Section */}
-                  <div className="order-1 col-span-8 rounded-lg border border-primary/20 bg-primary/[0.03] p-4 space-y-4">
+                  <div className="order-1 lg:col-span-8 rounded-lg border border-primary/20 bg-primary/[0.03] p-4 space-y-4">
                     <h3 className="font-semibold flex items-center gap-2">
                       <Plus className="h-4 w-4" />
                       {t("sales.add_invoice_item")}
@@ -2670,7 +2670,7 @@ export default function Sales() {
                   </div>
 
                   {newInvoice.items && newInvoice.items.length > 0 && (
-                    <div className="order-4 col-span-8 space-y-4">
+                    <div className="order-4 lg:col-span-8 space-y-4">
                       <h3 className="font-semibold">
                         {t("sales.invoice_items")}
                       </h3>
@@ -2830,7 +2830,7 @@ export default function Sales() {
                     <span>{t("common.notes")}</span>
                     <span className="text-lg leading-none">{showNotes ? "−" : "+"}</span>
                   </Button>
-                  <div className={`order-5 col-span-4 col-start-9 space-y-2 ${showNotes ? "" : "hidden md:block"}`}>
+                  <div className={`order-5 lg:col-span-4 lg:col-start-9 space-y-2 ${showNotes ? "" : "hidden md:block"}`}>
                     <Label htmlFor="notes">{t("common.notes")}</Label>
                     <Textarea
                       id="notes"
@@ -2888,9 +2888,9 @@ export default function Sales() {
                   </DialogDescription>
                 </DialogHeader>
                 {/* Reuse same content as drawer */}
-                <div className="grid grid-cols-12 gap-6 px-1 sm:px-0">
+                <div className="grid grid-cols-1 gap-5 px-1 sm:px-0 lg:grid-cols-12 lg:gap-6">
                   {/* Client Information */}
-                  <div className="order-2 col-span-4 col-start-9 space-y-4">
+                  <div className="order-2 lg:col-span-4 lg:col-start-9 space-y-4">
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-lg bg-muted/40 p-3">
                       <input
                         type="radio"
@@ -3028,7 +3028,7 @@ export default function Sales() {
                     <span className="text-lg leading-none">{showPaymentDetails ? "−" : "+"}</span>
                   </Button>
                   {/* Payment */}
-                  <div className={`order-3 col-span-4 col-start-9 grid grid-cols-1 sm:grid-cols-2 gap-4 ${showPaymentDetails ? "" : "hidden md:grid"}`}>
+                  <div className={`order-3 lg:col-span-4 lg:col-start-9 grid grid-cols-1 sm:grid-cols-2 gap-4 ${showPaymentDetails ? "" : "hidden md:grid"}`}>
                     {!forBorrow && (
                       <div className="space-y-2">
                         <Label htmlFor="paymentMethod">
@@ -3066,7 +3066,7 @@ export default function Sales() {
                   </div>
 
                   {/* Add Item Section */}
-                  <div className="order-1 col-span-8 rounded-lg border border-primary/20 bg-primary/[0.03] p-4 space-y-4">
+                  <div className="order-1 lg:col-span-8 rounded-lg border border-primary/20 bg-primary/[0.03] p-4 space-y-4">
                     <h3 className="font-semibold flex items-center gap-2">
                       <Plus className="h-4 w-4" />
                       {t("sales.add_invoice_item")}
@@ -3235,7 +3235,7 @@ export default function Sales() {
                   </div>
 
                   {newInvoice.items && newInvoice.items.length > 0 && (
-                    <div className="order-4 col-span-8 space-y-4">
+                    <div className="order-4 lg:col-span-8 space-y-4">
                       <h3 className="font-semibold">
                         {t("sales.invoice_items")}
                       </h3>
@@ -3395,7 +3395,7 @@ export default function Sales() {
                     <span>{t("common.notes")}</span>
                     <span className="text-lg leading-none">{showNotes ? "−" : "+"}</span>
                   </Button>
-                  <div className={`order-5 col-span-4 col-start-9 space-y-2 ${showNotes ? "" : "hidden md:block"}`}>
+                  <div className={`order-5 lg:col-span-4 lg:col-start-9 space-y-2 ${showNotes ? "" : "hidden md:block"}`}>
                     <Label htmlFor="notes">{t("common.notes")}</Label>
                     <Textarea
                       id="notes"
