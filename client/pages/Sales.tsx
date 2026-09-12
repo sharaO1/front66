@@ -3712,9 +3712,9 @@ export default function Sales() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="hidden md:block">
+          <div className="hidden sm:block">
             <div className="w-full overflow-x-auto">
-              <Table className="min-w-[720px] sm:min-w-0 table-fixed [&_th]:px-4 [&_td]:px-4 md:[&_th]:px-6 md:[&_td]:px-6">
+              <Table className="min-w-[720px] sm:min-w-0 table-fixed [&_th]:px-4 [&_td]:px-4 sm:[&_th]:px-6 sm:[&_td]:px-6">
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("sales.invoice_number")}</TableHead>
@@ -3894,7 +3894,7 @@ export default function Sales() {
             </div>
           </div>
 
-          <div className="md:hidden space-y-3">
+          <div className="sm:hidden space-y-3">
             {paginatedInvoices.map((invoice) => (
               <div
                 key={invoice.id}
