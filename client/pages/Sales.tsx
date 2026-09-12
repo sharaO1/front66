@@ -329,6 +329,20 @@ export default function Sales() {
     (document.activeElement as HTMLElement | null)?.blur?.();
   };
 
+  const restoreInteractionAfterClose = () => {
+    restoreInteractionState();
+    window.setTimeout(restoreInteractionState, 0);
+    window.setTimeout(restoreInteractionState, 350);
+  };
+
+  const handleCreateDialogOpenChange = (open: boolean) => {
+    setIsCreateDialogOpen(open);
+    if (!open) {
+      setIsScannerOpen(false);
+      restoreInteractionAfterClose();
+    }
+  };
+
   const closeExportLayers = () => {
     setExportMenuOpen(false);
     setIsPdfDialogOpen(false);
@@ -516,7 +530,7 @@ export default function Sales() {
       clearNewInvoice();
       autoScanStartedRef.current = false;
       setIsScannerOpen(false);
-      const cleanupTimer = window.setTimeout(restoreInteractionState, 0);
+      const cleanupTimer = window.setTimeout(restoreInteractionAfterClose, 0);
       return () => window.clearTimeout(cleanupTimer);
     }
 
@@ -1858,7 +1872,7 @@ export default function Sales() {
       autoScanStartedRef.current = false;
       clearNewInvoice();
       setIsCreateDialogOpen(false);
-      restoreInteractionState();
+      restoreInteractionAfterClose();
     } catch (e: any) {
       toast({
         title: "Failed",
@@ -2495,7 +2509,7 @@ export default function Sales() {
           {isMobile ? (
             <Drawer
               open={isCreateDialogOpen}
-              onOpenChange={setIsCreateDialogOpen}
+              onOpenChange={handleCreateDialogOpenChange}
             >
               <DrawerTrigger asChild>
                 <Button title="F2 or Ctrl+N">
@@ -3070,7 +3084,7 @@ export default function Sales() {
           ) : (
             <Dialog
               open={isCreateDialogOpen}
-              onOpenChange={setIsCreateDialogOpen}
+              onOpenChange={handleCreateDialogOpenChange}
             >
               <DialogTrigger asChild>
                 <Button title="F2 or Ctrl+N">
