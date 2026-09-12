@@ -182,7 +182,14 @@ export default function Layout({ children }: LayoutProps) {
       >
         <div className="flex flex-col h-full">
           {/* Enhanced Logo Section */}
-          <div className="flex h-[72px] shrink-0 items-center gap-3 border-b border-gray-200/30 px-6 py-3 dark:border-gray-700/30 relative">
+          <div
+            className={cn(
+              "relative flex h-[72px] shrink-0 items-center border-b border-gray-200/30 py-3 dark:border-gray-700/30",
+              sidebarCollapsed
+                ? "justify-center px-2"
+                : "gap-3 px-6",
+            )}
+          >
             <div className="relative group">
               <div className="w-12 h-12 bg-gradient-to-br from-blue-600 via-blue-700 to-purple-700 rounded-xl flex items-center justify-center shadow-business-lg hover:shadow-business-xl transition-all duration-300 hover:scale-110 animate-glow">
                 <Package className="h-6 w-6 text-white group-hover:rotate-12 transition-transform duration-300" />
