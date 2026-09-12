@@ -31,9 +31,11 @@ import {
   TrendingDown,
   AlertTriangle,
   ShoppingCart,
+  Minus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { formatCurrency } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -49,6 +51,28 @@ import { API_BASE } from "@/lib/api";
 import { SalesSummaryResponse } from "@shared/api";
 import { useNavigate } from "react-router-dom";
 import { PaginationControls } from "@/components/ui/pagination";
+
+const getTrendTone = (change: number | null | undefined) => {
+  if (change == null || change === 0) {
+    return {
+      text: "text-muted-foreground",
+      icon: "text-muted-foreground",
+      bar: "bg-muted",
+    };
+  }
+
+  return change > 0
+    ? {
+        text: "text-green-600",
+        icon: "text-green-600",
+        bar: "bg-green-500",
+      }
+    : {
+        text: "text-red-600",
+        icon: "text-red-600",
+        bar: "bg-red-500",
+      };
+};
 
 const salesData = [
   { name: "Jan", sales: 4000, profit: 2400 },
@@ -668,11 +692,13 @@ export default function Dashboard() {
         ).length;
 
         const change =
-          paidYesterday === 0
-            ? paidToday > 0
+          paidYesterday > 0
+            ? paidToday === 0
+              ? -100
+              : ((paidToday - paidYesterday) / paidYesterday) * 100
+            : paidToday > 0
               ? 100
-              : 0
-            : ((paidToday - paidYesterday) / paidYesterday) * 100;
+              : 0;
 
         if (mounted) {
           setSalesTodayCount(paidToday);
@@ -1055,14 +1081,14 @@ ${t("common.period", { defaultValue: "Period" })}: ${data.dateRange}
 
 ${t("finance.executive_summary")}
 ===============
-${t("dashboard.total_revenue")}: $${nf(data.summary.totalRevenue)}
+${t("dashboard.total_revenue")}: ${nf(data.summary.totalRevenue)} TJS
 ${t("dashboard.products")}: ${nf(data.summary.totalProducts)}
 ${t("dashboard.active_clients")}: ${nf(data.summary.activeClients)}
 ${t("dashboard.sales_today")}: ${nf(data.summary.salesToday)}
 
 ${t("dashboard.recent_activity")}
 =================
-${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.description}${activity.amount ? ` ($${nf(activity.amount)})` : ""}`).join("\n")}
+${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.description}${activity.amount ? ` (${nf(activity.amount)} TJS)` : ""}`).join("\n")}
     `;
   };
 
@@ -1092,7 +1118,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
     csv += "Monthly Sales Data\n";
     csv += "Month,Sales,Profit\n";
     data.salesData.forEach((item: any) => {
-      csv += `${item.name},${item.sales.toLocaleString()}c,${item.profit.toLocaleString()}c\n`;
+      csv += `${item.name},${item.sales.toLocaleString()} TJS,${item.profit.toLocaleString()} TJS\n`;
     });
     csv += "\n";
 
@@ -1122,6 +1148,9 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
     return csv;
   };
 
+  const totalSalesTone = getTrendTone(quickStats?.totalSales?.change);
+  const salesTodayTone = getTrendTone(salesTodayChange);
+
   return (
     <div className="space-y-6 sm:space-y-8 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border">
@@ -1150,17 +1179,23 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
           <CardContent className="pt-0 relative z-10">
             <div className="text-3xl font-bold text-card-foreground mb-2 tracking-tight text-nowrap">
               {typeof totalRevenue === "number"
-                ? `${totalRevenue.toLocaleString()}c`
+                ? `${totalRevenue.toLocaleString()} TJS`
                 : derivedSales
-                  ? `${derivedSales.totals.revenue.toLocaleString()}c`
+                  ? `${derivedSales.totals.revenue.toLocaleString()} TJS`
                   : salesSummary
-                    ? `${salesSummary.totals.revenue.toLocaleString()}c`
+                    ? `${salesSummary.totals.revenue.toLocaleString()} TJS`
                     : "—"}
             </div>
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1">
-                <TrendingUp className="h-4 w-4 text-green-600" />
-                <span className="text-sm font-semibold text-green-600">
+                {quickStats.totalSales.change > 0 ? (
+                  <TrendingUp className={`h-4 w-4 ${totalSalesTone.icon}`} />
+                ) : quickStats.totalSales.change < 0 ? (
+                  <TrendingDown className={`h-4 w-4 ${totalSalesTone.icon}`} />
+                ) : (
+                  <Minus className={`h-4 w-4 ${totalSalesTone.icon}`} />
+                )}
+                <span className={`text-sm font-semibold ${totalSalesTone.text}`}>
                   {(() => {
                     const c = quickStats?.totalSales?.change ?? 0;
                     const sign = c >= 0 ? "+" : "";
@@ -1174,7 +1209,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
             </div>
             <div className="mt-3 h-1 bg-muted rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"
+                className={`h-full ${totalSalesTone.bar} rounded-full`}
                 style={{
                   width: `${(() => {
                     const v = quickStats?.totalSales?.change ?? 0;
@@ -1310,8 +1345,14 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
             </div>
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1">
-                <TrendingUp className="h-4 w-4 text-orange-600" />
-                <span className="text-sm font-semibold text-orange-600">
+                {salesTodayChange != null && salesTodayChange > 0 ? (
+                  <TrendingUp className={`h-4 w-4 ${salesTodayTone.icon}`} />
+                ) : salesTodayChange != null && salesTodayChange < 0 ? (
+                  <TrendingDown className={`h-4 w-4 ${salesTodayTone.icon}`} />
+                ) : (
+                  <Minus className={`h-4 w-4 ${salesTodayTone.icon}`} />
+                )}
+                <span className={`text-sm font-semibold ${salesTodayTone.text}`}>
                   {typeof salesTodayChange === "number"
                     ? `${salesTodayChange >= 0 ? "+" : ""}${salesTodayChange}%`
                     : "—"}
@@ -1323,7 +1364,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
             </div>
             <div className="mt-3 h-1 bg-muted rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-orange-500 to-red-500 rounded-full"
+                className={`h-full ${salesTodayTone.bar} rounded-full`}
                 style={{
                   width: `${(() => {
                     const count = salesTodayCount;
@@ -1373,11 +1414,20 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
             <ResponsiveContainer width="100%" height={isMobile ? 220 : 320}>
               <LineChart
                 data={cashFlowData}
-                margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
+                margin={{ top: 10, right: 20, left: 0, bottom: 12 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
+                <XAxis
+                  dataKey="month"
+                  height={36}
+                  interval="preserveStartEnd"
+                  tick={{ fontSize: 12 }}
+                  tickLine={false}
+                />
+                <YAxis
+                  domain={["auto", "auto"]}
+                  padding={{ top: 12, bottom: 12 }}
+                />
                 <Tooltip />
                 <Legend />
                 <Line
@@ -1578,8 +1628,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
                     {t("finance.sales_revenue")}
                   </div>
                   <div className="text-xl font-semibold text-foreground dark:text-slate-100">
-                    $
-                    {(
+                    TJS {(
                       (derivedSales?.totals.revenue ??
                         salesSummary?.totals.revenue) ||
                       0
@@ -1593,7 +1642,7 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
                   <div className="text-xl font-semibold text-foreground dark:text-slate-100">
                     {derivedSales?.totals.profit == null
                       ? "—"
-                      : `${(derivedSales?.totals.profit || 0).toLocaleString()}c`}
+                      : `${(derivedSales?.totals.profit || 0).toLocaleString()} TJS`}
                   </div>
                 </div>
               </div>
@@ -1633,12 +1682,12 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
                             {p.unitsSold.toLocaleString()}
                           </TableCell>
                           <TableCell className="text-right">
-                            ${p.revenue.toLocaleString()}
+                            {p.revenue.toLocaleString()} TJS
                           </TableCell>
                           <TableCell className="text-right">
                             {p.profit == null
                               ? "—"
-                              : `${p.profit.toLocaleString()}c`}
+                              : `${p.profit.toLocaleString()} TJS`}
                           </TableCell>
                           <TableCell className="text-right">
                             {margin == null ? "—" : `${margin.toFixed(1)}%`}
@@ -1711,10 +1760,13 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
                   decimals: 2,
                 },
               ].map((row, idx) => {
-                const positive = (row.change || 0) >= 0;
+                const tone = getTrendTone(row.change);
                 const fmt = (n: number) =>
                   row.money
-                    ? `$${Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: row.decimals, maximumFractionDigits: row.decimals })}`
+                    ? formatCurrency(n, {
+                        minimumFractionDigits: row.decimals,
+                        maximumFractionDigits: row.decimals,
+                      })
                     : Number(n || 0).toLocaleString();
                 return (
                   <TableRow key={idx}>
@@ -1722,24 +1774,25 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
                     <TableCell>{fmt(row.thisVal)}</TableCell>
                     <TableCell>{fmt(row.lastVal)}</TableCell>
                     <TableCell
-                      className={positive ? "text-green-600" : "text-red-600"}
+                      className={tone.text}
                     >
-                      {(positive ? "+" : "") + (row.change || 0).toFixed(1)}%
+                      {((row.change || 0) >= 0 ? "+" : "") + (row.change || 0).toFixed(1)}%
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        {positive ? (
-                          <TrendingUp className="h-4 w-4 text-green-600" />
+                        {row.change > 0 ? (
+                          <TrendingUp className={`h-4 w-4 ${tone.icon}`} />
+                        ) : row.change < 0 ? (
+                          <TrendingDown className={`h-4 w-4 ${tone.icon}`} />
                         ) : (
-                          <TrendingDown className="h-4 w-4 text-red-600" />
+                          <Minus className={`h-4 w-4 ${tone.icon}`} />
                         )}
-                        <span
-                          className={
-                            (positive ? "text-green-600" : "text-red-600") +
-                            " text-sm"
-                          }
-                        >
-                          {positive ? t("dashboard.up") : "Down"}
+                        <span className={`${tone.text} text-sm`}>
+                          {row.change > 0
+                            ? t("dashboard.up")
+                            : row.change < 0
+                              ? "Down"
+                              : "—"}
                         </span>
                       </div>
                     </TableCell>
