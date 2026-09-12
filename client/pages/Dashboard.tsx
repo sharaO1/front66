@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { formatCurrency } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -1055,14 +1056,14 @@ ${t("common.period", { defaultValue: "Period" })}: ${data.dateRange}
 
 ${t("finance.executive_summary")}
 ===============
-${t("dashboard.total_revenue")}: $${nf(data.summary.totalRevenue)}
+${t("dashboard.total_revenue")}: ${nf(data.summary.totalRevenue)} TJS
 ${t("dashboard.products")}: ${nf(data.summary.totalProducts)}
 ${t("dashboard.active_clients")}: ${nf(data.summary.activeClients)}
 ${t("dashboard.sales_today")}: ${nf(data.summary.salesToday)}
 
 ${t("dashboard.recent_activity")}
 =================
-${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.description}${activity.amount ? ` ($${nf(activity.amount)})` : ""}`).join("\n")}
+${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.description}${activity.amount ? ` (${nf(activity.amount)} TJS)` : ""}`).join("\n")}
     `;
   };
 
@@ -1713,7 +1714,10 @@ ${data.recentActivities.map((activity: any) => `${activity.time} - ${activity.de
                 const positive = (row.change || 0) >= 0;
                 const fmt = (n: number) =>
                   row.money
-                    ? `$${Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: row.decimals, maximumFractionDigits: row.decimals })}`
+                    ? formatCurrency(n, {
+                        minimumFractionDigits: row.decimals,
+                        maximumFractionDigits: row.decimals,
+                      })
                     : Number(n || 0).toLocaleString();
                 return (
                   <TableRow key={idx}>
