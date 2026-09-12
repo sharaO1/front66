@@ -2338,7 +2338,7 @@ export default function Sales() {
                   variant="outline"
                   onClick={() => {
                     setIsScannerOpen(false);
-                    window.setTimeout(() => productSelectTriggerRef.current?.click(), 150);
+                    window.setTimeout(() => productSelectTriggerRef.current?.focus(), 150);
                   }}
                 >
                   Search manually
@@ -2373,7 +2373,7 @@ export default function Sales() {
                   className="flex-1"
                   onClick={() => {
                     setIsScannerOpen(false);
-                    window.setTimeout(() => productSelectTriggerRef.current?.click(), 150);
+                    window.setTimeout(() => productSelectTriggerRef.current?.focus(), 150);
                   }}
                 >
                   Search manually
