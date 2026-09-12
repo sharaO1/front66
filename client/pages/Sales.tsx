@@ -103,6 +103,7 @@ interface Product {
   category: string;
   sku?: string;
   barcode?: string;
+  stock?: number;
 }
 
 interface Employee {
@@ -313,6 +314,11 @@ export default function Sales() {
   const barcodeScanTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const justScannedRef = useRef(false);
   const quantityInputRef = useRef<HTMLInputElement | null>(null);
+  const productSelectTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const scanQuantityRef = useRef(1);
+  const lastCameraScanRef = useRef<{ code: string; at: number } | null>(null);
+  const autoScanStartedRef = useRef(false);
+  const [scanQuantity, setScanQuantity] = useState(1);
 
   const closeExportLayers = () => {
     setExportMenuOpen(false);
@@ -355,7 +361,7 @@ export default function Sales() {
   const { toast } = useToast();
 
   const handleBarcodeScanned = useCallback(
-    (sku: string, addImmediately = false) => {
+    (sku: string, addImmediately = false, quantity = 1) => {
       const normalizedCode = sku.trim().toLowerCase();
       const product = products.find(
         (p) =>
@@ -366,6 +372,24 @@ export default function Sales() {
         toast({
           title: "Product Not Found",
           description: `No product found with SKU: ${sku}`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (addImmediately && (!Number.isInteger(quantity) || quantity <= 0)) {
+        toast({
+          title: "Invalid quantity",
+          description: "Enter a quantity greater than 0 before scanning.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (addImmediately && product.stock != null && quantity > product.stock) {
+        toast({
+          title: "Not enough stock",
+          description: `Only ${product.stock} units are available.`,
           variant: "destructive",
         });
         return;
@@ -385,7 +409,7 @@ export default function Sales() {
       const scannedItem: Partial<InvoiceItem> = {
         productId: product.id,
         productName: product.name,
-        quantity: 1,
+        quantity: quantity > 0 ? quantity : 1,
         unitPrice: product.unitPrice,
         discount: 0,
       };
@@ -421,8 +445,8 @@ export default function Sales() {
     }
 
     let cancelled = false;
-    let detected = false;
     const reader = new BrowserMultiFormatReader();
+    lastCameraScanRef.current = null;
 
     const startScanner = async () => {
       if (!window.isSecureContext) {
@@ -444,11 +468,16 @@ export default function Sales() {
           scannerVideoRef.current,
           (result) => {
             const value = result?.getText().trim();
-            if (!cancelled && !detected && value) {
-              detected = true;
-              setIsScannerOpen(false);
-              handleBarcodeScanned(value, true);
-            }
+            if (cancelled || !value) return;
+
+            const now = Date.now();
+            const lastScan = lastCameraScanRef.current;
+            if (lastScan?.code === value && now - lastScan.at < 1200) return;
+
+            lastCameraScanRef.current = { code: value, at: now };
+            handleBarcodeScanned(value, true, scanQuantityRef.current);
+            scanQuantityRef.current = 1;
+            setScanQuantity(1);
           },
         );
         if (cancelled) {
@@ -484,6 +513,7 @@ export default function Sales() {
   useEffect(() => {
     if (!isCreateDialogOpen) {
       clearNewInvoice();
+      autoScanStartedRef.current = false;
       setIsScannerOpen(false);
       const cleanupTimer = window.setTimeout(() => {
         document.body.style.pointerEvents = "";
@@ -492,6 +522,14 @@ export default function Sales() {
         (document.activeElement as HTMLElement | null)?.blur?.();
       }, 0);
       return () => window.clearTimeout(cleanupTimer);
+    }
+
+    if (isMobile && !autoScanStartedRef.current) {
+      autoScanStartedRef.current = true;
+      scanQuantityRef.current = 1;
+      setScanQuantity(1);
+      setScannerStatus("starting");
+      setIsScannerOpen(true);
     }
 
     // When dialog opens, blur any focused input to allow barcode scanning
@@ -506,7 +544,7 @@ export default function Sales() {
       }
     }, 100);
     return () => window.clearTimeout(blurTimer);
-  }, [isCreateDialogOpen]);
+  }, [isCreateDialogOpen, isMobile]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -1359,6 +1397,8 @@ export default function Sales() {
     setShowCustomerDetails(false);
     setShowPaymentDetails(false);
     setShowNotes(false);
+    scanQuantityRef.current = 1;
+    setScanQuantity(1);
     setBorrowReturnDate(defaultReturnDate);
   };
 
@@ -1563,6 +1603,24 @@ export default function Sales() {
     }
 
     const newDiscount = itemToAdd.discount || 0;
+
+    const existingQuantity = (newInvoice.items || [])
+      .filter(
+        (item) =>
+          item.productId === itemToAdd.productId && item.discount === newDiscount,
+      )
+      .reduce((sum, item) => sum + item.quantity, 0);
+    if (
+      product.stock != null &&
+      existingQuantity + quantity > product.stock
+    ) {
+      toast({
+        title: "Not enough stock",
+        description: `Only ${product.stock} units are available.`,
+        variant: "destructive",
+      });
+      return;
+    }
 
     // Check if an item with the same product ID and discount already exists
     const existingItemIndex = (newInvoice.items || []).findIndex(
@@ -2139,6 +2197,10 @@ export default function Sales() {
               category: p.category || "",
               sku: p.sku || "",
               barcode: p.barcode || p.barCode || p.sku || "",
+              stock:
+                p.stock == null || Number.isNaN(Number(p.stock))
+                  ? undefined
+                  : Number(p.stock),
             };
           });
           setProducts(normalized);
@@ -2243,6 +2305,36 @@ export default function Sales() {
               <p className="text-center text-sm text-muted-foreground">
                 {scannerStatus === "starting" ? "Starting camera…" : "Scanning…"}
               </p>
+              <div className="flex items-end gap-2">
+                <div className="flex-1 space-y-1">
+                  <Label htmlFor="scan-quantity" className="text-xs">
+                    Quantity for next scan
+                  </Label>
+                  <Input
+                    id="scan-quantity"
+                    type="number"
+                    min="1"
+                    inputMode="numeric"
+                    value={scanQuantity}
+                    onFocus={(event) => event.currentTarget.select()}
+                    onChange={(event) => {
+                      const next = event.target.value === "" ? 0 : parseInt(event.target.value, 10);
+                      scanQuantityRef.current = Number.isFinite(next) ? next : 0;
+                      setScanQuantity(Number.isFinite(next) ? next : 0);
+                    }}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setIsScannerOpen(false);
+                    window.setTimeout(() => productSelectTriggerRef.current?.click(), 150);
+                  }}
+                >
+                  Search manually
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="space-y-4 rounded-lg border p-4 text-sm">
@@ -2255,20 +2347,33 @@ export default function Sales() {
                       ? "Camera scanning requires HTTPS on this device. Open the app using a secure HTTPS address and try again."
                       : "The camera could not be started. Check that another app is not using it and try again."}
               </p>
-              <Button
-                className="w-full"
-                onClick={() => {
-                  setScannerStatus("starting");
-                  setIsScannerOpen(false);
-                  setTimeout(() => setIsScannerOpen(true), 0);
-                }}
-              >
-                Try again
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  className="flex-1"
+                  onClick={() => {
+                    setScannerStatus("starting");
+                    setIsScannerOpen(false);
+                    setTimeout(() => setIsScannerOpen(true), 0);
+                  }}
+                >
+                  Try again
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setIsScannerOpen(false);
+                    window.setTimeout(() => productSelectTriggerRef.current?.click(), 150);
+                  }}
+                >
+                  Search manually
+                </Button>
+              </div>
             </div>
           )}
           <Button variant="outline" onClick={() => setIsScannerOpen(false)}>
-            Cancel
+            Done scanning
           </Button>
         </DialogContent>
       </Dialog>
@@ -2565,7 +2670,7 @@ export default function Sales() {
                             }
                           }}
                         >
-                          <SelectTrigger id="product">
+                          <SelectTrigger ref={productSelectTriggerRef} id="product">
                             <SelectValue
                               placeholder={t("sales.choose_product")}
                             />
@@ -3130,7 +3235,7 @@ export default function Sales() {
                             }
                           }}
                         >
-                          <SelectTrigger id="product">
+                          <SelectTrigger ref={productSelectTriggerRef} id="product">
                             <SelectValue
                               placeholder={t("sales.choose_product")}
                             />
