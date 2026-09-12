@@ -304,7 +304,9 @@ export default function Sales() {
   const isMobile = useIsMobile();
   const [barcodeBuffer, setBarcodeBuffer] = useState("");
   const [isScannerOpen, setIsScannerOpen] = useState(false);
-  const [scannerStatus, setScannerStatus] = useState<"starting" | "scanning" | "unsupported" | "denied" | "error">("starting");
+  const [scannerStatus, setScannerStatus] = useState<
+    "starting" | "scanning" | "unsupported" | "denied" | "insecure" | "error"
+  >("starting");
   const scannerVideoRef = useRef<HTMLVideoElement | null>(null);
   const scannerControlsRef = useRef<{ stop: () => void } | null>(null);
   const barcodeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -411,7 +413,10 @@ export default function Sales() {
     if (!isScannerOpen) {
       scannerControlsRef.current?.stop();
       scannerControlsRef.current = null;
-      if (scannerVideoRef.current) scannerVideoRef.current.srcObject = null;
+      if (scannerVideoRef.current) {
+        scannerVideoRef.current.pause();
+        scannerVideoRef.current.srcObject = null;
+      }
       return;
     }
 
@@ -420,6 +425,11 @@ export default function Sales() {
     const reader = new BrowserMultiFormatReader();
 
     const startScanner = async () => {
+      if (!window.isSecureContext) {
+        setScannerStatus("insecure");
+        return;
+      }
+
       if (!navigator.mediaDevices?.getUserMedia || !scannerVideoRef.current) {
         setScannerStatus("unsupported");
         return;
@@ -463,7 +473,10 @@ export default function Sales() {
       cancelled = true;
       scannerControlsRef.current?.stop();
       scannerControlsRef.current = null;
-      reader.reset();
+      if (scannerVideoRef.current) {
+        scannerVideoRef.current.pause();
+        scannerVideoRef.current.srcObject = null;
+      }
     };
   }, [isScannerOpen, handleBarcodeScanned]);
 
@@ -2222,6 +2235,7 @@ export default function Sales() {
                   ref={scannerVideoRef}
                   className="h-full w-full object-cover"
                   playsInline
+                  autoPlay
                   muted
                 />
                 <div className="pointer-events-none absolute inset-x-8 top-1/2 h-0.5 -translate-y-1/2 bg-primary shadow-[0_0_12px_hsl(var(--primary))]" />
@@ -2237,7 +2251,9 @@ export default function Sales() {
                   ? "Barcode scanning is not supported by this browser. Try a current Chrome or Safari browser."
                   : scannerStatus === "denied"
                     ? "Camera access was denied. Allow camera access in your browser settings and try again."
-                    : "The camera could not be started. Check that another app is not using it and try again."}
+                    : scannerStatus === "insecure"
+                      ? "Camera scanning requires HTTPS on this device. Open the app using a secure HTTPS address and try again."
+                      : "The camera could not be started. Check that another app is not using it and try again."}
               </p>
               <Button
                 className="w-full"
