@@ -322,18 +322,17 @@ export default function Sales() {
   const [scannerMode, setScannerMode] = useState<"camera" | "manual">("camera");
   const [manualProductSearch, setManualProductSearch] = useState("");
 
+  const restoreInteractionState = () => {
+    document.body.style.pointerEvents = "";
+    document.body.style.overflow = "";
+    document.documentElement.style.overflow = "";
+    (document.activeElement as HTMLElement | null)?.blur?.();
+  };
+
   const closeExportLayers = () => {
     setExportMenuOpen(false);
     setIsPdfDialogOpen(false);
-    try {
-      const el = document.activeElement as HTMLElement | null;
-      el?.blur?.();
-    } catch {}
-    try {
-      document.body.style.pointerEvents = "";
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
-    } catch {}
+    restoreInteractionState();
   };
 
   // Real clients/products will be loaded from backend
@@ -517,12 +516,7 @@ export default function Sales() {
       clearNewInvoice();
       autoScanStartedRef.current = false;
       setIsScannerOpen(false);
-      const cleanupTimer = window.setTimeout(() => {
-        document.body.style.pointerEvents = "";
-        document.body.style.overflow = "";
-        document.documentElement.style.overflow = "";
-        (document.activeElement as HTMLElement | null)?.blur?.();
-      }, 0);
+      const cleanupTimer = window.setTimeout(restoreInteractionState, 0);
       return () => window.clearTimeout(cleanupTimer);
     }
 
@@ -1859,8 +1853,12 @@ export default function Sales() {
       };
 
       setInvoices([invoice, ...invoices]);
+      setIsScannerOpen(false);
+      setScannerMode("camera");
+      autoScanStartedRef.current = false;
       clearNewInvoice();
       setIsCreateDialogOpen(false);
+      restoreInteractionState();
     } catch (e: any) {
       toast({
         title: "Failed",
