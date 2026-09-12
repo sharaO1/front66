@@ -532,8 +532,12 @@ export default function Sales() {
       setIsScannerOpen(true);
     }
 
-    // When dialog opens, blur any focused input to allow barcode scanning
-    const blurTimer = window.setTimeout(() => {
+    const focusTimer = window.setTimeout(() => {
+      if (!isMobile) {
+        productSelectTriggerRef.current?.focus();
+        return;
+      }
+
       const activeElement = document.activeElement as HTMLElement;
       if (
         (activeElement && activeElement.tagName === "INPUT") ||
@@ -543,7 +547,7 @@ export default function Sales() {
         activeElement.blur();
       }
     }, 100);
-    return () => window.clearTimeout(blurTimer);
+    return () => window.clearTimeout(focusTimer);
   }, [isCreateDialogOpen, isMobile]);
 
   useEffect(() => {
@@ -591,7 +595,7 @@ export default function Sales() {
 
         // If barcode buffer has content and not in an input field, treat as barcode scan
         if (!isOtherInput && barcodeBuffer.trim().length > 0) {
-          handleBarcodeScanned(barcodeBuffer.trim());
+          handleBarcodeScanned(barcodeBuffer.trim(), true);
           setBarcodeBuffer("");
           if (barcodeTimeoutRef.current) {
             clearTimeout(barcodeTimeoutRef.current);
@@ -604,7 +608,8 @@ export default function Sales() {
         if (
           !currentItem.productId &&
           isCreateDialogOpen &&
-          !justScannedRef.current
+          !justScannedRef.current &&
+          (newInvoice.items?.length ?? 0) > 0
         ) {
           createInvoice();
         }
@@ -682,6 +687,7 @@ export default function Sales() {
     isCreateDialogOpen,
     isSubmitting,
     currentItem,
+    newInvoice.items,
     handleBarcodeScanned,
   ]);
 
@@ -1353,6 +1359,9 @@ export default function Sales() {
       unitPrice: 0,
       discount: 0,
     });
+    if (!isMobile && isCreateDialogOpen) {
+      window.setTimeout(() => productSelectTriggerRef.current?.focus(), 0);
+    }
   };
 
   const handleAddItemWithProduct = (productId: string) => {
