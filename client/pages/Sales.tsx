@@ -319,6 +319,8 @@ export default function Sales() {
   const lastCameraScanRef = useRef<{ code: string; at: number } | null>(null);
   const autoScanStartedRef = useRef(false);
   const [scanQuantity, setScanQuantity] = useState(1);
+  const [scannerMode, setScannerMode] = useState<"camera" | "manual">("camera");
+  const [manualProductSearch, setManualProductSearch] = useState("");
 
   const closeExportLayers = () => {
     setExportMenuOpen(false);
@@ -434,7 +436,7 @@ export default function Sales() {
   );
 
   useEffect(() => {
-    if (!isScannerOpen) {
+    if (!isScannerOpen || scannerMode !== "camera") {
       scannerControlsRef.current?.stop();
       scannerControlsRef.current = null;
       if (scannerVideoRef.current) {
@@ -507,7 +509,7 @@ export default function Sales() {
         scannerVideoRef.current.srcObject = null;
       }
     };
-  }, [isScannerOpen, handleBarcodeScanned]);
+  }, [isScannerOpen, scannerMode, handleBarcodeScanned]);
 
   // Reset form state when dialog closes, and focus body when dialog opens to enable barcode scanning
   useEffect(() => {
@@ -528,6 +530,8 @@ export default function Sales() {
       autoScanStartedRef.current = true;
       scanQuantityRef.current = 1;
       setScanQuantity(1);
+      setScannerMode("camera");
+      setManualProductSearch("");
       setScannerStatus("starting");
       setIsScannerOpen(true);
     }
@@ -2292,14 +2296,78 @@ export default function Sales() {
         <DialogContent className="w-[calc(100vw-2rem)] max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Camera className="h-5 w-5" />
-              Scan barcode
+              {scannerMode === "camera" ? (
+                <Camera className="h-5 w-5" />
+              ) : (
+                <Search className="h-5 w-5" />
+              )}
+              {scannerMode === "camera" ? "Scan barcode" : "Search product"}
             </DialogTitle>
             <DialogDescription>
-              Point your phone camera at a product barcode.
+              {scannerMode === "camera"
+                ? "Point your phone camera at a product barcode."
+                : "Find a product by name, SKU, or barcode."}
             </DialogDescription>
           </DialogHeader>
-          {scannerStatus === "starting" || scannerStatus === "scanning" ? (
+          {scannerMode === "manual" ? (
+            <div className="space-y-3">
+              <Input
+                autoFocus
+                placeholder="Search products…"
+                value={manualProductSearch}
+                onChange={(event) => setManualProductSearch(event.target.value)}
+              />
+              <div className="max-h-64 space-y-2 overflow-y-auto">
+                {products
+                  .filter((product) => {
+                    const query = manualProductSearch.trim().toLowerCase();
+                    if (!query) return true;
+                    return [product.name, product.sku, product.barcode]
+                      .filter(Boolean)
+                      .some((value) => value!.toLowerCase().includes(query));
+                  })
+                  .map((product) => (
+                    <button
+                      key={product.id}
+                      type="button"
+                      className="flex w-full items-center justify-between rounded-lg border p-3 text-left transition-colors hover:bg-muted"
+                      onClick={() => {
+                        addItemToInvoice({
+                          productId: product.id,
+                          productName: product.name,
+                          quantity: scanQuantity,
+                          unitPrice: product.unitPrice,
+                          discount: 0,
+                        });
+                        setManualProductSearch("");
+                      }}
+                    >
+                      <span className="min-w-0">
+                        <span className="block truncate font-medium">{product.name}</span>
+                        <span className="block truncate text-xs text-muted-foreground">
+                          {product.sku || product.barcode || ""}
+                        </span>
+                      </span>
+                      <span className="ml-3 shrink-0 text-sm font-medium">
+                        {product.unitPrice.toLocaleString()} TJS
+                      </span>
+                    </button>
+                  ))}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  setScannerMode("camera");
+                  setScannerStatus("starting");
+                }}
+              >
+                <Camera className="mr-2 h-4 w-4" />
+                Back to camera
+              </Button>
+            </div>
+          ) : scannerStatus === "starting" || scannerStatus === "scanning" ? (
             <div className="space-y-4">
               <div className="relative overflow-hidden rounded-lg bg-black aspect-video">
                 <video
@@ -2337,8 +2405,8 @@ export default function Sales() {
                   type="button"
                   variant="outline"
                   onClick={() => {
-                    setIsScannerOpen(false);
-                    window.setTimeout(() => productSelectTriggerRef.current?.focus(), 150);
+                    setScannerMode("manual");
+                    setManualProductSearch("");
                   }}
                 >
                   Search manually
@@ -2372,8 +2440,8 @@ export default function Sales() {
                   variant="outline"
                   className="flex-1"
                   onClick={() => {
-                    setIsScannerOpen(false);
-                    window.setTimeout(() => productSelectTriggerRef.current?.focus(), 150);
+                    setScannerMode("manual");
+                    setManualProductSearch("");
                   }}
                 >
                   Search manually
@@ -2649,6 +2717,8 @@ export default function Sales() {
                               size="sm"
                               className="h-8 shrink-0"
                               onClick={() => {
+                                setScannerMode("camera");
+                                setManualProductSearch("");
                                 setScannerStatus("starting");
                                 setIsScannerOpen(true);
                               }}
@@ -3214,6 +3284,8 @@ export default function Sales() {
                               size="sm"
                               className="h-8 shrink-0"
                               onClick={() => {
+                                setScannerMode("camera");
+                                setManualProductSearch("");
                                 setScannerStatus("starting");
                                 setIsScannerOpen(true);
                               }}
