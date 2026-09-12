@@ -637,7 +637,7 @@ export default function Sales() {
   const buildInvoiceReport = (inv: Invoice) => {
     const sep = "========================================";
     const line = (s: string) => s;
-    const money = (n: number) => `${n.toFixed(2)}c`;
+    const money = (n: number) => `${n.toFixed(2)} TJS`;
     const fmtDate = (d: string) =>
       new Date(d).toLocaleString(i18n.language || "en");
 
@@ -908,7 +908,7 @@ export default function Sales() {
     `${new Intl.NumberFormat(i18n.language || "en", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(n)}c`;
+    }).format(n)} TJS`;
 
   const formatDateTime = (
     d: string | Date,
@@ -3788,7 +3788,7 @@ export default function Sales() {
                       </TableCell>
                       <TableCell>
                         <div className="font-medium">
-                          {invoice.total.toFixed(2)}c
+                          {invoice.total.toFixed(2)} TJS
                         </div>
                         {!invoice.borrow && (
                           <div className="text-sm text-muted-foreground">
@@ -4163,22 +4163,22 @@ export default function Sales() {
               <div className="border rounded-lg p-4 space-y-2 bg-muted text-sm">
                 <div className="flex justify-between">
                   <span>Subtotal:</span>
-                  <span>{selectedInvoice.subtotal.toFixed(2)}c</span>
+                  <span>{selectedInvoice.subtotal.toFixed(2)} TJS</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Tax ({selectedInvoice.taxRate}%):</span>
-                  <span>{selectedInvoice.taxAmount.toFixed(2)}c</span>
+                  <span>{selectedInvoice.taxAmount.toFixed(2)} TJS</span>
                 </div>
                 {selectedInvoice.discountAmount > 0 && (
                   <div className="flex justify-between text-red-600">
                     <span>Discount:</span>
-                    <span>-{selectedInvoice.discountAmount.toFixed(2)}c</span>
+                    <span>-{selectedInvoice.discountAmount.toFixed(2)} TJS</span>
                   </div>
                 )}
                 <hr />
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total:</span>
-                  <span>{selectedInvoice.total.toFixed(2)}c</span>
+                  <span>{selectedInvoice.total.toFixed(2)} TJS</span>
                 </div>
               </div>
 
