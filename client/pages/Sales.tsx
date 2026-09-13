@@ -638,14 +638,16 @@ export default function Sales() {
         const now = Date.now();
         const gap = now - quantityScanner.lastAt;
 
-        if (!quantityScanner.value || gap >= 250) {
+        if (!quantityScanner.value || gap >= 1000) {
           quantityScanner.value = event.key;
           quantityScanner.mode = "unknown";
         } else {
+          const nextValue = quantityScanner.value + event.key;
           if (quantityScanner.mode === "unknown") {
-            quantityScanner.mode = gap < 80 ? "scanner" : "manual";
+            quantityScanner.mode =
+              gap < 100 || nextValue.length >= 4 ? "scanner" : "manual";
           }
-          quantityScanner.value += event.key;
+          quantityScanner.value = nextValue;
         }
         quantityScanner.lastAt = now;
 
@@ -672,7 +674,7 @@ export default function Sales() {
           if (Number.isInteger(quantity) && quantity > 0) {
             setCurrentItem((item) => ({ ...item, quantity }));
           }
-        }, 250);
+        }, 1000);
         return;
       }
 
