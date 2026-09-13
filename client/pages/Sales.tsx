@@ -311,6 +311,7 @@ export default function Sales() {
   const [scannerAttempt, setScannerAttempt] = useState(0);
   const scannerVideoRef = useRef<HTMLVideoElement | null>(null);
   const scannerControlsRef = useRef<{ stop: () => void } | null>(null);
+  const desktopScannerInputRef = useRef<HTMLInputElement | null>(null);
   const barcodeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const barcodeScanTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const justScannedRef = useRef(false);
@@ -415,6 +416,11 @@ export default function Sales() {
 
       const wasDialogClosed = !isCreateDialogOpen;
 
+      if (!addImmediately && isCreateDialogOpen && currentItem.productId) {
+        const previousItemAdded = addItemToInvoice(currentItem);
+        if (!previousItemAdded) return;
+      }
+
       // Mark that a barcode was just scanned to prevent accidental invoice creation
       justScannedRef.current = true;
       if (barcodeScanTimeoutRef.current) {
@@ -444,8 +450,10 @@ export default function Sales() {
           quantityInputRef.current?.focus();
         }, 100);
       } else {
-        // Dialog is already open, focus quantity input immediately
-        quantityInputRef.current?.focus();
+        window.setTimeout(() => {
+          quantityInputRef.current?.focus();
+          quantityInputRef.current?.select();
+        }, 0);
       }
     },
     [products, isCreateDialogOpen, toast],
@@ -566,8 +574,29 @@ export default function Sales() {
   }, [isCreateDialogOpen, isMobile]);
 
   useEffect(() => {
+    if (isCreateDialogOpen || window.innerWidth < 640) return;
+
+    const focusTimer = window.setTimeout(() => {
+      desktopScannerInputRef.current?.focus();
+    }, 0);
+    return () => window.clearTimeout(focusTimer);
+  }, [isCreateDialogOpen]);
+
+  useEffect(() => {
+    if (!isMobile && isCreateDialogOpen && currentItem.productId) {
+      const focusTimer = window.setTimeout(() => {
+        quantityInputRef.current?.focus();
+        quantityInputRef.current?.select();
+      }, 0);
+      return () => window.clearTimeout(focusTimer);
+    }
+  }, [currentItem.productId, isCreateDialogOpen, isMobile]);
+
+  useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const activeElement = document.activeElement as HTMLElement;
+      const isDesktopScannerInput =
+        activeElement === desktopScannerInputRef.current;
       const opensInvoiceShortcut =
         event.key === "F2" ||
         ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "n");
@@ -584,37 +613,36 @@ export default function Sales() {
       const isDiscountInput = activeElement?.id === "discount";
       const isItemRelatedInput = isQuantityInput || isDiscountInput;
       const isOtherInput =
-        (activeElement?.tagName === "INPUT" && !isItemRelatedInput) ||
+        (activeElement?.tagName === "INPUT" &&
+          !isItemRelatedInput &&
+          !isDesktopScannerInput) ||
         activeElement?.tagName === "TEXTAREA";
 
       // Handle Enter key
       if (event.key === "Enter") {
         event.preventDefault();
 
-        // If a product is selected and Enter is pressed from quantity or discount field, add item
+        // Process a completed desktop scanner buffer before treating Enter as an add action.
+        if (!isOtherInput && barcodeBuffer.trim().length > 0) {
+          handleBarcodeScanned(barcodeBuffer.trim(), false);
+          setBarcodeBuffer("");
+          if (barcodeTimeoutRef.current) {
+            clearTimeout(barcodeTimeoutRef.current);
+          }
+          return;
+        }
+
         if (currentItem.productId && isItemRelatedInput) {
           addItemToInvoice();
           return;
         }
 
-        // If a product is selected and Enter is pressed (not from other inputs), add item
         if (currentItem.productId && !isOtherInput && isCreateDialogOpen) {
           addItemToInvoice();
           return;
         }
 
-        // If a product is selected but Enter from another field (like notes), don't do anything
         if (currentItem.productId && isOtherInput) {
-          return;
-        }
-
-        // If barcode buffer has content and not in an input field, treat as barcode scan
-        if (!isOtherInput && barcodeBuffer.trim().length > 0) {
-          handleBarcodeScanned(barcodeBuffer.trim(), true);
-          setBarcodeBuffer("");
-          if (barcodeTimeoutRef.current) {
-            clearTimeout(barcodeTimeoutRef.current);
-          }
           return;
         }
 
@@ -641,7 +669,11 @@ export default function Sales() {
       }
 
       // Allow barcode input if a text input is focused but only certain ones (prevent barcode in text inputs)
-      if (activeElement?.tagName === "INPUT" && !isItemRelatedInput) {
+      if (
+        activeElement?.tagName === "INPUT" &&
+        !isItemRelatedInput &&
+        !isDesktopScannerInput
+      ) {
         return;
       }
 
@@ -650,7 +682,7 @@ export default function Sales() {
       }
 
       // If product is selected and not in any input field, allow numbers to be quantity
-      if (currentItem.productId) {
+      if (currentItem.productId && !isDesktopScannerInput) {
         const char = event.key;
         if (/\d/.test(char)) {
           event.preventDefault();
@@ -1375,7 +1407,7 @@ export default function Sales() {
       discount: 0,
     });
     if (!isMobile && isCreateDialogOpen) {
-      window.setTimeout(() => productSelectTriggerRef.current?.focus(), 0);
+      window.setTimeout(() => desktopScannerInputRef.current?.focus(), 0);
     }
   };
 
@@ -2305,6 +2337,14 @@ export default function Sales() {
 
   return (
     <div className="space-y-6">
+      <input
+        ref={desktopScannerInputRef}
+        value={barcodeBuffer}
+        readOnly
+        tabIndex={-1}
+        aria-label="Barcode scanner input"
+        className="fixed left-[-9999px] top-0 h-px w-px opacity-0"
+      />
       <Dialog
         open={isScannerOpen}
         onOpenChange={setIsScannerOpen}
