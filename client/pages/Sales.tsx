@@ -2304,8 +2304,16 @@ export default function Sales() {
 
   return (
     <div className="space-y-6">
-      <Dialog open={isScannerOpen} onOpenChange={setIsScannerOpen}>
-        <DialogContent className="w-[calc(100vw-2rem)] max-w-md">
+      <Dialog
+        open={isScannerOpen}
+        onOpenChange={setIsScannerOpen}
+        modal={false}
+      >
+        <DialogContent
+          className="z-[60] w-[calc(100vw-2rem)] max-w-md"
+          onPointerDownOutside={(event) => event.preventDefault()}
+          onInteractOutside={(event) => event.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {scannerMode === "camera" ? (
