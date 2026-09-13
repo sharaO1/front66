@@ -314,6 +314,13 @@ export default function Sales() {
   const desktopScannerInputRef = useRef<HTMLInputElement | null>(null);
   const barcodeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const barcodeScanTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const quantityScannerTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const quantityScannerRef = useRef({
+    value: "",
+    lastAt: 0,
+    baselineQuantity: 1,
+    active: false,
+  });
   const justScannedRef = useRef(false);
   const quantityInputRef = useRef<HTMLInputElement | null>(null);
   const productSelectTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -448,6 +455,7 @@ export default function Sales() {
         // Give dialog time to render and focus quantity input
         setTimeout(() => {
           quantityInputRef.current?.focus();
+          quantityInputRef.current?.select();
         }, 100);
       } else {
         window.setTimeout(() => {
@@ -618,9 +626,55 @@ export default function Sales() {
           !isDesktopScannerInput) ||
         activeElement?.tagName === "TEXTAREA";
 
+      const quantityScanner = quantityScannerRef.current;
+      const scannerCharacter =
+        event.key.length === 1 && /[a-zA-Z0-9-]/i.test(event.key);
+
+      if (isQuantityInput && scannerCharacter) {
+        const now = Date.now();
+        const isRapidScannerInput =
+          quantityScanner.value.length > 0 && now - quantityScanner.lastAt < 80;
+
+        if (isRapidScannerInput) {
+          event.preventDefault();
+          if (!quantityScanner.active) {
+            quantityScanner.active = true;
+            setCurrentItem((item) => ({
+              ...item,
+              quantity: quantityScanner.baselineQuantity,
+            }));
+          }
+          quantityScanner.value += event.key;
+        } else {
+          quantityScanner.value = event.key;
+          quantityScanner.baselineQuantity = currentItem.quantity || 1;
+          quantityScanner.active = false;
+        }
+        quantityScanner.lastAt = now;
+        if (quantityScannerTimeoutRef.current) {
+          clearTimeout(quantityScannerTimeoutRef.current);
+        }
+        quantityScannerTimeoutRef.current = setTimeout(() => {
+          quantityScanner.value = "";
+          quantityScanner.active = false;
+        }, 250);
+        if (quantityScanner.active) return;
+      }
+
       // Handle Enter key
       if (event.key === "Enter") {
         event.preventDefault();
+
+        if (isQuantityInput && quantityScanner.active && quantityScanner.value) {
+          const scannedCode = quantityScanner.value;
+          quantityScanner.value = "";
+          quantityScanner.active = false;
+          if (quantityScannerTimeoutRef.current) {
+            clearTimeout(quantityScannerTimeoutRef.current);
+          }
+          handleBarcodeScanned(scannedCode, false);
+          return;
+        }
 
         // Process a completed desktop scanner buffer before treating Enter as an add action.
         if (!isOtherInput && barcodeBuffer.trim().length > 0) {
@@ -726,6 +780,9 @@ export default function Sales() {
       window.removeEventListener("keydown", handleKeyDown);
       if (barcodeTimeoutRef.current) {
         clearTimeout(barcodeTimeoutRef.current);
+      }
+      if (quantityScannerTimeoutRef.current) {
+        clearTimeout(quantityScannerTimeoutRef.current);
       }
     };
   }, [
@@ -1391,6 +1448,17 @@ export default function Sales() {
   const currentUser = useAuthStore((s) => s.user);
 
   const clearCurrentItem = () => {
+    quantityScannerRef.current = {
+      value: "",
+      lastAt: 0,
+      baselineQuantity: 1,
+      active: false,
+    };
+    if (quantityScannerTimeoutRef.current) {
+      clearTimeout(quantityScannerTimeoutRef.current);
+      quantityScannerTimeoutRef.current = null;
+    }
+
     // Blur any focused input to prevent scanned SKU from going to quantity field
     const activeElement = document.activeElement as HTMLElement;
     if (
@@ -2811,6 +2879,7 @@ export default function Sales() {
                               // Auto-focus quantity input after product selection
                               setTimeout(() => {
                                 quantityInputRef.current?.focus();
+          quantityInputRef.current?.select();
                               }, 0);
                             }
                           }}
@@ -3385,6 +3454,7 @@ export default function Sales() {
                               // Auto-focus quantity input after product selection
                               setTimeout(() => {
                                 quantityInputRef.current?.focus();
+          quantityInputRef.current?.select();
                               }, 0);
                             }
                           }}
