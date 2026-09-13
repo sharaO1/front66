@@ -308,6 +308,7 @@ export default function Sales() {
   const [scannerStatus, setScannerStatus] = useState<
     "starting" | "scanning" | "unsupported" | "denied" | "insecure" | "error"
   >("starting");
+  const [scannerAttempt, setScannerAttempt] = useState(0);
   const scannerVideoRef = useRef<HTMLVideoElement | null>(null);
   const scannerControlsRef = useRef<{ stop: () => void } | null>(null);
   const barcodeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -366,6 +367,8 @@ export default function Sales() {
     paymentMethod: "cash",
     notes: "",
   });
+  const newInvoiceRef = useRef(newInvoice);
+  newInvoiceRef.current = newInvoice;
   const [currentItem, setCurrentItem] = useState<Partial<InvoiceItem>>({
     productId: "",
     productName: "",
@@ -522,7 +525,7 @@ export default function Sales() {
         scannerVideoRef.current.srcObject = null;
       }
     };
-  }, [isScannerOpen, scannerMode, handleBarcodeScanned]);
+  }, [isScannerOpen, scannerMode, scannerAttempt, handleBarcodeScanned]);
 
   // Reset form state when dialog closes, and focus body when dialog opens to enable barcode scanning
   useEffect(() => {
@@ -1601,6 +1604,7 @@ export default function Sales() {
   };
 
   const addItemToInvoice = (itemData?: Partial<InvoiceItem>) => {
+    const invoice = newInvoiceRef.current;
     const itemToAdd = itemData || currentItem;
     const quantity = itemToAdd.quantity ?? 0;
 
@@ -1610,7 +1614,7 @@ export default function Sales() {
         description: "Please select a product and enter quantity",
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
     const product = products.find((p) => p.id === itemToAdd.productId);
@@ -1620,12 +1624,12 @@ export default function Sales() {
         description: "Selected product not found",
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
     const newDiscount = itemToAdd.discount || 0;
 
-    const existingQuantity = (newInvoice.items || [])
+    const existingQuantity = (invoice.items || [])
       .filter(
         (item) =>
           item.productId === itemToAdd.productId && item.discount === newDiscount,
@@ -1640,11 +1644,10 @@ export default function Sales() {
         description: `Only ${product.stock} units are available.`,
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
-    // Check if an item with the same product ID and discount already exists
-    const existingItemIndex = (newInvoice.items || []).findIndex(
+    const existingItemIndex = (invoice.items || []).findIndex(
       (item) =>
         item.productId === itemToAdd.productId && item.discount === newDiscount,
     );
@@ -1652,8 +1655,7 @@ export default function Sales() {
     let updatedItems: InvoiceItem[];
 
     if (existingItemIndex >= 0) {
-      // Merge with existing item: increase quantity
-      updatedItems = newInvoice.items!.map((item, index) => {
+      updatedItems = invoice.items!.map((item, index) => {
         if (index === existingItemIndex) {
           const newQuantity = item.quantity + quantity;
           return {
@@ -1668,28 +1670,27 @@ export default function Sales() {
         return item;
       });
     } else {
-      // Add as new item
       const item: InvoiceItem = {
         id: Date.now().toString(),
         productId: itemToAdd.productId!,
         productName: itemToAdd.productName!,
-        quantity: quantity,
+        quantity,
         unitPrice: itemToAdd.unitPrice!,
         discount: newDiscount,
         total: calculateItemTotal({ ...itemToAdd, quantity }),
       };
 
-      updatedItems = [...(newInvoice.items || []), item];
+      updatedItems = [...(invoice.items || []), item];
     }
 
     const { subtotal, taxAmount, total } = calculateInvoiceTotal(
       updatedItems,
-      newInvoice.taxRate,
-      newInvoice.discountAmount,
+      invoice.taxRate,
+      invoice.discountAmount,
     );
 
     setNewInvoice({
-      ...newInvoice,
+      ...invoice,
       items: updatedItems,
       subtotal,
       taxAmount,
@@ -1699,7 +1700,7 @@ export default function Sales() {
     clearCurrentItem();
     justScannedRef.current = false;
 
-    /* no toast on item add */
+    return true;
   };
 
   const removeItemFromInvoice = (itemId: string) => {
@@ -2310,6 +2311,7 @@ export default function Sales() {
         modal={false}
       >
         <DialogContent
+          hideOverlay
           className="z-[60] w-[calc(100vw-2rem)] max-w-md"
           onPointerDownOutside={(event) => event.preventDefault()}
           onInteractOutside={(event) => event.preventDefault()}
@@ -2352,14 +2354,17 @@ export default function Sales() {
                       type="button"
                       className="flex w-full items-center justify-between rounded-lg border p-3 text-left transition-colors hover:bg-muted"
                       onClick={() => {
-                        addItemToInvoice({
+                        const added = addItemToInvoice({
                           productId: product.id,
                           productName: product.name,
                           quantity: scanQuantity,
                           unitPrice: product.unitPrice,
                           discount: 0,
                         });
-                        setManualProductSearch("");
+                        if (added) {
+                          setManualProductSearch("");
+                          setIsScannerOpen(false);
+                        }
                       }}
                     >
                       <span className="min-w-0">
@@ -2446,11 +2451,11 @@ export default function Sales() {
               </p>
               <div className="flex gap-2">
                 <Button
+                  type="button"
                   className="flex-1"
                   onClick={() => {
                     setScannerStatus("starting");
-                    setIsScannerOpen(false);
-                    setTimeout(() => setIsScannerOpen(true), 0);
+                    setScannerAttempt((attempt) => attempt + 1);
                   }}
                 >
                   Try again
@@ -2469,7 +2474,7 @@ export default function Sales() {
               </div>
             </div>
           )}
-          <Button variant="outline" onClick={() => setIsScannerOpen(false)}>
+          <Button type="button" variant="outline" onClick={() => setIsScannerOpen(false)}>
             Done scanning
           </Button>
         </DialogContent>
@@ -2740,6 +2745,7 @@ export default function Sales() {
                                 setScannerMode("camera");
                                 setManualProductSearch("");
                                 setScannerStatus("starting");
+                                setScannerAttempt((attempt) => attempt + 1);
                                 setIsScannerOpen(true);
                               }}
                             >
@@ -3019,22 +3025,19 @@ export default function Sales() {
                           <div className="space-y-2">
                             <Label>{t("sales.final_total")}</Label>
                             <div className="h-10 px-3 py-2 border rounded-md bg-primary/10 flex items-center font-semibold">
-                              ${(newInvoice.total || 0).toFixed(2)}
+                              {(newInvoice.total || 0).toFixed(2)} TJS
                             </div>
                           </div>
                         </div>
                         <div className="text-sm text-muted-foreground space-y-1">
                           <div>
-                            {t("sales.subtotal")}: $
-                            {(newInvoice.subtotal || 0).toFixed(2)}
+                            {t("sales.subtotal")}: {(newInvoice.subtotal || 0).toFixed(2)} TJS
                           </div>
                           <div>
-                            {t("sales.tax")} ({newInvoice.taxRate}%): $
-                            {(newInvoice.taxAmount || 0).toFixed(2)}
+                            {t("sales.tax")} ({newInvoice.taxRate}%): {(newInvoice.taxAmount || 0).toFixed(2)} TJS
                           </div>
                           <div>
-                            {t("sales.discount")}: -$
-                            {(newInvoice.discountAmount || 0).toFixed(2)}
+                            {t("sales.discount")}: -{(newInvoice.discountAmount || 0).toFixed(2)} TJS
                           </div>
                         </div>
                       </div>
@@ -3307,6 +3310,7 @@ export default function Sales() {
                                 setScannerMode("camera");
                                 setManualProductSearch("");
                                 setScannerStatus("starting");
+                                setScannerAttempt((attempt) => attempt + 1);
                                 setIsScannerOpen(true);
                               }}
                             >
@@ -3586,22 +3590,19 @@ export default function Sales() {
                           <div className="space-y-2">
                             <Label>{t("sales.final_total")}</Label>
                             <div className="h-10 px-3 py-2 border rounded-md bg-primary/10 flex items-center font-semibold">
-                              ${(newInvoice.total || 0).toFixed(2)}
+                              {(newInvoice.total || 0).toFixed(2)} TJS
                             </div>
                           </div>
                         </div>
                         <div className="text-sm text-muted-foreground space-y-1">
                           <div>
-                            {t("sales.subtotal")}: $
-                            {(newInvoice.subtotal || 0).toFixed(2)}
+                            {t("sales.subtotal")}: {(newInvoice.subtotal || 0).toFixed(2)} TJS
                           </div>
                           <div>
-                            {t("sales.tax")} ({newInvoice.taxRate}%): $
-                            {(newInvoice.taxAmount || 0).toFixed(2)}
+                            {t("sales.tax")} ({newInvoice.taxRate}%): {(newInvoice.taxAmount || 0).toFixed(2)} TJS
                           </div>
                           <div>
-                            {t("sales.discount")}: -$
-                            {(newInvoice.discountAmount || 0).toFixed(2)}
+                            {t("sales.discount")}: -{(newInvoice.discountAmount || 0).toFixed(2)} TJS
                           </div>
                         </div>
                       </div>
@@ -3734,7 +3735,7 @@ export default function Sales() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${metrics.revenue.toLocaleString()}
+              {metrics.revenue.toLocaleString()} TJS
             </div>
             <p className="text-xs text-muted-foreground">
               {t("sales.from_paid_invoices")}
@@ -3751,7 +3752,7 @@ export default function Sales() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${metrics.pending.toLocaleString()}
+              {metrics.pending.toLocaleString()} TJS
             </div>
             <p className="text-xs text-muted-foreground">
               {t("sales.awaiting_payment")}
