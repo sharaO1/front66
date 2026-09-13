@@ -1724,15 +1724,15 @@ ${t("finance.generated_at", { defaultValue: "Generated" })}: ${new Date(data.gen
 
 ${t("finance.executive_summary", { defaultValue: "EXECUTIVE SUMMARY" })}
 =================
-${t("finance.total_income")}: $${data.summary.totalIncome.toLocaleString()}
-${t("finance.total_expenses")}: $${data.summary.totalExpenses.toLocaleString()}
-${t("finance.net_profit")}: $${data.summary.netProfit.toLocaleString()}
+${t("finance.total_income")}: ${data.summary.totalIncome.toLocaleString()} TJS
+${t("finance.total_expenses")}: ${data.summary.totalExpenses.toLocaleString()} TJS
+${t("finance.net_profit")}: ${data.summary.netProfit.toLocaleString()} TJS
 ${t("finance.profit_margin")}: ${data.summary.profitMargin.toFixed(1)}%
 ${t("finance.pending_transactions")}: ${data.summary.pendingTransactions}
 
 ${t("finance.cash_flow_trend")}
 ==================
-${data.cashFlowData.map((item: any) => `${item.month}: ${t("finance.income")} $${item.income.toLocaleString()}, ${t("finance.expenses")} $${item.expenses.toLocaleString()}, ${t("finance.profit")} $${item.profit.toLocaleString()}`).join("\n")}
+${data.cashFlowData.map((item: any) => `${item.month}: ${t("finance.income")} ${item.income.toLocaleString()} TJS, ${t("finance.expenses")} ${item.expenses.toLocaleString()} TJS, ${t("finance.profit")} ${item.profit.toLocaleString()} TJS`).join("\n")}
 
 ${t("finance.expense_breakdown")}
 =================
@@ -1740,7 +1740,7 @@ ${data.expenseBreakdown.map((cat: any) => `${cat.name}: ${cat.value.toLocaleStri
 
 ${t("finance.financial_goals")}
 ===============
-${data.goals.map((goal: any) => `${goal.title}: $${goal.currentAmount.toLocaleString()}/$${goal.targetAmount.toLocaleString()} (${((goal.currentAmount / goal.targetAmount) * 100).toFixed(1)}%) - ${goal.status}`).join("\n")}
+${data.goals.map((goal: any) => `${goal.title}: ${goal.currentAmount.toLocaleString()} TJS/${goal.targetAmount.toLocaleString()} TJS (${((goal.currentAmount / goal.targetAmount) * 100).toFixed(1)}%) - ${goal.status}`).join("\n")}
 
 ${t("finance.recent_transactions", { defaultValue: "RECENT TRANSACTIONS" })}
 ===================
@@ -1766,9 +1766,9 @@ ${data.transactions
     csv += `${t("finance.generated_at")},${new Date(data.generatedAt).toLocaleString(i18n.language || "en")}\n`;
     csv += "\n";
     csv += `${t("dashboard.metric")},${t("common.amount")}\n`;
-    csv += `${t("finance.total_income")},$${data.summary.totalIncome.toLocaleString()}\n`;
-    csv += `${t("finance.total_expenses")},$${data.summary.totalExpenses.toLocaleString()}\n`;
-    csv += `${t("finance.net_profit")},$${data.summary.netProfit.toLocaleString()}\n`;
+    csv += `${t("finance.total_income")},${data.summary.totalIncome.toLocaleString()} TJS\n`;
+    csv += `${t("finance.total_expenses")},${data.summary.totalExpenses.toLocaleString()} TJS\n`;
+    csv += `${t("finance.net_profit")},${data.summary.netProfit.toLocaleString()} TJS\n`;
     csv += `${t("finance.profit_margin")},${data.summary.profitMargin.toFixed(1)}%\n`;
     csv += `${t("finance.pending_transactions")},${data.summary.pendingTransactions}\n`;
     csv += "\n";
@@ -1777,7 +1777,7 @@ ${data.transactions
     csv += `${t("finance.cash_flow_trend")}\n`;
     csv += `${t("common.month", { defaultValue: "Month" })},${t("finance.income")},${t("finance.expenses")},${t("finance.profit")}\n`;
     data.cashFlowData.forEach((item: any) => {
-      csv += `${item.month},$${item.income.toLocaleString()},$${item.expenses.toLocaleString()},$${item.profit.toLocaleString()}\n`;
+      csv += `${item.month},${item.income.toLocaleString()} TJS,${item.expenses.toLocaleString()} TJS,${item.profit.toLocaleString()} TJS\n`;
     });
     csv += "\n";
 
@@ -1975,7 +1975,7 @@ ${data.transactions
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              ${totalIncome.toLocaleString()}
+              {totalIncome.toLocaleString()} TJS
             </div>
             <p className="text-xs text-muted-foreground">
               +12.5% {t("dashboard.from_last_month")}
@@ -1992,7 +1992,7 @@ ${data.transactions
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              ${totalExpenses.toLocaleString()}
+              {totalExpenses.toLocaleString()} TJS
             </div>
             <p className="text-xs text-muted-foreground">
               +5.2% {t("dashboard.from_last_month")}
@@ -2011,7 +2011,7 @@ ${data.transactions
             <div
               className={`text-2xl font-bold ${netProfit >= 0 ? "text-green-600" : "text-red-600"}`}
             >
-              ${netProfit.toLocaleString()}
+              {netProfit.toLocaleString()} TJS
             </div>
             <p className="text-xs text-muted-foreground">
               {profitMargin.toFixed(1)}% {t("finance.profit_margin")}
@@ -2184,8 +2184,8 @@ ${data.transactions
                         <TableCell
                           className={`font-medium ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}
                         >
-                          {transaction.type === "income" ? "+" : "-"}$
-                          {transaction.amount.toLocaleString()}
+                          {transaction.type === "income" ? "+" : "-"}
+                          {transaction.amount.toLocaleString()} TJS
                         </TableCell>
                         <TableCell>
                           {getStatusBadge(transaction.status)}
@@ -2301,8 +2301,8 @@ ${data.transactions
                       <div
                         className={`font-semibold ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}
                       >
-                        {transaction.type === "income" ? "+" : "-"}$
-                        {transaction.amount.toLocaleString()}
+                        {transaction.type === "income" ? "+" : "-"}
+                        {transaction.amount.toLocaleString()} TJS
                       </div>
                     </div>
                     <div className="mt-2 text-sm font-medium">
@@ -2554,7 +2554,7 @@ ${data.transactions
                       </TableCell>
                       <TableCell>
                         <span className="font-medium">
-                          ${(loan.amount ?? 0).toFixed(2)}
+                          {(loan.amount ?? 0).toFixed(2)} TJS
                         </span>
                       </TableCell>
                       <TableCell>
@@ -2686,7 +2686,7 @@ ${data.transactions
                           : t("finance.lend")}
                       </Badge>
                       <div className="font-semibold">
-                        ${(loan.amount ?? 0).toFixed(2)}
+                        {(loan.amount ?? 0).toFixed(2)} TJS
                       </div>
                     </div>
                     <div className="mt-2">
@@ -3079,7 +3079,7 @@ ${data.transactions
                   {t("common.date")}
                 </div>
                 <div className="text-lg font-bold">
-                  ${Number(newTransaction.amount || 0).toLocaleString()}
+                  {Number(newTransaction.amount || 0).toLocaleString()} TJS
                 </div>
               </div>
             </div>
@@ -3437,7 +3437,7 @@ ${data.transactions
                   {getStatusBadge(selectedTransaction.status)}
                 </div>
                 <div className="mt-2 text-2xl font-bold">
-                  ${Number(selectedTransaction.amount || 0).toLocaleString()}
+                  {Number(selectedTransaction.amount || 0).toLocaleString()} TJS
                 </div>
                 <div className="mt-1 text-sm text-muted-foreground">
                   {selectedTransaction.category} • {selectedTransaction.date}

@@ -2847,7 +2847,7 @@ export default function Sales() {
                       <div className="space-y-2">
                         <Label>{t("common.total")}</Label>
                         <div className="h-10 px-3 py-2 border rounded-md bg-muted flex items-center font-medium">
-                          ${calculateItemTotal(currentItem).toFixed(2)}
+                          {calculateItemTotal(currentItem).toFixed(2)} TJS
                         </div>
                       </div>
                     </div>
@@ -2859,8 +2859,8 @@ export default function Sales() {
                             {currentItem.productName}
                           </div>
                           <div>
-                            <strong>{t("sales.unit_price")}:</strong> $
-                            {currentItem.unitPrice?.toFixed(2)}
+                            <strong>{t("sales.unit_price")}:</strong>
+                            {currentItem.unitPrice?.toFixed(2)} TJS
                           </div>
                         </div>
                       </div>
@@ -2901,7 +2901,7 @@ export default function Sales() {
                               <div className="min-w-0">
                                 <p className="truncate font-medium">{item.productName}</p>
                                 <p className="mt-1 text-sm text-muted-foreground">
-                                  {t("sales.qty")}: {item.quantity} · {t("sales.unit_price")}: ${item.unitPrice.toFixed(2)}
+                                  {t("sales.qty")}: {item.quantity} · {t("sales.unit_price")}: {item.unitPrice.toFixed(2)} TJS
                                 </p>
                               </div>
                               <Button
@@ -2916,7 +2916,7 @@ export default function Sales() {
                             </div>
                             <div className="mt-3 flex items-center justify-between border-t pt-2 text-sm">
                               <span className="text-muted-foreground">{t("sales.discount")}: {item.discount}%</span>
-                              <span className="font-semibold">${item.total.toFixed(2)}</span>
+                              <span className="font-semibold">{item.total.toFixed(2)} TJS</span>
                             </div>
                           </div>
                         ))}
@@ -2939,10 +2939,10 @@ export default function Sales() {
                               <TableCell>{item.productName}</TableCell>
                               <TableCell>{item.quantity}</TableCell>
                               <TableCell>
-                                ${item.unitPrice.toFixed(2)}
+                                {item.unitPrice.toFixed(2)} TJS
                               </TableCell>
                               <TableCell>{item.discount}%</TableCell>
-                              <TableCell>${item.total.toFixed(2)}</TableCell>
+                              <TableCell>{item.total.toFixed(2)} TJS</TableCell>
                               <TableCell>
                                 <Button
                                   variant="outline"
@@ -3414,7 +3414,7 @@ export default function Sales() {
                       <div className="space-y-2">
                         <Label>{t("common.total")}</Label>
                         <div className="h-10 px-3 py-2 border rounded-md bg-muted flex items-center font-medium">
-                          ${calculateItemTotal(currentItem).toFixed(2)}
+                          {calculateItemTotal(currentItem).toFixed(2)} TJS
                         </div>
                       </div>
                     </div>
@@ -3426,8 +3426,8 @@ export default function Sales() {
                             {currentItem.productName}
                           </div>
                           <div>
-                            <strong>{t("sales.unit_price")}:</strong> $
-                            {currentItem.unitPrice?.toFixed(2)}
+                            <strong>{t("sales.unit_price")}:</strong>
+                            {currentItem.unitPrice?.toFixed(2)} TJS
                           </div>
                         </div>
                       </div>
@@ -3468,7 +3468,7 @@ export default function Sales() {
                               <div className="min-w-0">
                                 <p className="truncate font-medium">{item.productName}</p>
                                 <p className="mt-1 text-sm text-muted-foreground">
-                                  {t("sales.qty")}: {item.quantity} · {t("sales.unit_price")}: ${item.unitPrice.toFixed(2)}
+                                  {t("sales.qty")}: {item.quantity} · {t("sales.unit_price")}: {item.unitPrice.toFixed(2)} TJS
                                 </p>
                               </div>
                               <Button
@@ -3483,7 +3483,7 @@ export default function Sales() {
                             </div>
                             <div className="mt-3 flex items-center justify-between border-t pt-2 text-sm">
                               <span className="text-muted-foreground">{t("sales.discount")}: {item.discount}%</span>
-                              <span className="font-semibold">${item.total.toFixed(2)}</span>
+                              <span className="font-semibold">{item.total.toFixed(2)} TJS</span>
                             </div>
                           </div>
                         ))}
@@ -3506,10 +3506,10 @@ export default function Sales() {
                               <TableCell>{item.productName}</TableCell>
                               <TableCell>{item.quantity}</TableCell>
                               <TableCell>
-                                ${item.unitPrice.toFixed(2)}
+                                {item.unitPrice.toFixed(2)} TJS
                               </TableCell>
                               <TableCell>{item.discount}%</TableCell>
-                              <TableCell>${item.total.toFixed(2)}</TableCell>
+                              <TableCell>{item.total.toFixed(2)} TJS</TableCell>
                               <TableCell>
                                 <Button
                                   variant="outline"
@@ -4340,7 +4340,7 @@ export default function Sales() {
                           {t("sales.unit_price")}
                         </div>
                         <div className="text-right">
-                          ${item.unitPrice.toFixed(2)}
+                          {item.unitPrice.toFixed(2)} TJS
                         </div>
                         <div className="text-muted-foreground">
                           {t("sales.discount")}
@@ -4348,7 +4348,7 @@ export default function Sales() {
                         <div className="text-right">{item.discount}%</div>
                         <div className="font-medium">{t("common.total")}</div>
                         <div className="text-right font-semibold">
-                          ${item.total.toFixed(2)}
+                          {item.total.toFixed(2)} TJS
                         </div>
                       </div>
                     </div>
@@ -4371,9 +4371,9 @@ export default function Sales() {
                         <TableRow key={item.id}>
                           <TableCell>{item.productName}</TableCell>
                           <TableCell>{item.quantity}</TableCell>
-                          <TableCell>${item.unitPrice.toFixed(2)}</TableCell>
+                          <TableCell>{item.unitPrice.toFixed(2)} TJS</TableCell>
                           <TableCell>{item.discount}%</TableCell>
-                          <TableCell>${item.total.toFixed(2)}</TableCell>
+                          <TableCell>{item.total.toFixed(2)} TJS</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
