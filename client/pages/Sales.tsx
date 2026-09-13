@@ -315,11 +315,14 @@ export default function Sales() {
   const barcodeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const barcodeScanTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const quantityScannerTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const quantityScannerRef = useRef({
+  const quantityScannerRef = useRef<{
+    value: string;
+    lastAt: number;
+    mode: "unknown" | "manual" | "scanner";
+  }>({
     value: "",
     lastAt: 0,
-    baselineQuantity: 1,
-    active: false,
+    mode: "unknown",
   });
   const justScannedRef = useRef(false);
   const quantityInputRef = useRef<HTMLInputElement | null>(null);
@@ -631,48 +634,74 @@ export default function Sales() {
         event.key.length === 1 && /[a-zA-Z0-9-]/i.test(event.key);
 
       if (isQuantityInput && scannerCharacter) {
+        event.preventDefault();
         const now = Date.now();
-        const isRapidScannerInput =
-          quantityScanner.value.length > 0 && now - quantityScanner.lastAt < 80;
+        const gap = now - quantityScanner.lastAt;
 
-        if (isRapidScannerInput) {
-          event.preventDefault();
-          if (!quantityScanner.active) {
-            quantityScanner.active = true;
-            setCurrentItem((item) => ({
-              ...item,
-              quantity: quantityScanner.baselineQuantity,
-            }));
+        if (!quantityScanner.value || gap >= 250) {
+          quantityScanner.value = event.key;
+          quantityScanner.mode = "unknown";
+        } else {
+          if (quantityScanner.mode === "unknown") {
+            quantityScanner.mode = gap < 80 ? "scanner" : "manual";
           }
           quantityScanner.value += event.key;
-        } else {
-          quantityScanner.value = event.key;
-          quantityScanner.baselineQuantity = currentItem.quantity || 1;
-          quantityScanner.active = false;
         }
         quantityScanner.lastAt = now;
+
         if (quantityScannerTimeoutRef.current) {
           clearTimeout(quantityScannerTimeoutRef.current);
         }
         quantityScannerTimeoutRef.current = setTimeout(() => {
+          const pendingValue = quantityScanner.value;
+          const pendingMode = quantityScanner.mode;
           quantityScanner.value = "";
-          quantityScanner.active = false;
+          quantityScanner.mode = "unknown";
+          if (!pendingValue) return;
+
+          const looksLikeBarcode =
+            pendingMode === "scanner" ||
+            /[a-zA-Z-]/.test(pendingValue) ||
+            pendingValue.length >= 6;
+          if (looksLikeBarcode) {
+            handleBarcodeScanned(pendingValue, false);
+            return;
+          }
+
+          const quantity = Number.parseInt(pendingValue, 10);
+          if (Number.isInteger(quantity) && quantity > 0) {
+            setCurrentItem((item) => ({ ...item, quantity }));
+          }
         }, 250);
-        if (quantityScanner.active) return;
+        return;
       }
 
       // Handle Enter key
       if (event.key === "Enter") {
         event.preventDefault();
 
-        if (isQuantityInput && quantityScanner.active && quantityScanner.value) {
-          const scannedCode = quantityScanner.value;
+        if (isQuantityInput && quantityScanner.value) {
+          const pendingValue = quantityScanner.value;
+          const pendingMode = quantityScanner.mode;
           quantityScanner.value = "";
-          quantityScanner.active = false;
+          quantityScanner.mode = "unknown";
           if (quantityScannerTimeoutRef.current) {
             clearTimeout(quantityScannerTimeoutRef.current);
           }
-          handleBarcodeScanned(scannedCode, false);
+
+          const looksLikeBarcode =
+            pendingMode === "scanner" ||
+            /[a-zA-Z-]/.test(pendingValue) ||
+            pendingValue.length >= 6;
+          if (looksLikeBarcode) {
+            handleBarcodeScanned(pendingValue, false);
+            return;
+          }
+
+          const quantity = Number.parseInt(pendingValue, 10);
+          if (Number.isInteger(quantity) && quantity > 0) {
+            addItemToInvoice({ ...currentItem, quantity });
+          }
           return;
         }
 
@@ -1451,8 +1480,7 @@ export default function Sales() {
     quantityScannerRef.current = {
       value: "",
       lastAt: 0,
-      baselineQuantity: 1,
-      active: false,
+      mode: "unknown",
     };
     if (quantityScannerTimeoutRef.current) {
       clearTimeout(quantityScannerTimeoutRef.current);
