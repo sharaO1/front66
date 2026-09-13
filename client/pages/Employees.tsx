@@ -1419,8 +1419,8 @@ export default function Employees() {
     csv += `Total Employees,${data.summary.totalEmployees}\n`;
     csv += `Active Employees,${data.summary.activeEmployees}\n`;
     csv += `Sales Team,${data.summary.salesTeam}\n`;
-    csv += `Today's Sales,$${data.summary.todaysSales.toLocaleString()}\n`;
-    csv += `Today's Commissions,$${data.summary.todaysCommissions.toFixed(2)}\n`;
+    csv += `Today's Sales,${data.summary.todaysSales.toLocaleString()} TJS\n`;
+    csv += `Today's Commissions,${data.summary.todaysCommissions.toFixed(2)} TJS\n`;
     csv += `Average Salary,${data.summary.avgSalary.toLocaleString()} TJS\n`;
     csv += "\n";
 
