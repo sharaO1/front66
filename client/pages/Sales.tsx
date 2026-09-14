@@ -314,16 +314,6 @@ export default function Sales() {
   const desktopScannerInputRef = useRef<HTMLInputElement | null>(null);
   const barcodeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const barcodeScanTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const quantityScannerTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const quantityScannerRef = useRef<{
-    value: string;
-    lastAt: number;
-    mode: "unknown" | "manual" | "scanner";
-  }>({
-    value: "",
-    lastAt: 0,
-    mode: "unknown",
-  });
   const justScannedRef = useRef(false);
   const quantityInputRef = useRef<HTMLInputElement | null>(null);
   const productSelectTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -455,19 +445,18 @@ export default function Sales() {
 
       if (wasDialogClosed) {
         setIsCreateDialogOpen(true);
-        // Give dialog time to render and focus quantity input
-        setTimeout(() => {
-          quantityInputRef.current?.focus();
-          quantityInputRef.current?.select();
-        }, 100);
-      } else {
-        window.setTimeout(() => {
-          quantityInputRef.current?.focus();
-          quantityInputRef.current?.select();
-        }, 0);
       }
+
+      window.setTimeout(() => {
+        if (!isMobile) {
+          desktopScannerInputRef.current?.focus();
+          return;
+        }
+        quantityInputRef.current?.focus();
+        quantityInputRef.current?.select();
+      }, wasDialogClosed ? 100 : 0);
     },
-    [products, isCreateDialogOpen, toast],
+    [products, isCreateDialogOpen, isMobile, toast],
   );
 
   useEffect(() => {
@@ -568,7 +557,7 @@ export default function Sales() {
 
     const focusTimer = window.setTimeout(() => {
       if (!isMobile) {
-        productSelectTriggerRef.current?.focus();
+        desktopScannerInputRef.current?.focus();
         return;
       }
 
@@ -596,8 +585,7 @@ export default function Sales() {
   useEffect(() => {
     if (!isMobile && isCreateDialogOpen && currentItem.productId) {
       const focusTimer = window.setTimeout(() => {
-        quantityInputRef.current?.focus();
-        quantityInputRef.current?.select();
+        desktopScannerInputRef.current?.focus();
       }, 0);
       return () => window.clearTimeout(focusTimer);
     }
@@ -629,83 +617,9 @@ export default function Sales() {
           !isDesktopScannerInput) ||
         activeElement?.tagName === "TEXTAREA";
 
-      const quantityScanner = quantityScannerRef.current;
-      const scannerCharacter =
-        event.key.length === 1 && /[a-zA-Z0-9-]/i.test(event.key);
-
-      if (isQuantityInput && scannerCharacter) {
-        event.preventDefault();
-        const now = Date.now();
-        const gap = now - quantityScanner.lastAt;
-
-        if (!quantityScanner.value || gap >= 1000) {
-          quantityScanner.value = event.key;
-          quantityScanner.mode = "unknown";
-        } else {
-          const nextValue = quantityScanner.value + event.key;
-          if (quantityScanner.mode === "unknown") {
-            quantityScanner.mode =
-              gap < 100 || nextValue.length >= 4 ? "scanner" : "manual";
-          }
-          quantityScanner.value = nextValue;
-        }
-        quantityScanner.lastAt = now;
-
-        if (quantityScannerTimeoutRef.current) {
-          clearTimeout(quantityScannerTimeoutRef.current);
-        }
-        quantityScannerTimeoutRef.current = setTimeout(() => {
-          const pendingValue = quantityScanner.value;
-          const pendingMode = quantityScanner.mode;
-          quantityScanner.value = "";
-          quantityScanner.mode = "unknown";
-          if (!pendingValue) return;
-
-          const looksLikeBarcode =
-            pendingMode === "scanner" ||
-            /[a-zA-Z-]/.test(pendingValue) ||
-            pendingValue.length >= 6;
-          if (looksLikeBarcode) {
-            handleBarcodeScanned(pendingValue, false);
-            return;
-          }
-
-          const quantity = Number.parseInt(pendingValue, 10);
-          if (Number.isInteger(quantity) && quantity > 0) {
-            setCurrentItem((item) => ({ ...item, quantity }));
-          }
-        }, 1000);
-        return;
-      }
-
       // Handle Enter key
       if (event.key === "Enter") {
         event.preventDefault();
-
-        if (isQuantityInput && quantityScanner.value) {
-          const pendingValue = quantityScanner.value;
-          const pendingMode = quantityScanner.mode;
-          quantityScanner.value = "";
-          quantityScanner.mode = "unknown";
-          if (quantityScannerTimeoutRef.current) {
-            clearTimeout(quantityScannerTimeoutRef.current);
-          }
-
-          const looksLikeBarcode =
-            pendingMode === "scanner" ||
-            /[a-zA-Z-]/.test(pendingValue) ||
-            pendingValue.length >= 6;
-          if (looksLikeBarcode) {
-            handleBarcodeScanned(pendingValue, false);
-            return;
-          }
-
-          const quantity = Number.parseInt(pendingValue, 10);
-          if (Number.isInteger(quantity) && quantity > 0) {
-            addItemToInvoice({ ...currentItem, quantity });
-          }
-          return;
-        }
 
         // Process a completed desktop scanner buffer before treating Enter as an add action.
         if (!isOtherInput && barcodeBuffer.trim().length > 0) {
@@ -811,9 +725,6 @@ export default function Sales() {
       window.removeEventListener("keydown", handleKeyDown);
       if (barcodeTimeoutRef.current) {
         clearTimeout(barcodeTimeoutRef.current);
-      }
-      if (quantityScannerTimeoutRef.current) {
-        clearTimeout(quantityScannerTimeoutRef.current);
       }
     };
   }, [
@@ -1479,16 +1390,6 @@ export default function Sales() {
   const currentUser = useAuthStore((s) => s.user);
 
   const clearCurrentItem = () => {
-    quantityScannerRef.current = {
-      value: "",
-      lastAt: 0,
-      mode: "unknown",
-    };
-    if (quantityScannerTimeoutRef.current) {
-      clearTimeout(quantityScannerTimeoutRef.current);
-      quantityScannerTimeoutRef.current = null;
-    }
-
     // Blur any focused input to prevent scanned SKU from going to quantity field
     const activeElement = document.activeElement as HTMLElement;
     if (
@@ -2908,8 +2809,12 @@ export default function Sales() {
                               });
                               // Auto-focus quantity input after product selection
                               setTimeout(() => {
+                                if (!isMobile) {
+                                  desktopScannerInputRef.current?.focus();
+                                  return;
+                                }
                                 quantityInputRef.current?.focus();
-          quantityInputRef.current?.select();
+                                quantityInputRef.current?.select();
                               }, 0);
                             }
                           }}
@@ -2951,6 +2856,11 @@ export default function Sales() {
                           min="1"
                           value={currentItem.quantity ?? 1}
                           onFocus={(e) => e.currentTarget.select()}
+                          onBlur={() => {
+                            if (!isMobile && isCreateDialogOpen) {
+                              desktopScannerInputRef.current?.focus();
+                            }
+                          }}
                           onChange={(e) =>
                             setCurrentItem({
                               ...currentItem,
@@ -3483,8 +3393,12 @@ export default function Sales() {
                               });
                               // Auto-focus quantity input after product selection
                               setTimeout(() => {
+                                if (!isMobile) {
+                                  desktopScannerInputRef.current?.focus();
+                                  return;
+                                }
                                 quantityInputRef.current?.focus();
-          quantityInputRef.current?.select();
+                                quantityInputRef.current?.select();
                               }, 0);
                             }
                           }}
@@ -3526,6 +3440,11 @@ export default function Sales() {
                           min="1"
                           value={currentItem.quantity ?? 1}
                           onFocus={(e) => e.currentTarget.select()}
+                          onBlur={() => {
+                            if (!isMobile && isCreateDialogOpen) {
+                              desktopScannerInputRef.current?.focus();
+                            }
+                          }}
                           onChange={(e) =>
                             setCurrentItem({
                               ...currentItem,
