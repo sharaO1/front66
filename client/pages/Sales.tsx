@@ -377,6 +377,14 @@ export default function Sales() {
     unitPrice: 0,
     discount: 0,
   });
+  const currentItemRef = useRef<Partial<InvoiceItem>>({
+    productId: "",
+    productName: "",
+    quantity: 1,
+    unitPrice: 0,
+    discount: 0,
+  });
+  currentItemRef.current = currentItem;
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
 
@@ -417,8 +425,8 @@ export default function Sales() {
 
       const wasDialogClosed = !isCreateDialogOpen;
 
-      if (!addImmediately && isCreateDialogOpen && currentItem.productId) {
-        const previousItemAdded = addItemToInvoice(currentItem);
+      if (!addImmediately && isCreateDialogOpen && currentItemRef.current.productId) {
+        const previousItemAdded = addItemToInvoice(currentItemRef.current);
         if (!previousItemAdded) return;
       }
 
@@ -457,7 +465,7 @@ export default function Sales() {
         quantityInputRef.current?.select();
       }, wasDialogClosed ? 100 : 0);
     },
-    [products, isCreateDialogOpen, isMobile, toast],
+    [products, isCreateDialogOpen, isMobile, toast, t],
   );
 
   useEffect(() => {
