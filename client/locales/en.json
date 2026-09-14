@@ -44,7 +44,15 @@
     "month": "Month",
     "required_fields_error": "Please fill in all required fields",
     "updated": "Updated",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "product_not_found": "Product not found",
+    "product_not_found_with_code": "No product found with code: {{code}}",
+    "invalid_quantity": "Invalid quantity",
+    "quantity_greater_than_zero": "Enter a quantity greater than 0 before scanning.",
+    "not_enough_stock": "Not enough stock",
+    "units_available": "Only {{count}} units are available.",
+    "product_required": "Please select a product and enter quantity",
+    "selected_product_not_found": "Selected product not found"
   },
   "auth": {
     "login": "Login",
@@ -564,7 +572,19 @@
       "generated_on": "Generated on",
       "sales_employee": "Sales Employee"
     },
-    "sales_employee": "Sales Employee"
+    "sales_employee": "Sales Employee",
+    "search_products_scanner": "Search products…",
+    "back_to_camera": "Back to camera",
+    "search_manually": "Search manually",
+    "try_again": "Try again",
+    "starting_camera": "Starting camera…",
+    "scanning": "Scanning…",
+    "camera_unsupported": "Barcode scanning is not supported",
+    "camera_denied": "Camera access was denied",
+    "camera_insecure": "Camera scanning requires HTTPS",
+    "camera_error": "The camera could not be started",
+    "period": "Period",
+    "invalid_date_range": "Invalid date range"
   },
   "finance": {
     "title": "Financial Management",

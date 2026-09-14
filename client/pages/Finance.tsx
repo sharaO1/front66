@@ -1119,7 +1119,7 @@ export default function Finance() {
     setIsAddTransactionOpen(false);
 
     toast({
-      title: "Transaction added",
+      title: t("common.success"),
       description: `${transaction.type === "income" ? "Income" : "Expense"} of $${transaction.amount} has been recorded.`,
     });
   };
@@ -1172,13 +1172,13 @@ export default function Finance() {
       setSelectedTransaction(null);
 
       toast({
-        title: "Transaction updated",
+        title: t("common.updated"),
         description: "Transaction has been updated successfully.",
       });
     } catch (e) {
       const message = (e as any)?.message || "Failed to update transaction";
       toast({
-        title: "Update failed",
+        title: t("common.error"),
         description: String(message),
         variant: "destructive",
       });
@@ -1190,7 +1190,7 @@ export default function Finance() {
     setTransactions(transactions.filter((t) => t.id !== transactionId));
 
     toast({
-      title: "Transaction deleted",
+      title: t("common.success"),
       description: `Transaction "${transaction?.description}" has been removed.`,
     });
   };
@@ -1234,7 +1234,7 @@ export default function Finance() {
     setIsAddGoalOpen(false);
 
     toast({
-      title: "Goal created",
+      title: t("common.success"),
       description: `Financial goal "${goal.title}" has been created.`,
     });
   };
@@ -1269,7 +1269,7 @@ export default function Finance() {
     setSelectedGoal(null);
 
     toast({
-      title: "Goal updated",
+      title: t("common.updated"),
       description: `Goal "${updatedGoal.title}" has been updated.`,
     });
   };
@@ -1279,7 +1279,7 @@ export default function Finance() {
     setGoals(goals.filter((g) => g.id !== goalId));
 
     toast({
-      title: "Goal deleted",
+      title: t("common.success"),
       description: `Goal "${goal?.title}" has been removed.`,
     });
   };
@@ -1462,7 +1462,7 @@ export default function Finance() {
   const addLoan = () => {
     if (!newLoan.partyName || !newLoan.dueDate) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: "Please fill in required fields",
         variant: "destructive",
       });
@@ -1504,14 +1504,14 @@ export default function Finance() {
     setLoans(
       loans.map((l) => (l.id === loanId ? { ...l, status: "returned" } : l)),
     );
-    toast({ title: "Marked as returned" });
+    toast({ title: t("common.updated") });
   };
 
   const deleteLoan = (loanId: string) => {
     const loan = loans.find((l) => l.id === loanId);
     setLoans(loans.filter((l) => l.id !== loanId));
     toast({
-      title: "Removed",
+      title: t("common.success"),
       description: `Record removed for ${loan?.partyName}.`,
     });
   };
@@ -1895,7 +1895,7 @@ ${data.transactions
                     onValueChange={(v) => setExportPeriod(v as any)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Period" />
+                      <SelectValue placeholder={t("sales.period")} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="daily">

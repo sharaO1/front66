@@ -378,6 +378,7 @@ export default function Sales() {
     discount: 0,
   });
   const { toast } = useToast();
+  const { t, i18n } = useTranslation();
 
   const handleBarcodeScanned = useCallback(
     (sku: string, addImmediately = false, quantity = 1) => {
@@ -389,8 +390,8 @@ export default function Sales() {
       );
       if (!product) {
         toast({
-          title: "Product Not Found",
-          description: `No product found with SKU: ${sku}`,
+          title: t("common.product_not_found"),
+          description: t("common.product_not_found_with_code", { code: sku }),
           variant: "destructive",
         });
         return;
@@ -398,8 +399,8 @@ export default function Sales() {
 
       if (addImmediately && (!Number.isInteger(quantity) || quantity <= 0)) {
         toast({
-          title: "Invalid quantity",
-          description: "Enter a quantity greater than 0 before scanning.",
+          title: t("common.invalid_quantity"),
+          description: t("common.quantity_greater_than_zero"),
           variant: "destructive",
         });
         return;
@@ -407,8 +408,8 @@ export default function Sales() {
 
       if (addImmediately && product.stock != null && quantity > product.stock) {
         toast({
-          title: "Not enough stock",
-          description: `Only ${product.stock} units are available.`,
+          title: t("common.not_enough_stock"),
+          description: t("common.units_available", { count: product.stock }),
           variant: "destructive",
         });
         return;
@@ -1385,7 +1386,6 @@ export default function Sales() {
     );
   };
 
-  const { t, i18n } = useTranslation();
   const accessToken = useAuthStore((s) => s.accessToken);
   const currentUser = useAuthStore((s) => s.user);
 
@@ -1414,8 +1414,8 @@ export default function Sales() {
     const selectedProduct = products.find((p) => p.id === productId);
     if (!selectedProduct) {
       toast({
-        title: "Error",
-        description: "Product not found",
+        title: t("common.error"),
+        description: t("common.product_not_found"),
         variant: "destructive",
       });
       return;
@@ -1641,8 +1641,8 @@ export default function Sales() {
 
     if (!itemToAdd.productId || quantity <= 0) {
       toast({
-        title: "Error",
-        description: "Please select a product and enter quantity",
+        title: t("common.error"),
+        description: t("common.product_required"),
         variant: "destructive",
       });
       return false;
@@ -1651,8 +1651,8 @@ export default function Sales() {
     const product = products.find((p) => p.id === itemToAdd.productId);
     if (!product) {
       toast({
-        title: "Error",
-        description: "Selected product not found",
+        title: t("common.error"),
+        description: t("common.selected_product_not_found"),
         variant: "destructive",
       });
       return false;
@@ -1671,8 +1671,8 @@ export default function Sales() {
       existingQuantity + quantity > product.stock
     ) {
       toast({
-        title: "Not enough stock",
-        description: `Only ${product.stock} units are available.`,
+        title: t("common.not_enough_stock"),
+          description: t("common.units_available", { count: product.stock }),
         variant: "destructive",
       });
       return false;
@@ -2374,7 +2374,7 @@ export default function Sales() {
             <div className="space-y-3">
               <Input
                 autoFocus
-                placeholder="Search products…"
+                placeholder={t("sales.search_products_scanner")}
                 value={manualProductSearch}
                 onChange={(event) => setManualProductSearch(event.target.value)}
               />
@@ -2428,7 +2428,7 @@ export default function Sales() {
                 }}
               >
                 <Camera className="mr-2 h-4 w-4" />
-                Back to camera
+                {t("sales.back_to_camera")}
               </Button>
             </div>
           ) : scannerStatus === "starting" || scannerStatus === "scanning" ? (
@@ -2444,7 +2444,7 @@ export default function Sales() {
                 <div className="pointer-events-none absolute inset-x-8 top-1/2 h-0.5 -translate-y-1/2 bg-primary shadow-[0_0_12px_hsl(var(--primary))]" />
               </div>
               <p className="text-center text-sm text-muted-foreground">
-                {scannerStatus === "starting" ? "Starting camera…" : "Scanning…"}
+                {scannerStatus === "starting" ? t("sales.starting_camera") : t("sales.scanning")}
               </p>
               <div className="flex items-end gap-2">
                 <div className="flex-1 space-y-1">
@@ -2473,7 +2473,7 @@ export default function Sales() {
                     setManualProductSearch("");
                   }}
                 >
-                  Search manually
+                  {t("sales.search_manually")}
                 </Button>
               </div>
             </div>
@@ -2481,12 +2481,12 @@ export default function Sales() {
             <div className="space-y-4 rounded-lg border p-4 text-sm">
               <p className="text-muted-foreground">
                 {scannerStatus === "unsupported"
-                  ? "Barcode scanning is not supported by this browser. Try a current Chrome or Safari browser."
+                  ? t("sales.camera_unsupported")
                   : scannerStatus === "denied"
-                    ? "Camera access was denied. Allow camera access in your browser settings and try again."
+                    ? t("sales.camera_denied")
                     : scannerStatus === "insecure"
-                      ? "Camera scanning requires HTTPS on this device. Open the app using a secure HTTPS address and try again."
-                      : "The camera could not be started. Check that another app is not using it and try again."}
+                      ? t("sales.camera_insecure")
+                      : t("sales.camera_error")}
               </p>
               <div className="flex gap-2">
                 <Button
@@ -2497,7 +2497,7 @@ export default function Sales() {
                     setScannerAttempt((attempt) => attempt + 1);
                   }}
                 >
-                  Try again
+                  {t("sales.try_again")}
                 </Button>
                 <Button
                   type="button"
@@ -2508,7 +2508,7 @@ export default function Sales() {
                     setManualProductSearch("");
                   }}
                 >
-                  Search manually
+                  {t("sales.search_manually")}
                 </Button>
               </div>
             </div>
@@ -3747,7 +3747,7 @@ export default function Sales() {
                     onValueChange={(v) => setPdfPeriod(v as any)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Period" />
+                      <SelectValue placeholder={t("sales.period")} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="today">{t("sales.today")}</SelectItem>
@@ -3948,7 +3948,7 @@ export default function Sales() {
                         toast({
                           title: t("common.error", { defaultValue: "Error" }),
                           description: t("warehouse.invalid_date_range", {
-                            defaultValue: "Invalid date range",
+                            defaultValue: t("sales.invalid_date_range"),
                           }),
                           variant: "destructive",
                         });

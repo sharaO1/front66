@@ -731,7 +731,7 @@ export default function Employees() {
   const addAttendanceEntry = async () => {
     if (!newAttendance.employeeId) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: "Please fill in all required fields",
         variant: "destructive",
       });
@@ -768,7 +768,7 @@ export default function Employees() {
       (emp) => emp.id === newAttendance.employeeId,
     );
     toast({
-      title: "Attendance recorded",
+      title: t("common.success"),
       description: `Attendance recorded for ${employee?.firstName} ${employee?.lastName}.`,
     });
   };
@@ -814,7 +814,7 @@ export default function Employees() {
   const addEmployee = async () => {
     if (!selectedAccountId) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: "Please select an email (user account)",
         variant: "destructive",
       });
@@ -898,7 +898,7 @@ export default function Employees() {
       setIsAddEmployeeOpen(false);
 
       toast({
-        title: "Employee added",
+        title: t("common.success"),
         description:
           `${employeeToAdd.firstName || ""} ${employeeToAdd.lastName || ""}`.trim()
             .length
@@ -907,7 +907,7 @@ export default function Employees() {
       });
     } catch (e: any) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: e?.message || "Failed to add employee",
         variant: "destructive",
       });
@@ -917,7 +917,7 @@ export default function Employees() {
   const updateEmployee = async () => {
     if (!selectedEmployee) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: "No employee selected",
         variant: "destructive",
       });
@@ -981,12 +981,12 @@ export default function Employees() {
       setSelectedEmployee(null);
 
       toast({
-        title: "Employee updated",
+        title: t("common.updated"),
         description: `${updatedEmployee.firstName} ${updatedEmployee.lastName} has been updated.`,
       });
     } catch (e: any) {
       toast({
-        title: "Update failed",
+        title: t("common.error"),
         description: e?.message || "Failed to update employee",
         variant: "destructive",
       });
@@ -999,7 +999,7 @@ export default function Employees() {
       employees.find((emp) => emp.employeeId === idOrEmployeeId);
     if (!employee) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: "Employee not found",
         variant: "destructive",
       });
@@ -1031,12 +1031,12 @@ export default function Employees() {
         ),
       );
       toast({
-        title: "Employee removed",
+        title: t("common.success"),
         description: `${employee.firstName} ${employee.lastName} has been removed from the team.`,
       });
     } catch (e: any) {
       toast({
-        title: "Delete failed",
+        title: t("common.error"),
         description: e?.message || "Failed to delete employee",
         variant: "destructive",
       });
@@ -1064,7 +1064,7 @@ export default function Employees() {
   const addDailySale = () => {
     if (!newSale.employeeId || !newSale.amount || !newSale.clientName) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: "Please fill in all required fields",
         variant: "destructive",
       });
@@ -1091,7 +1091,7 @@ export default function Employees() {
     setIsAddSaleOpen(false);
 
     toast({
-      title: "Sale recorded",
+      title: t("common.success"),
       description: `Sale of ${sale.amount} TJS recorded for ${employee?.firstName} ${employee?.lastName}.`,
     });
   };
@@ -1104,7 +1104,7 @@ export default function Employees() {
     );
 
     toast({
-      title: "Status updated",
+      title: t("common.updated"),
       description: `Employee status changed to ${newStatus}.`,
     });
   };
@@ -1243,7 +1243,7 @@ export default function Employees() {
 
     downloadFile(csv, "employee-directory.csv", "text/csv");
     toast({
-      title: "Directory Exported",
+      title: t("common.export"),
       description: "Employee directory has been exported as CSV.",
     });
   };
@@ -1260,7 +1260,7 @@ export default function Employees() {
 
     downloadFile(csv, "sales-performance.csv", "text/csv");
     toast({
-      title: "Sales Performance Exported",
+      title: t("common.export"),
       description: "Sales performance data has been exported as CSV.",
     });
   };
@@ -1277,7 +1277,7 @@ export default function Employees() {
 
     downloadFile(csv, "attendance-data.csv", "text/csv");
     toast({
-      title: "Attendance Exported",
+      title: t("common.export"),
       description: "Attendance data has been exported as CSV.",
     });
   };
@@ -1852,7 +1852,7 @@ export default function Employees() {
                   <Label>{t("employees.skills")}</Label>
                   <div className="flex gap-2">
                     <Input
-                      placeholder="Add a skill"
+                      placeholder={t("employees.skills")}
                       value={currentSkill}
                       onChange={(e) => setCurrentSkill(e.target.value)}
                       onKeyPress={(e) => {
@@ -1894,7 +1894,7 @@ export default function Employees() {
                   <Label htmlFor="notes">{t("common.notes")}</Label>
                   <Textarea
                     id="notes"
-                    placeholder="Additional notes about the employee"
+                    placeholder={t("employees.additional_notes_employee")}
                     value={newEmployee.notes}
                     onChange={(e) =>
                       setNewEmployee({ ...newEmployee, notes: e.target.value })
@@ -3215,7 +3215,7 @@ export default function Employees() {
               <Label>{t("employees.skills")}</Label>
               <div className="flex gap-2">
                 <Input
-                  placeholder="Add a skill"
+                  placeholder={t("employees.skills")}
                   value={currentSkill}
                   onChange={(e) => setCurrentSkill(e.target.value)}
                   onKeyPress={(e) => {
