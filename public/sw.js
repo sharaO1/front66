@@ -36,21 +36,29 @@ self.addEventListener("fetch", (event) => {
   if (!isAppAsset && !isNavigation) return;
 
   event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) return cachedResponse;
-
-      return fetch(request)
-        .then((response) => {
-          if (!response || response.status !== 200 || response.type === "opaque") {
+    isNavigation
+      ? fetch(request)
+          .then((response) => {
+            if (response && response.status === 200) {
+              const responseForCache = response.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(request, responseForCache));
+            }
             return response;
-          }
+          })
+          .catch(() => caches.match("/"))
+      : caches.match(request).then((cachedResponse) => {
+          if (cachedResponse) return cachedResponse;
 
-          const responseForCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseForCache));
-          return response;
-        })
-        .catch(() => (isNavigation ? caches.match("/") : Response.error()));
-    }),
+          return fetch(request).then((response) => {
+            if (!response || response.status !== 200 || response.type === "opaque") {
+              return response;
+            }
+
+            const responseForCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, responseForCache));
+            return response;
+          });
+        }),
   );
 });
 
