@@ -19,7 +19,7 @@ export function formatCurrency(
   if (!Number.isFinite(amount)) amount = 0;
 
   const {
-    currency = "USD",
+    currency = "TJS",
     minimumFractionDigits = 0,
     maximumFractionDigits = 2,
     locale,
@@ -35,5 +35,5 @@ export function formatCurrency(
     maximumFractionDigits,
   });
 
-  return `${formatted}c`;
+  return `${formatted} ${currency}`;
 }

@@ -731,7 +731,7 @@ export default function Employees() {
   const addAttendanceEntry = async () => {
     if (!newAttendance.employeeId) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: "Please fill in all required fields",
         variant: "destructive",
       });
@@ -768,7 +768,7 @@ export default function Employees() {
       (emp) => emp.id === newAttendance.employeeId,
     );
     toast({
-      title: "Attendance recorded",
+      title: t("common.success"),
       description: `Attendance recorded for ${employee?.firstName} ${employee?.lastName}.`,
     });
   };
@@ -814,7 +814,7 @@ export default function Employees() {
   const addEmployee = async () => {
     if (!selectedAccountId) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: "Please select an email (user account)",
         variant: "destructive",
       });
@@ -898,7 +898,7 @@ export default function Employees() {
       setIsAddEmployeeOpen(false);
 
       toast({
-        title: "Employee added",
+        title: t("common.success"),
         description:
           `${employeeToAdd.firstName || ""} ${employeeToAdd.lastName || ""}`.trim()
             .length
@@ -907,7 +907,7 @@ export default function Employees() {
       });
     } catch (e: any) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: e?.message || "Failed to add employee",
         variant: "destructive",
       });
@@ -917,7 +917,7 @@ export default function Employees() {
   const updateEmployee = async () => {
     if (!selectedEmployee) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: "No employee selected",
         variant: "destructive",
       });
@@ -981,12 +981,12 @@ export default function Employees() {
       setSelectedEmployee(null);
 
       toast({
-        title: "Employee updated",
+        title: t("common.updated"),
         description: `${updatedEmployee.firstName} ${updatedEmployee.lastName} has been updated.`,
       });
     } catch (e: any) {
       toast({
-        title: "Update failed",
+        title: t("common.error"),
         description: e?.message || "Failed to update employee",
         variant: "destructive",
       });
@@ -999,7 +999,7 @@ export default function Employees() {
       employees.find((emp) => emp.employeeId === idOrEmployeeId);
     if (!employee) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: "Employee not found",
         variant: "destructive",
       });
@@ -1031,12 +1031,12 @@ export default function Employees() {
         ),
       );
       toast({
-        title: "Employee removed",
+        title: t("common.success"),
         description: `${employee.firstName} ${employee.lastName} has been removed from the team.`,
       });
     } catch (e: any) {
       toast({
-        title: "Delete failed",
+        title: t("common.error"),
         description: e?.message || "Failed to delete employee",
         variant: "destructive",
       });
@@ -1064,7 +1064,7 @@ export default function Employees() {
   const addDailySale = () => {
     if (!newSale.employeeId || !newSale.amount || !newSale.clientName) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: "Please fill in all required fields",
         variant: "destructive",
       });
@@ -1091,8 +1091,8 @@ export default function Employees() {
     setIsAddSaleOpen(false);
 
     toast({
-      title: "Sale recorded",
-      description: `Sale of $${sale.amount} recorded for ${employee?.firstName} ${employee?.lastName}.`,
+      title: t("common.success"),
+      description: `Sale of ${sale.amount} TJS recorded for ${employee?.firstName} ${employee?.lastName}.`,
     });
   };
 
@@ -1104,7 +1104,7 @@ export default function Employees() {
     );
 
     toast({
-      title: "Status updated",
+      title: t("common.updated"),
       description: `Employee status changed to ${newStatus}.`,
     });
   };
@@ -1243,7 +1243,7 @@ export default function Employees() {
 
     downloadFile(csv, "employee-directory.csv", "text/csv");
     toast({
-      title: "Directory Exported",
+      title: t("common.export"),
       description: "Employee directory has been exported as CSV.",
     });
   };
@@ -1260,7 +1260,7 @@ export default function Employees() {
 
     downloadFile(csv, "sales-performance.csv", "text/csv");
     toast({
-      title: "Sales Performance Exported",
+      title: t("common.export"),
       description: "Sales performance data has been exported as CSV.",
     });
   };
@@ -1277,7 +1277,7 @@ export default function Employees() {
 
     downloadFile(csv, "attendance-data.csv", "text/csv");
     toast({
-      title: "Attendance Exported",
+      title: t("common.export"),
       description: "Attendance data has been exported as CSV.",
     });
   };
@@ -1328,8 +1328,8 @@ export default function Employees() {
         <tr>
           <td>${s.date}</td>
           <td>${emp ? emp.firstName + " " + emp.lastName : ""}</td>
-          <td class="right">$${nf(s.amount)}</td>
-          <td class="right">$${(Number(s.commission) || 0).toFixed(2)}</td>
+          <td class="right">${nf(s.amount)} TJS</td>
+          <td class="right">${(Number(s.commission) || 0).toFixed(2)} TJS</td>
         </tr>`;
       })
       .join("");
@@ -1366,9 +1366,9 @@ export default function Employees() {
                 <tr><td>${t("employees.total_employees")}</td><td class="right">${nf(data.summary.totalEmployees)}</td></tr>
                 <tr><td>${t("status.active")}</td><td class="right">${nf(data.summary.activeEmployees)}</td></tr>
                 <tr><td>${t("employees.sales_team")}</td><td class="right">${nf(data.summary.salesTeam)}</td></tr>
-                <tr><td>${t("employees.todays_sales")}</td><td class="right">$${nf(data.summary.todaysSales)}</td></tr>
-                <tr><td>${t("employees.commissions")}</td><td class="right">$${(Number(data.summary.todaysCommissions) || 0).toFixed(2)}</td></tr>
-                <tr><td>${t("employees.average_salary")}</td><td class="right">$${nf(data.summary.avgSalary)}</td></tr>
+                <tr><td>${t("employees.todays_sales")}</td><td class="right">${nf(data.summary.todaysSales)} TJS</td></tr>
+                <tr><td>${t("employees.commissions")}</td><td class="right">${(Number(data.summary.todaysCommissions) || 0).toFixed(2)} TJS</td></tr>
+                <tr><td>${t("employees.average_salary")}</td><td class="right">${nf(data.summary.avgSalary)} TJS</td></tr>
               </tbody></table>
             </div>
             <div>
@@ -1419,9 +1419,9 @@ export default function Employees() {
     csv += `Total Employees,${data.summary.totalEmployees}\n`;
     csv += `Active Employees,${data.summary.activeEmployees}\n`;
     csv += `Sales Team,${data.summary.salesTeam}\n`;
-    csv += `Today's Sales,$${data.summary.todaysSales.toLocaleString()}\n`;
-    csv += `Today's Commissions,$${data.summary.todaysCommissions.toFixed(2)}\n`;
-    csv += `Average Salary,${data.summary.avgSalary.toLocaleString()}c\n`;
+    csv += `Today's Sales,${data.summary.todaysSales.toLocaleString()} TJS\n`;
+    csv += `Today's Commissions,${data.summary.todaysCommissions.toFixed(2)} TJS\n`;
+    csv += `Average Salary,${data.summary.avgSalary.toLocaleString()} TJS\n`;
     csv += "\n";
 
     // Department Data
@@ -1852,7 +1852,7 @@ export default function Employees() {
                   <Label>{t("employees.skills")}</Label>
                   <div className="flex gap-2">
                     <Input
-                      placeholder="Add a skill"
+                      placeholder={t("employees.skills")}
                       value={currentSkill}
                       onChange={(e) => setCurrentSkill(e.target.value)}
                       onKeyPress={(e) => {
@@ -1894,7 +1894,7 @@ export default function Employees() {
                   <Label htmlFor="notes">{t("common.notes")}</Label>
                   <Textarea
                     id="notes"
-                    placeholder="Additional notes about the employee"
+                    placeholder={t("employees.additional_notes_employee")}
                     value={newEmployee.notes}
                     onChange={(e) =>
                       setNewEmployee({ ...newEmployee, notes: e.target.value })
@@ -1977,7 +1977,7 @@ export default function Employees() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              $
+              TJS
               {dailySales
                 .filter((s) => s.date === selectedDate)
                 .reduce((sum, s) => sum + s.amount, 0)
@@ -1999,7 +1999,7 @@ export default function Employees() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              $
+              TJS
               {dailySales
                 .filter((s) => s.date === selectedDate)
                 .reduce((sum, s) => sum + s.commission, 0)
@@ -2020,7 +2020,7 @@ export default function Employees() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              $
+              TJS
               {Math.round(
                 employees.reduce((sum, e) => sum + e.salary, 0) /
                   employees.length,
@@ -2179,14 +2179,13 @@ export default function Employees() {
                       </TableCell>
                       <TableCell>{getRoleBadge(employee.role)}</TableCell>
                       <TableCell className="font-medium">
-                        <div>{employee.salary.toLocaleString()}c</div>
+                        <div>{employee.salary.toLocaleString()} TJS</div>
                         <div className="text-xs text-muted-foreground">
                           {employee.commission}% {t("employees.commission")}
                         </div>
                         {employee.salesTarget && (
                           <div className="text-xs text-muted-foreground">
-                            {t("employees.target_label")}: $
-                            {employee.salesTarget.toLocaleString()}
+                            {t("employees.target_label")}: {employee.salesTarget.toLocaleString()} TJS
                           </div>
                         )}
                       </TableCell>
@@ -2348,7 +2347,7 @@ export default function Employees() {
                           {t("employees.sales_label")}
                         </div>
                         <div className="font-semibold text-green-600">
-                          ${dailySalesAmount.toLocaleString()}
+                          {dailySalesAmount.toLocaleString()} TJS
                         </div>
                       </div>
                       <div>
@@ -2356,7 +2355,7 @@ export default function Employees() {
                           {t("employees.commission")}
                         </div>
                         <div className="font-semibold text-blue-600">
-                          ${dailyCommission.toFixed(2)}
+                          {dailyCommission.toFixed(2)} TJS
                         </div>
                       </div>
                     </div>
@@ -2380,8 +2379,7 @@ export default function Employees() {
                           />
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          {t("employees.target_label")}: $
-                          {employee.salesTarget.toLocaleString()}
+                          {t("employees.target_label")}: {employee.salesTarget.toLocaleString()} TJS
                         </div>
                       </div>
                     )}
@@ -2888,7 +2886,7 @@ export default function Employees() {
                         </TableCell>
                         <TableCell>{dept.employees}</TableCell>
                         <TableCell>
-                          {Math.round(avgSalary).toLocaleString()}c
+                          {Math.round(avgSalary).toLocaleString()} TJS
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
@@ -2906,7 +2904,7 @@ export default function Employees() {
                         <TableCell>
                           {dept.department === "Sales" ? (
                             <div className="text-green-600 font-medium">
-                              ${dept.avgSales.toLocaleString()}/month
+                              {dept.avgSales.toLocaleString()} TJS/month
                             </div>
                           ) : (
                             <span className="text-muted-foreground">N/A</span>
@@ -2953,13 +2951,13 @@ export default function Employees() {
                             })}
                           </div>
                           <div className="font-medium">
-                            {avgSalary.toLocaleString()}c
+                            {avgSalary.toLocaleString()} TJS
                           </div>
                         </div>
                       </div>
                       <div className="mt-2 text-xs text-muted-foreground">
                         {dept.department === "Sales" ? (
-                          <span>${dept.avgSales.toLocaleString()}/month</span>
+                          <span>{dept.avgSales.toLocaleString()} TJS/month</span>
                         ) : (
                           <span>N/A</span>
                         )}
@@ -3021,7 +3019,7 @@ export default function Employees() {
                 },
                 {
                   label: t("employees.salary"),
-                  value: `${selectedEmployee.salary.toLocaleString()}c`,
+                  value: `${selectedEmployee.salary.toLocaleString()} TJS`,
                 },
                 selectedEmployee.commission > 0
                   ? {
@@ -3032,7 +3030,7 @@ export default function Employees() {
                 selectedEmployee.salesTarget
                   ? {
                       label: t("employees.monthly_sales_target"),
-                      value: `${selectedEmployee.salesTarget.toLocaleString()}c`,
+                      value: `${selectedEmployee.salesTarget.toLocaleString()} TJS`,
                     }
                   : { label: "", value: "" },
               ].filter((k) => k.label)}
@@ -3217,7 +3215,7 @@ export default function Employees() {
               <Label>{t("employees.skills")}</Label>
               <div className="flex gap-2">
                 <Input
-                  placeholder="Add a skill"
+                  placeholder={t("employees.skills")}
                   value={currentSkill}
                   onChange={(e) => setCurrentSkill(e.target.value)}
                   onKeyPress={(e) => {
@@ -3322,7 +3320,7 @@ export default function Employees() {
                       Today's Sales
                     </div>
                     <div className="text-2xl font-bold text-green-600">
-                      $
+                      TJS
                       {getTotalSalesForEmployee(
                         selectedEmployeeSales.id,
                         selectedDate,
@@ -3336,7 +3334,7 @@ export default function Employees() {
                       Commission Earned
                     </div>
                     <div className="text-2xl font-bold text-blue-600">
-                      $
+                      TJS
                       {getTotalCommissionForEmployee(
                         selectedEmployeeSales.id,
                         selectedDate,
@@ -3383,10 +3381,10 @@ export default function Employees() {
                           {sale.clientName}
                         </TableCell>
                         <TableCell className="font-medium text-green-600">
-                          ${sale.amount.toLocaleString()}
+                          {sale.amount.toLocaleString()} TJS
                         </TableCell>
                         <TableCell className="font-medium text-blue-600">
-                          {sale.commission.toFixed(2)}c
+                          {sale.commission.toFixed(2)} TJS
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {sale.notes || "-"}

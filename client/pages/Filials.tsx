@@ -38,6 +38,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuthStore } from "@/stores/authStore";
 import { useRBACStore } from "@/stores/rbacStore";
 import { API_BASE, apiFetch } from "@/lib/api";
+import { formatCurrency } from "@/lib/utils";
 import {
   Plus,
   Search,
@@ -177,7 +178,7 @@ const mockFilials: Filial[] = [
 
 export default function Filials() {
   const [filials, setFilials] = useState<Filial[]>(mockFilials);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const accessToken = useAuthStore((s) => s.accessToken);
@@ -614,9 +615,19 @@ export default function Filials() {
     if (v === null || v === undefined || v === "") return "-";
     const n = Number(v);
     if (isNaN(n)) return String(v);
-    return n.toLocaleString(undefined, {
+    return formatCurrency(n, {
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
+    });
+  };
+
+  const formatDate = (value: string) => {
+    const date = new Date(value);
+    if (!value || Number.isNaN(date.getTime())) return "-";
+    return date.toLocaleDateString(i18n.language || "en", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -1338,10 +1349,10 @@ export default function Filials() {
 
               <div className="grid grid-cols-2 gap-3 text-xs text-muted-foreground border-t pt-3 mt-3">
                 <div>
-                  📅 {t("filials.created")}: {selectedFilial.createdAt}
+                  📅 {t("filials.created")}: {formatDate(selectedFilial.createdAt)}
                 </div>
                 <div>
-                  🔄 {t("filials.updated")}: {selectedFilial.updatedAt}
+                  🔄 {t("filials.updated")}: {formatDate(selectedFilial.updatedAt)}
                 </div>
               </div>
             </DetailCard>
