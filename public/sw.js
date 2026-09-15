@@ -1,80 +1,75 @@
-const CACHE_NAME = 'business-dashboard-v2';
+const CACHE_NAME = "stockmind-v3";
+const APP_SHELL = ["/", "/manifest.json"];
 
-const urlsToCache = [
-  '/',
-  '/manifest.json',
-  '/icons/app-icon.svg',
-  '/favicon.ico'
-];
-
-// Install event - cache static assets
-self.addEventListener('install', (event) => {
+self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
+    caches
+      .open(CACHE_NAME)
+      .then((cache) => cache.addAll(APP_SHELL))
+      .then(() => self.skipWaiting()),
   );
 });
 
-// Fetch event - serve from cache when offline
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Return cached version or fetch from network
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      }
-    )
-  );
-});
-
-// Activate event - clean up old caches
-self.addEventListener('activate', (event) => {
+self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    caches
+      .keys()
+      .then((cacheNames) =>
+        Promise.all(
+          cacheNames
+            .filter((cacheName) => cacheName !== CACHE_NAME)
+            .map((cacheName) => caches.delete(cacheName)),
+        ),
+      )
+      .then(() => self.clients.claim()),
   );
 });
 
-// Handle push notifications (if needed in the future)
-self.addEventListener('push', (event) => {
-  if (event.data) {
-    const notificationData = event.data.json();
-    
-    const notificationOptions = {
-      body: notificationData.body,
-      icon: '/icons/app-icon.svg',
-      badge: '/icons/app-icon.svg',
-      vibrate: [100, 50, 100],
-      data: {
-        url: notificationData.url || '/'
-      }
-    };
-
-    event.waitUntil(
-      self.registration.showNotification(notificationData.title, notificationOptions)
-    );
+self.addEventListener("fetch", (event) => {
+  const request = event.request;
+  if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) {
+    return;
   }
+
+  const isAppAsset = ["style", "script", "font", "image"].includes(request.destination);
+  const isNavigation = request.mode === "navigate";
+  if (!isAppAsset && !isNavigation) return;
+
+  event.respondWith(
+    caches.match(request).then((cachedResponse) => {
+      if (cachedResponse) return cachedResponse;
+
+      return fetch(request)
+        .then((response) => {
+          if (!response || response.status !== 200 || response.type === "opaque") {
+            return response;
+          }
+
+          const responseForCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseForCache));
+          return response;
+        })
+        .catch(() => (isNavigation ? caches.match("/") : Response.error()));
+    }),
+  );
 });
 
-// Handle notification click
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  
+self.addEventListener("push", (event) => {
+  if (!event.data) return;
+
+  const notificationData = event.data.json();
   event.waitUntil(
-    clients.openWindow(event.notification.data.url || '/')
+    self.registration.showNotification(notificationData.title, {
+      body: notificationData.body,
+      icon: "/icons/app-icon.svg",
+      badge: "/icons/app-icon.svg",
+      vibrate: [100, 50, 100],
+      data: { url: notificationData.url || "/" },
+    }),
   );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil(clients.openWindow(event.notification.data?.url || "/"));
 });
