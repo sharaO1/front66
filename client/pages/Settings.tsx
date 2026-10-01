@@ -102,7 +102,7 @@ export default function Settings() {
     companyName: "StockMind Corp",
     companyEmail: "admin@businesspro.com",
     companyPhone: "+1 (555) 123-4567",
-    currency: "USD",
+    currency: "TJS",
     timezone: "America/New_York",
     language: "en",
   });

@@ -211,7 +211,7 @@ export default function MobileEmployeeCard({
               <div className="flex items-center gap-1">
                 <DollarSign className="h-3 w-3 text-green-600" />
                 <span className="text-xs">
-                  {t("employees.salary")}: {employee.salary.toLocaleString()}c
+                  {t("employees.salary")}: {employee.salary.toLocaleString()} TJS
                 </span>
               </div>
               {employee.commission > 0 && (

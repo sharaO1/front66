@@ -4,6 +4,7 @@ import cors from "cors";
 import { handleDemo } from "./routes/demo";
 import { handleSalesSummary } from "./routes/sales";
 import { handleProducts } from "./routes/products";
+import { handleNotificationStream } from "./routes/notifications";
 
 export function createServer() {
   const app = express();
@@ -22,6 +23,7 @@ export function createServer() {
   app.get("/api/demo", handleDemo);
   app.get("/api/dashboard/sales-summary", handleSalesSummary);
   app.get("/api/products", handleProducts);
+  app.get("/api/notifications/stream", handleNotificationStream);
 
   // Simple fallback RBAC routes for development (without shared imports)
   app.get("/api/admin/users", (_req, res) => {

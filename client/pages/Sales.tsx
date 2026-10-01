@@ -52,6 +52,7 @@ import {
   X,
   AlertTriangle,
   Calendar,
+  Camera,
 } from "lucide-react";
 import { API_BASE } from "@/lib/api";
 import {
@@ -76,6 +77,7 @@ import {
 } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PaginationControls } from "@/components/ui/pagination";
+import { BrowserMultiFormatReader } from "@zxing/browser";
 
 interface InvoiceItem {
   id: string;
@@ -100,6 +102,8 @@ interface Product {
   unitPrice: number;
   category: string;
   sku?: string;
+  barcode?: string;
+  stock?: number;
 }
 
 interface Employee {
@@ -279,6 +283,9 @@ export default function Sales() {
   const [cancellationReason, setCancellationReason] = useState("");
   const [useExistingClient, setUseExistingClient] = useState(true);
   const [forBorrow, setForBorrow] = useState(false);
+  const [showCustomerDetails, setShowCustomerDetails] = useState(false);
+  const [showPaymentDetails, setShowPaymentDetails] = useState(false);
+  const [showNotes, setShowNotes] = useState(false);
 
   // Default return date for borrowed items: 7 days from today
   const defaultReturnDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
@@ -297,23 +304,51 @@ export default function Sales() {
   >("today");
   const isMobile = useIsMobile();
   const [barcodeBuffer, setBarcodeBuffer] = useState("");
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [scannerStatus, setScannerStatus] = useState<
+    "starting" | "scanning" | "unsupported" | "denied" | "insecure" | "error"
+  >("starting");
+  const [scannerAttempt, setScannerAttempt] = useState(0);
+  const scannerVideoRef = useRef<HTMLVideoElement | null>(null);
+  const scannerControlsRef = useRef<{ stop: () => void } | null>(null);
+  const desktopScannerInputRef = useRef<HTMLInputElement | null>(null);
   const barcodeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const barcodeScanTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const justScannedRef = useRef(false);
   const quantityInputRef = useRef<HTMLInputElement | null>(null);
+  const productSelectTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const scanQuantityRef = useRef(1);
+  const lastCameraScanRef = useRef<{ code: string; at: number } | null>(null);
+  const autoScanStartedRef = useRef(false);
+  const [scanQuantity, setScanQuantity] = useState(1);
+  const [scannerMode, setScannerMode] = useState<"camera" | "manual">("camera");
+  const [manualProductSearch, setManualProductSearch] = useState("");
+
+  const restoreInteractionState = () => {
+    document.body.style.pointerEvents = "";
+    document.body.style.overflow = "";
+    document.documentElement.style.overflow = "";
+    (document.activeElement as HTMLElement | null)?.blur?.();
+  };
+
+  const restoreInteractionAfterClose = () => {
+    restoreInteractionState();
+    window.setTimeout(restoreInteractionState, 0);
+    window.setTimeout(restoreInteractionState, 350);
+  };
+
+  const handleCreateDialogOpenChange = (open: boolean) => {
+    setIsCreateDialogOpen(open);
+    if (!open) {
+      setIsScannerOpen(false);
+      restoreInteractionAfterClose();
+    }
+  };
 
   const closeExportLayers = () => {
     setExportMenuOpen(false);
     setIsPdfDialogOpen(false);
-    try {
-      const el = document.activeElement as HTMLElement | null;
-      el?.blur?.();
-    } catch {}
-    try {
-      document.body.style.pointerEvents = "";
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
-    } catch {}
+    restoreInteractionState();
   };
 
   // Real clients/products will be loaded from backend
@@ -333,6 +368,8 @@ export default function Sales() {
     paymentMethod: "cash",
     notes: "",
   });
+  const newInvoiceRef = useRef(newInvoice);
+  newInvoiceRef.current = newInvoice;
   const [currentItem, setCurrentItem] = useState<Partial<InvoiceItem>>({
     productId: "",
     productName: "",
@@ -340,23 +377,58 @@ export default function Sales() {
     unitPrice: 0,
     discount: 0,
   });
+  const currentItemRef = useRef<Partial<InvoiceItem>>({
+    productId: "",
+    productName: "",
+    quantity: 1,
+    unitPrice: 0,
+    discount: 0,
+  });
+  currentItemRef.current = currentItem;
   const { toast } = useToast();
+  const { t, i18n } = useTranslation();
 
   const handleBarcodeScanned = useCallback(
-    (sku: string) => {
+    (sku: string, addImmediately = false, quantity = 1) => {
+      const normalizedCode = sku.trim().toLowerCase();
       const product = products.find(
-        (p) => p.sku?.toLowerCase() === sku.toLowerCase(),
+        (p) =>
+          p.sku?.trim().toLowerCase() === normalizedCode ||
+          p.barcode?.trim().toLowerCase() === normalizedCode,
       );
       if (!product) {
         toast({
-          title: "Product Not Found",
-          description: `No product found with SKU: ${sku}`,
+          title: t("common.product_not_found"),
+          description: t("common.product_not_found_with_code", { code: sku }),
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (addImmediately && (!Number.isInteger(quantity) || quantity <= 0)) {
+        toast({
+          title: t("common.invalid_quantity"),
+          description: t("common.quantity_greater_than_zero"),
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (addImmediately && product.stock != null && quantity > product.stock) {
+        toast({
+          title: t("common.not_enough_stock"),
+          description: t("common.units_available", { count: product.stock }),
           variant: "destructive",
         });
         return;
       }
 
       const wasDialogClosed = !isCreateDialogOpen;
+
+      if (!addImmediately && isCreateDialogOpen && currentItemRef.current.productId) {
+        const previousItemAdded = addItemToInvoice(currentItemRef.current);
+        if (!previousItemAdded) return;
+      }
 
       // Mark that a barcode was just scanned to prevent accidental invoice creation
       justScannedRef.current = true;
@@ -367,86 +439,218 @@ export default function Sales() {
         justScannedRef.current = false;
       }, 500);
 
-      // Set current item (this will select it in the product dropdown)
-      setCurrentItem({
+      const scannedItem: Partial<InvoiceItem> = {
         productId: product.id,
         productName: product.name,
-        quantity: 1,
+        quantity: quantity > 0 ? quantity : 1,
         unitPrice: product.unitPrice,
         discount: 0,
-      });
+      };
+
+      setCurrentItem(scannedItem);
+      if (addImmediately) {
+        addItemToInvoice(scannedItem);
+      }
 
       if (wasDialogClosed) {
         setIsCreateDialogOpen(true);
-        // Give dialog time to render and focus quantity input
-        setTimeout(() => {
-          quantityInputRef.current?.focus();
-        }, 100);
-      } else {
-        // Dialog is already open, focus quantity input immediately
-        quantityInputRef.current?.focus();
       }
+
+      window.setTimeout(() => {
+        if (!isMobile) {
+          desktopScannerInputRef.current?.focus();
+          return;
+        }
+        quantityInputRef.current?.focus();
+        quantityInputRef.current?.select();
+      }, wasDialogClosed ? 100 : 0);
     },
-    [products, isCreateDialogOpen, toast],
+    [products, isCreateDialogOpen, isMobile, toast, t],
   );
+
+  useEffect(() => {
+    if (!isScannerOpen || scannerMode !== "camera") {
+      scannerControlsRef.current?.stop();
+      scannerControlsRef.current = null;
+      if (scannerVideoRef.current) {
+        scannerVideoRef.current.pause();
+        scannerVideoRef.current.srcObject = null;
+      }
+      return;
+    }
+
+    let cancelled = false;
+    const reader = new BrowserMultiFormatReader();
+    lastCameraScanRef.current = null;
+
+    const startScanner = async () => {
+      if (!window.isSecureContext) {
+        setScannerStatus("insecure");
+        return;
+      }
+
+      if (!navigator.mediaDevices?.getUserMedia || !scannerVideoRef.current) {
+        setScannerStatus("unsupported");
+        return;
+      }
+
+      try {
+        const controls = await reader.decodeFromConstraints(
+          {
+            video: { facingMode: { ideal: "environment" } },
+            audio: false,
+          },
+          scannerVideoRef.current,
+          (result) => {
+            const value = result?.getText().trim();
+            if (cancelled || !value) return;
+
+            const now = Date.now();
+            const lastScan = lastCameraScanRef.current;
+            if (lastScan?.code === value && now - lastScan.at < 1200) return;
+
+            lastCameraScanRef.current = { code: value, at: now };
+            handleBarcodeScanned(value, true, scanQuantityRef.current);
+            scanQuantityRef.current = 1;
+            setScanQuantity(1);
+          },
+        );
+        if (cancelled) {
+          controls.stop();
+          return;
+        }
+        scannerControlsRef.current = controls;
+        setScannerStatus("scanning");
+      } catch (error) {
+        if (!cancelled) {
+          setScannerStatus(
+            error instanceof DOMException && error.name === "NotAllowedError"
+              ? "denied"
+              : "error",
+          );
+        }
+      }
+    };
+
+    startScanner();
+    return () => {
+      cancelled = true;
+      scannerControlsRef.current?.stop();
+      scannerControlsRef.current = null;
+      if (scannerVideoRef.current) {
+        scannerVideoRef.current.pause();
+        scannerVideoRef.current.srcObject = null;
+      }
+    };
+  }, [isScannerOpen, scannerMode, scannerAttempt, handleBarcodeScanned]);
 
   // Reset form state when dialog closes, and focus body when dialog opens to enable barcode scanning
   useEffect(() => {
     if (!isCreateDialogOpen) {
       clearNewInvoice();
-    } else {
-      // When dialog opens, blur any focused input to allow barcode scanning
-      setTimeout(() => {
-        const activeElement = document.activeElement as HTMLElement;
-        if (
-          (activeElement && activeElement.tagName === "INPUT") ||
-          activeElement?.tagName === "SELECT" ||
-          activeElement?.tagName === "BUTTON"
-        ) {
-          activeElement.blur();
-        }
-      }, 100);
+      autoScanStartedRef.current = false;
+      setIsScannerOpen(false);
+      const cleanupTimer = window.setTimeout(restoreInteractionAfterClose, 0);
+      return () => window.clearTimeout(cleanupTimer);
     }
+
+    if (isMobile && !autoScanStartedRef.current) {
+      autoScanStartedRef.current = true;
+      scanQuantityRef.current = 1;
+      setScanQuantity(1);
+      setScannerMode("camera");
+      setManualProductSearch("");
+      setScannerStatus("starting");
+      setIsScannerOpen(true);
+    }
+
+    const focusTimer = window.setTimeout(() => {
+      if (!isMobile) {
+        desktopScannerInputRef.current?.focus();
+        return;
+      }
+
+      const activeElement = document.activeElement as HTMLElement;
+      if (
+        (activeElement && activeElement.tagName === "INPUT") ||
+        activeElement?.tagName === "SELECT" ||
+        activeElement?.tagName === "BUTTON"
+      ) {
+        activeElement.blur();
+      }
+    }, 100);
+    return () => window.clearTimeout(focusTimer);
+  }, [isCreateDialogOpen, isMobile]);
+
+  useEffect(() => {
+    if (isCreateDialogOpen || window.innerWidth < 640) return;
+
+    const focusTimer = window.setTimeout(() => {
+      desktopScannerInputRef.current?.focus();
+    }, 0);
+    return () => window.clearTimeout(focusTimer);
   }, [isCreateDialogOpen]);
+
+  useEffect(() => {
+    if (!isMobile && isCreateDialogOpen && currentItem.productId) {
+      const focusTimer = window.setTimeout(() => {
+        desktopScannerInputRef.current?.focus();
+      }, 0);
+      return () => window.clearTimeout(focusTimer);
+    }
+  }, [currentItem.productId, isCreateDialogOpen, isMobile]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const activeElement = document.activeElement as HTMLElement;
+      const isDesktopScannerInput =
+        activeElement === desktopScannerInputRef.current;
+      const opensInvoiceShortcut =
+        event.key === "F2" ||
+        ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "n");
+
+      if (opensInvoiceShortcut) {
+        event.preventDefault();
+        if (!isCreateDialogOpen) {
+          clearNewInvoice();
+          setIsCreateDialogOpen(true);
+        }
+        return;
+      }
       const isQuantityInput = activeElement?.id === "quantity";
       const isDiscountInput = activeElement?.id === "discount";
       const isItemRelatedInput = isQuantityInput || isDiscountInput;
       const isOtherInput =
-        (activeElement?.tagName === "INPUT" && !isItemRelatedInput) ||
+        (activeElement?.tagName === "INPUT" &&
+          !isItemRelatedInput &&
+          !isDesktopScannerInput) ||
         activeElement?.tagName === "TEXTAREA";
 
       // Handle Enter key
       if (event.key === "Enter") {
         event.preventDefault();
 
-        // If a product is selected and Enter is pressed from quantity or discount field, add item
+        // Process a completed desktop scanner buffer before treating Enter as an add action.
+        if (!isOtherInput && barcodeBuffer.trim().length > 0) {
+          handleBarcodeScanned(barcodeBuffer.trim(), false);
+          setBarcodeBuffer("");
+          if (barcodeTimeoutRef.current) {
+            clearTimeout(barcodeTimeoutRef.current);
+          }
+          return;
+        }
+
         if (currentItem.productId && isItemRelatedInput) {
           addItemToInvoice();
           return;
         }
 
-        // If a product is selected and Enter is pressed (not from other inputs), add item
         if (currentItem.productId && !isOtherInput && isCreateDialogOpen) {
           addItemToInvoice();
           return;
         }
 
-        // If a product is selected but Enter from another field (like notes), don't do anything
         if (currentItem.productId && isOtherInput) {
-          return;
-        }
-
-        // If barcode buffer has content and not in an input field, treat as barcode scan
-        if (!isOtherInput && barcodeBuffer.trim().length > 0) {
-          handleBarcodeScanned(barcodeBuffer.trim());
-          setBarcodeBuffer("");
-          if (barcodeTimeoutRef.current) {
-            clearTimeout(barcodeTimeoutRef.current);
-          }
           return;
         }
 
@@ -455,7 +659,8 @@ export default function Sales() {
         if (
           !currentItem.productId &&
           isCreateDialogOpen &&
-          !justScannedRef.current
+          !justScannedRef.current &&
+          (newInvoice.items?.length ?? 0) > 0
         ) {
           createInvoice();
         }
@@ -472,7 +677,11 @@ export default function Sales() {
       }
 
       // Allow barcode input if a text input is focused but only certain ones (prevent barcode in text inputs)
-      if (activeElement?.tagName === "INPUT" && !isItemRelatedInput) {
+      if (
+        activeElement?.tagName === "INPUT" &&
+        !isItemRelatedInput &&
+        !isDesktopScannerInput
+      ) {
         return;
       }
 
@@ -481,7 +690,7 @@ export default function Sales() {
       }
 
       // If product is selected and not in any input field, allow numbers to be quantity
-      if (currentItem.productId) {
+      if (currentItem.productId && !isDesktopScannerInput) {
         const char = event.key;
         if (/\d/.test(char)) {
           event.preventDefault();
@@ -531,14 +740,16 @@ export default function Sales() {
     barcodeBuffer,
     products,
     isCreateDialogOpen,
+    isSubmitting,
     currentItem,
+    newInvoice.items,
     handleBarcodeScanned,
   ]);
 
   const buildInvoiceReport = (inv: Invoice) => {
     const sep = "========================================";
     const line = (s: string) => s;
-    const money = (n: number) => `${n.toFixed(2)}c`;
+    const money = (n: number) => `${n.toFixed(2)} TJS`;
     const fmtDate = (d: string) =>
       new Date(d).toLocaleString(i18n.language || "en");
 
@@ -809,7 +1020,7 @@ export default function Sales() {
     `${new Intl.NumberFormat(i18n.language || "en", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(n)}c`;
+    }).format(n)} TJS`;
 
   const formatDateTime = (
     d: string | Date,
@@ -1183,7 +1394,6 @@ export default function Sales() {
     );
   };
 
-  const { t, i18n } = useTranslation();
   const accessToken = useAuthStore((s) => s.accessToken);
   const currentUser = useAuthStore((s) => s.user);
 
@@ -1203,14 +1413,17 @@ export default function Sales() {
       unitPrice: 0,
       discount: 0,
     });
+    if (!isMobile && isCreateDialogOpen) {
+      window.setTimeout(() => desktopScannerInputRef.current?.focus(), 0);
+    }
   };
 
   const handleAddItemWithProduct = (productId: string) => {
     const selectedProduct = products.find((p) => p.id === productId);
     if (!selectedProduct) {
       toast({
-        title: "Error",
-        description: "Product not found",
+        title: t("common.error"),
+        description: t("common.product_not_found"),
         variant: "destructive",
       });
       return;
@@ -1244,6 +1457,11 @@ export default function Sales() {
     clearCurrentItem();
     setUseExistingClient(true);
     setForBorrow(false);
+    setShowCustomerDetails(false);
+    setShowPaymentDetails(false);
+    setShowNotes(false);
+    scanQuantityRef.current = 1;
+    setScanQuantity(1);
     setBorrowReturnDate(defaultReturnDate);
   };
 
@@ -1425,32 +1643,50 @@ export default function Sales() {
   };
 
   const addItemToInvoice = (itemData?: Partial<InvoiceItem>) => {
+    const invoice = newInvoiceRef.current;
     const itemToAdd = itemData || currentItem;
-    const quantity = itemToAdd.quantity || 1;
+    const quantity = itemToAdd.quantity ?? 0;
 
     if (!itemToAdd.productId || quantity <= 0) {
       toast({
-        title: "Error",
-        description: "Please select a product and enter quantity",
+        title: t("common.error"),
+        description: t("common.product_required"),
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
     const product = products.find((p) => p.id === itemToAdd.productId);
     if (!product) {
       toast({
-        title: "Error",
-        description: "Selected product not found",
+        title: t("common.error"),
+        description: t("common.selected_product_not_found"),
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
     const newDiscount = itemToAdd.discount || 0;
 
-    // Check if an item with the same product ID and discount already exists
-    const existingItemIndex = (newInvoice.items || []).findIndex(
+    const existingQuantity = (invoice.items || [])
+      .filter(
+        (item) =>
+          item.productId === itemToAdd.productId && item.discount === newDiscount,
+      )
+      .reduce((sum, item) => sum + item.quantity, 0);
+    if (
+      product.stock != null &&
+      existingQuantity + quantity > product.stock
+    ) {
+      toast({
+        title: t("common.not_enough_stock"),
+          description: t("common.units_available", { count: product.stock }),
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    const existingItemIndex = (invoice.items || []).findIndex(
       (item) =>
         item.productId === itemToAdd.productId && item.discount === newDiscount,
     );
@@ -1458,8 +1694,7 @@ export default function Sales() {
     let updatedItems: InvoiceItem[];
 
     if (existingItemIndex >= 0) {
-      // Merge with existing item: increase quantity
-      updatedItems = newInvoice.items!.map((item, index) => {
+      updatedItems = invoice.items!.map((item, index) => {
         if (index === existingItemIndex) {
           const newQuantity = item.quantity + quantity;
           return {
@@ -1474,28 +1709,27 @@ export default function Sales() {
         return item;
       });
     } else {
-      // Add as new item
       const item: InvoiceItem = {
         id: Date.now().toString(),
         productId: itemToAdd.productId!,
         productName: itemToAdd.productName!,
-        quantity: quantity,
+        quantity,
         unitPrice: itemToAdd.unitPrice!,
         discount: newDiscount,
         total: calculateItemTotal({ ...itemToAdd, quantity }),
       };
 
-      updatedItems = [...(newInvoice.items || []), item];
+      updatedItems = [...(invoice.items || []), item];
     }
 
     const { subtotal, taxAmount, total } = calculateInvoiceTotal(
       updatedItems,
-      newInvoice.taxRate,
-      newInvoice.discountAmount,
+      invoice.taxRate,
+      invoice.discountAmount,
     );
 
     setNewInvoice({
-      ...newInvoice,
+      ...invoice,
       items: updatedItems,
       subtotal,
       taxAmount,
@@ -1503,8 +1737,9 @@ export default function Sales() {
     });
 
     clearCurrentItem();
+    justScannedRef.current = false;
 
-    /* no toast on item add */
+    return true;
   };
 
   const removeItemFromInvoice = (itemId: string) => {
@@ -1536,6 +1771,8 @@ export default function Sales() {
   };
 
   const createInvoice = async () => {
+    if (isSubmitting) return;
+
     // If this invoice is for borrow, client is required
     if (forBorrow) {
       if (
@@ -1670,8 +1907,12 @@ export default function Sales() {
       };
 
       setInvoices([invoice, ...invoices]);
+      setIsScannerOpen(false);
+      setScannerMode("camera");
+      autoScanStartedRef.current = false;
       clearNewInvoice();
       setIsCreateDialogOpen(false);
+      restoreInteractionAfterClose();
     } catch (e: any) {
       toast({
         title: "Failed",
@@ -2020,6 +2261,11 @@ export default function Sales() {
               unitPrice: parsedPrice,
               category: p.category || "",
               sku: p.sku || "",
+              barcode: p.barcode || p.barCode || p.sku || "",
+              stock:
+                p.stock == null || Number.isNaN(Number(p.stock))
+                  ? undefined
+                  : Number(p.stock),
             };
           });
           setProducts(normalized);
@@ -2098,6 +2344,188 @@ export default function Sales() {
 
   return (
     <div className="space-y-6">
+      <input
+        ref={desktopScannerInputRef}
+        value={barcodeBuffer}
+        readOnly
+        tabIndex={-1}
+        aria-label="Barcode scanner input"
+        className="fixed left-[-9999px] top-0 h-px w-px opacity-0"
+      />
+      <Dialog
+        open={isScannerOpen}
+        onOpenChange={setIsScannerOpen}
+        modal={false}
+      >
+        <DialogContent
+          hideOverlay
+          className="z-[60] w-[calc(100vw-2rem)] max-w-md"
+          onPointerDownOutside={(event) => event.preventDefault()}
+          onInteractOutside={(event) => event.preventDefault()}
+        >
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {scannerMode === "camera" ? (
+                <Camera className="h-5 w-5" />
+              ) : (
+                <Search className="h-5 w-5" />
+              )}
+              {scannerMode === "camera" ? "Scan barcode" : "Search product"}
+            </DialogTitle>
+            <DialogDescription>
+              {scannerMode === "camera"
+                ? "Point your phone camera at a product barcode."
+                : "Find a product by name, SKU, or barcode."}
+            </DialogDescription>
+          </DialogHeader>
+          {scannerMode === "manual" ? (
+            <div className="space-y-3">
+              <Input
+                autoFocus
+                placeholder={t("sales.search_products_scanner")}
+                value={manualProductSearch}
+                onChange={(event) => setManualProductSearch(event.target.value)}
+              />
+              <div className="max-h-64 space-y-2 overflow-y-auto">
+                {products
+                  .filter((product) => {
+                    const query = manualProductSearch.trim().toLowerCase();
+                    if (!query) return true;
+                    return [product.name, product.sku, product.barcode]
+                      .filter(Boolean)
+                      .some((value) => value!.toLowerCase().includes(query));
+                  })
+                  .map((product) => (
+                    <button
+                      key={product.id}
+                      type="button"
+                      className="flex w-full items-center justify-between rounded-lg border p-3 text-left transition-colors hover:bg-muted"
+                      onClick={() => {
+                        const added = addItemToInvoice({
+                          productId: product.id,
+                          productName: product.name,
+                          quantity: scanQuantity,
+                          unitPrice: product.unitPrice,
+                          discount: 0,
+                        });
+                        if (added) {
+                          setManualProductSearch("");
+                          setIsScannerOpen(false);
+                        }
+                      }}
+                    >
+                      <span className="min-w-0">
+                        <span className="block truncate font-medium">{product.name}</span>
+                        <span className="block truncate text-xs text-muted-foreground">
+                          {product.sku || product.barcode || ""}
+                        </span>
+                      </span>
+                      <span className="ml-3 shrink-0 text-sm font-medium">
+                        {product.unitPrice.toLocaleString()} TJS
+                      </span>
+                    </button>
+                  ))}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  setScannerMode("camera");
+                  setScannerStatus("starting");
+                }}
+              >
+                <Camera className="mr-2 h-4 w-4" />
+                {t("sales.back_to_camera")}
+              </Button>
+            </div>
+          ) : scannerStatus === "starting" || scannerStatus === "scanning" ? (
+            <div className="space-y-4">
+              <div className="relative overflow-hidden rounded-lg bg-black aspect-video">
+                <video
+                  ref={scannerVideoRef}
+                  className="h-full w-full object-cover"
+                  playsInline
+                  autoPlay
+                  muted
+                />
+                <div className="pointer-events-none absolute inset-x-8 top-1/2 h-0.5 -translate-y-1/2 bg-primary shadow-[0_0_12px_hsl(var(--primary))]" />
+              </div>
+              <p className="text-center text-sm text-muted-foreground">
+                {scannerStatus === "starting" ? t("sales.starting_camera") : t("sales.scanning")}
+              </p>
+              <div className="flex items-end gap-2">
+                <div className="flex-1 space-y-1">
+                  <Label htmlFor="scan-quantity" className="text-xs">
+                    Quantity for next scan
+                  </Label>
+                  <Input
+                    id="scan-quantity"
+                    type="number"
+                    min="1"
+                    inputMode="numeric"
+                    value={scanQuantity}
+                    onFocus={(event) => event.currentTarget.select()}
+                    onChange={(event) => {
+                      const next = event.target.value === "" ? 0 : parseInt(event.target.value, 10);
+                      scanQuantityRef.current = Number.isFinite(next) ? next : 0;
+                      setScanQuantity(Number.isFinite(next) ? next : 0);
+                    }}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setScannerMode("manual");
+                    setManualProductSearch("");
+                  }}
+                >
+                  {t("sales.search_manually")}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4 rounded-lg border p-4 text-sm">
+              <p className="text-muted-foreground">
+                {scannerStatus === "unsupported"
+                  ? t("sales.camera_unsupported")
+                  : scannerStatus === "denied"
+                    ? t("sales.camera_denied")
+                    : scannerStatus === "insecure"
+                      ? t("sales.camera_insecure")
+                      : t("sales.camera_error")}
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  className="flex-1"
+                  onClick={() => {
+                    setScannerStatus("starting");
+                    setScannerAttempt((attempt) => attempt + 1);
+                  }}
+                >
+                  {t("sales.try_again")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setScannerMode("manual");
+                    setManualProductSearch("");
+                  }}
+                >
+                  {t("sales.search_manually")}
+                </Button>
+              </div>
+            </div>
+          )}
+          <Button type="button" variant="outline" onClick={() => setIsScannerOpen(false)}>
+            Done scanning
+          </Button>
+        </DialogContent>
+      </Dialog>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
@@ -2141,10 +2569,10 @@ export default function Sales() {
           {isMobile ? (
             <Drawer
               open={isCreateDialogOpen}
-              onOpenChange={setIsCreateDialogOpen}
+              onOpenChange={handleCreateDialogOpenChange}
             >
               <DrawerTrigger asChild>
-                <Button>
+                <Button title="F2 or Ctrl+N">
                   <Plus className="mr-2 h-4 w-4" />
                   {t("sales.new_invoice")}
                 </Button>
@@ -2156,9 +2584,18 @@ export default function Sales() {
                     {t("sales.generate_invoice")}
                   </DrawerDescription>
                 </DrawerHeader>
-                <div className="px-4 pb-4 overflow-y-auto space-y-6">
+                <div className="px-4 pb-4 overflow-y-auto flex flex-col gap-6">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="order-2 flex w-full items-center justify-between"
+                    onClick={() => setShowCustomerDetails((visible) => !visible)}
+                  >
+                    <span>{t("sales.customer_details", "Customer & borrowing (optional)")}</span>
+                    <span className="text-lg leading-none">{showCustomerDetails ? "−" : "+"}</span>
+                  </Button>
                   {/* Client Information */}
-                  <div className="space-y-4">
+                  <div className={`order-2 space-y-4 ${showCustomerDetails ? "" : "hidden"}`}>
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-lg bg-muted/40 p-3">
                       <input
                         type="radio"
@@ -2286,8 +2723,17 @@ export default function Sales() {
                     )}
                   </div>
 
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="order-3 flex w-full items-center justify-between"
+                    onClick={() => setShowPaymentDetails((visible) => !visible)}
+                  >
+                    <span>{t("sales.payment_method", "Payment method")}</span>
+                    <span className="text-lg leading-none">{showPaymentDetails ? "−" : "+"}</span>
+                  </Button>
                   {/* Payment */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className={`order-3  grid grid-cols-1 sm:grid-cols-2 gap-4 ${showPaymentDetails ? "" : "hidden"}`}>
                     {!forBorrow && (
                       <div className="space-y-2">
                         <Label htmlFor="paymentMethod">
@@ -2325,16 +2771,36 @@ export default function Sales() {
                   </div>
 
                   {/* Add Item Section */}
-                  <div className="border rounded-lg p-4 space-y-4">
+                  <div className="order-1  rounded-lg border border-primary/20 bg-primary/[0.03] p-4 space-y-4">
                     <h3 className="font-semibold flex items-center gap-2">
                       <Plus className="h-4 w-4" />
                       {t("sales.add_invoice_item")}
                     </h3>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
                       <div className="space-y-2 sm:col-span-2">
-                        <Label htmlFor="product">
-                          {t("sales.select_product")} *
-                        </Label>
+                        <div className="flex items-center justify-between gap-2">
+                          <Label htmlFor="product">
+                            {t("sales.select_product")} *
+                          </Label>
+                          {isMobile && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="h-8 shrink-0"
+                              onClick={() => {
+                                setScannerMode("camera");
+                                setManualProductSearch("");
+                                setScannerStatus("starting");
+                                setScannerAttempt((attempt) => attempt + 1);
+                                setIsScannerOpen(true);
+                              }}
+                            >
+                              <Camera className="mr-1.5 h-4 w-4" />
+                              Scan barcode
+                            </Button>
+                          )}
+                        </div>
                         <Select
                           value={currentItem.productId || ""}
                           onValueChange={(value) => {
@@ -2351,12 +2817,17 @@ export default function Sales() {
                               });
                               // Auto-focus quantity input after product selection
                               setTimeout(() => {
+                                if (!isMobile) {
+                                  desktopScannerInputRef.current?.focus();
+                                  return;
+                                }
                                 quantityInputRef.current?.focus();
+                                quantityInputRef.current?.select();
                               }, 0);
                             }
                           }}
                         >
-                          <SelectTrigger id="product">
+                          <SelectTrigger ref={productSelectTriggerRef} id="product">
                             <SelectValue
                               placeholder={t("sales.choose_product")}
                             />
@@ -2392,10 +2863,16 @@ export default function Sales() {
                           type="number"
                           min="1"
                           value={currentItem.quantity ?? 1}
+                          onFocus={(e) => e.currentTarget.select()}
+                          onBlur={() => {
+                            if (!isMobile && isCreateDialogOpen) {
+                              desktopScannerInputRef.current?.focus();
+                            }
+                          }}
                           onChange={(e) =>
                             setCurrentItem({
                               ...currentItem,
-                              quantity: parseInt(e.target.value) || 1,
+                              quantity: e.target.value === "" ? 0 : parseInt(e.target.value, 10),
                             })
                           }
                           onKeyDown={(e) => {
@@ -2433,7 +2910,7 @@ export default function Sales() {
                       <div className="space-y-2">
                         <Label>{t("common.total")}</Label>
                         <div className="h-10 px-3 py-2 border rounded-md bg-muted flex items-center font-medium">
-                          ${calculateItemTotal(currentItem).toFixed(2)}
+                          {calculateItemTotal(currentItem).toFixed(2)} TJS
                         </div>
                       </div>
                     </div>
@@ -2445,8 +2922,8 @@ export default function Sales() {
                             {currentItem.productName}
                           </div>
                           <div>
-                            <strong>{t("sales.unit_price")}:</strong> $
-                            {currentItem.unitPrice?.toFixed(2)}
+                            <strong>{t("sales.unit_price")}:</strong>
+                            {currentItem.unitPrice?.toFixed(2)} TJS
                           </div>
                         </div>
                       </div>
@@ -2476,7 +2953,7 @@ export default function Sales() {
                   </div>
 
                   {newInvoice.items && newInvoice.items.length > 0 && (
-                    <div className="space-y-4">
+                    <div className="order-4  space-y-4">
                       <h3 className="font-semibold">
                         {t("sales.invoice_items")}
                       </h3>
@@ -2487,7 +2964,7 @@ export default function Sales() {
                               <div className="min-w-0">
                                 <p className="truncate font-medium">{item.productName}</p>
                                 <p className="mt-1 text-sm text-muted-foreground">
-                                  {t("sales.qty")}: {item.quantity} · {t("sales.unit_price")}: ${item.unitPrice.toFixed(2)}
+                                  {t("sales.qty")}: {item.quantity} · {t("sales.unit_price")}: {item.unitPrice.toFixed(2)} TJS
                                 </p>
                               </div>
                               <Button
@@ -2502,7 +2979,7 @@ export default function Sales() {
                             </div>
                             <div className="mt-3 flex items-center justify-between border-t pt-2 text-sm">
                               <span className="text-muted-foreground">{t("sales.discount")}: {item.discount}%</span>
-                              <span className="font-semibold">${item.total.toFixed(2)}</span>
+                              <span className="font-semibold">{item.total.toFixed(2)} TJS</span>
                             </div>
                           </div>
                         ))}
@@ -2525,10 +3002,10 @@ export default function Sales() {
                               <TableCell>{item.productName}</TableCell>
                               <TableCell>{item.quantity}</TableCell>
                               <TableCell>
-                                ${item.unitPrice.toFixed(2)}
+                                {item.unitPrice.toFixed(2)} TJS
                               </TableCell>
                               <TableCell>{item.discount}%</TableCell>
-                              <TableCell>${item.total.toFixed(2)}</TableCell>
+                              <TableCell>{item.total.toFixed(2)} TJS</TableCell>
                               <TableCell>
                                 <Button
                                   variant="outline"
@@ -2605,29 +3082,35 @@ export default function Sales() {
                           <div className="space-y-2">
                             <Label>{t("sales.final_total")}</Label>
                             <div className="h-10 px-3 py-2 border rounded-md bg-primary/10 flex items-center font-semibold">
-                              ${(newInvoice.total || 0).toFixed(2)}
+                              {(newInvoice.total || 0).toFixed(2)} TJS
                             </div>
                           </div>
                         </div>
                         <div className="text-sm text-muted-foreground space-y-1">
                           <div>
-                            {t("sales.subtotal")}: $
-                            {(newInvoice.subtotal || 0).toFixed(2)}
+                            {t("sales.subtotal")}: {(newInvoice.subtotal || 0).toFixed(2)} TJS
                           </div>
                           <div>
-                            {t("sales.tax")} ({newInvoice.taxRate}%): $
-                            {(newInvoice.taxAmount || 0).toFixed(2)}
+                            {t("sales.tax")} ({newInvoice.taxRate}%): {(newInvoice.taxAmount || 0).toFixed(2)} TJS
                           </div>
                           <div>
-                            {t("sales.discount")}: -$
-                            {(newInvoice.discountAmount || 0).toFixed(2)}
+                            {t("sales.discount")}: -{(newInvoice.discountAmount || 0).toFixed(2)} TJS
                           </div>
                         </div>
                       </div>
                     </div>
                   )}
 
-                  <div className="space-y-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="order-5 flex w-full items-center justify-between"
+                    onClick={() => setShowNotes((visible) => !visible)}
+                  >
+                    <span>{t("common.notes")}</span>
+                    <span className="text-lg leading-none">{showNotes ? "−" : "+"}</span>
+                  </Button>
+                  <div className={`order-5  space-y-2 ${showNotes ? "" : "hidden"}`}>
                     <Label htmlFor="notes">{t("common.notes")}</Label>
                     <Textarea
                       id="notes"
@@ -2669,10 +3152,10 @@ export default function Sales() {
           ) : (
             <Dialog
               open={isCreateDialogOpen}
-              onOpenChange={setIsCreateDialogOpen}
+              onOpenChange={handleCreateDialogOpenChange}
             >
               <DialogTrigger asChild>
-                <Button>
+                <Button title="F2 or Ctrl+N">
                   <Plus className="mr-2 h-4 w-4" />
                   {t("sales.new_invoice")}
                 </Button>
@@ -2685,9 +3168,18 @@ export default function Sales() {
                   </DialogDescription>
                 </DialogHeader>
                 {/* Reuse same content as drawer */}
-                <div className="space-y-6 px-1 sm:px-0">
+                <div className="flex flex-col gap-5 px-1 sm:px-0">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="order-2 flex w-full items-center justify-between"
+                    onClick={() => setShowCustomerDetails((visible) => !visible)}
+                  >
+                    <span>{t("sales.customer_details", "Customer & borrowing (optional)")}</span>
+                    <span className="text-lg leading-none">{showCustomerDetails ? "−" : "+"}</span>
+                  </Button>
                   {/* Client Information */}
-                  <div className="space-y-4">
+                  <div className={`order-2 space-y-4 ${showCustomerDetails ? "" : "hidden"}`}>
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-lg bg-muted/40 p-3">
                       <input
                         type="radio"
@@ -2815,8 +3307,17 @@ export default function Sales() {
                     )}
                   </div>
 
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="order-3 flex w-full items-center justify-between"
+                    onClick={() => setShowPaymentDetails((visible) => !visible)}
+                  >
+                    <span>{t("sales.payment_method", "Payment method")}</span>
+                    <span className="text-lg leading-none">{showPaymentDetails ? "−" : "+"}</span>
+                  </Button>
                   {/* Payment */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className={`order-3  grid grid-cols-1 sm:grid-cols-2 gap-4 ${showPaymentDetails ? "" : "hidden"}`}>
                     {!forBorrow && (
                       <div className="space-y-2">
                         <Label htmlFor="paymentMethod">
@@ -2854,16 +3355,36 @@ export default function Sales() {
                   </div>
 
                   {/* Add Item Section */}
-                  <div className="border rounded-lg p-4 space-y-4">
+                  <div className="order-1  rounded-lg border border-primary/20 bg-primary/[0.03] p-4 space-y-4">
                     <h3 className="font-semibold flex items-center gap-2">
                       <Plus className="h-4 w-4" />
                       {t("sales.add_invoice_item")}
                     </h3>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
                       <div className="space-y-2 sm:col-span-2">
-                        <Label htmlFor="product">
-                          {t("sales.select_product")} *
-                        </Label>
+                        <div className="flex items-center justify-between gap-2">
+                          <Label htmlFor="product">
+                            {t("sales.select_product")} *
+                          </Label>
+                          {isMobile && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="h-8 shrink-0"
+                              onClick={() => {
+                                setScannerMode("camera");
+                                setManualProductSearch("");
+                                setScannerStatus("starting");
+                                setScannerAttempt((attempt) => attempt + 1);
+                                setIsScannerOpen(true);
+                              }}
+                            >
+                              <Camera className="mr-1.5 h-4 w-4" />
+                              Scan barcode
+                            </Button>
+                          )}
+                        </div>
                         <Select
                           value={currentItem.productId || ""}
                           onValueChange={(value) => {
@@ -2880,12 +3401,17 @@ export default function Sales() {
                               });
                               // Auto-focus quantity input after product selection
                               setTimeout(() => {
+                                if (!isMobile) {
+                                  desktopScannerInputRef.current?.focus();
+                                  return;
+                                }
                                 quantityInputRef.current?.focus();
+                                quantityInputRef.current?.select();
                               }, 0);
                             }
                           }}
                         >
-                          <SelectTrigger id="product">
+                          <SelectTrigger ref={productSelectTriggerRef} id="product">
                             <SelectValue
                               placeholder={t("sales.choose_product")}
                             />
@@ -2921,10 +3447,16 @@ export default function Sales() {
                           type="number"
                           min="1"
                           value={currentItem.quantity ?? 1}
+                          onFocus={(e) => e.currentTarget.select()}
+                          onBlur={() => {
+                            if (!isMobile && isCreateDialogOpen) {
+                              desktopScannerInputRef.current?.focus();
+                            }
+                          }}
                           onChange={(e) =>
                             setCurrentItem({
                               ...currentItem,
-                              quantity: parseInt(e.target.value) || 1,
+                              quantity: e.target.value === "" ? 0 : parseInt(e.target.value, 10),
                             })
                           }
                           onKeyDown={(e) => {
@@ -2962,7 +3494,7 @@ export default function Sales() {
                       <div className="space-y-2">
                         <Label>{t("common.total")}</Label>
                         <div className="h-10 px-3 py-2 border rounded-md bg-muted flex items-center font-medium">
-                          ${calculateItemTotal(currentItem).toFixed(2)}
+                          {calculateItemTotal(currentItem).toFixed(2)} TJS
                         </div>
                       </div>
                     </div>
@@ -2974,8 +3506,8 @@ export default function Sales() {
                             {currentItem.productName}
                           </div>
                           <div>
-                            <strong>{t("sales.unit_price")}:</strong> $
-                            {currentItem.unitPrice?.toFixed(2)}
+                            <strong>{t("sales.unit_price")}:</strong>
+                            {currentItem.unitPrice?.toFixed(2)} TJS
                           </div>
                         </div>
                       </div>
@@ -3005,7 +3537,7 @@ export default function Sales() {
                   </div>
 
                   {newInvoice.items && newInvoice.items.length > 0 && (
-                    <div className="space-y-4">
+                    <div className="order-4  space-y-4">
                       <h3 className="font-semibold">
                         {t("sales.invoice_items")}
                       </h3>
@@ -3016,7 +3548,7 @@ export default function Sales() {
                               <div className="min-w-0">
                                 <p className="truncate font-medium">{item.productName}</p>
                                 <p className="mt-1 text-sm text-muted-foreground">
-                                  {t("sales.qty")}: {item.quantity} · {t("sales.unit_price")}: ${item.unitPrice.toFixed(2)}
+                                  {t("sales.qty")}: {item.quantity} · {t("sales.unit_price")}: {item.unitPrice.toFixed(2)} TJS
                                 </p>
                               </div>
                               <Button
@@ -3031,7 +3563,7 @@ export default function Sales() {
                             </div>
                             <div className="mt-3 flex items-center justify-between border-t pt-2 text-sm">
                               <span className="text-muted-foreground">{t("sales.discount")}: {item.discount}%</span>
-                              <span className="font-semibold">${item.total.toFixed(2)}</span>
+                              <span className="font-semibold">{item.total.toFixed(2)} TJS</span>
                             </div>
                           </div>
                         ))}
@@ -3054,10 +3586,10 @@ export default function Sales() {
                               <TableCell>{item.productName}</TableCell>
                               <TableCell>{item.quantity}</TableCell>
                               <TableCell>
-                                ${item.unitPrice.toFixed(2)}
+                                {item.unitPrice.toFixed(2)} TJS
                               </TableCell>
                               <TableCell>{item.discount}%</TableCell>
-                              <TableCell>${item.total.toFixed(2)}</TableCell>
+                              <TableCell>{item.total.toFixed(2)} TJS</TableCell>
                               <TableCell>
                                 <Button
                                   variant="outline"
@@ -3134,29 +3666,35 @@ export default function Sales() {
                           <div className="space-y-2">
                             <Label>{t("sales.final_total")}</Label>
                             <div className="h-10 px-3 py-2 border rounded-md bg-primary/10 flex items-center font-semibold">
-                              ${(newInvoice.total || 0).toFixed(2)}
+                              {(newInvoice.total || 0).toFixed(2)} TJS
                             </div>
                           </div>
                         </div>
                         <div className="text-sm text-muted-foreground space-y-1">
                           <div>
-                            {t("sales.subtotal")}: $
-                            {(newInvoice.subtotal || 0).toFixed(2)}
+                            {t("sales.subtotal")}: {(newInvoice.subtotal || 0).toFixed(2)} TJS
                           </div>
                           <div>
-                            {t("sales.tax")} ({newInvoice.taxRate}%): $
-                            {(newInvoice.taxAmount || 0).toFixed(2)}
+                            {t("sales.tax")} ({newInvoice.taxRate}%): {(newInvoice.taxAmount || 0).toFixed(2)} TJS
                           </div>
                           <div>
-                            {t("sales.discount")}: -$
-                            {(newInvoice.discountAmount || 0).toFixed(2)}
+                            {t("sales.discount")}: -{(newInvoice.discountAmount || 0).toFixed(2)} TJS
                           </div>
                         </div>
                       </div>
                     </div>
                   )}
 
-                  <div className="space-y-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="order-5 flex w-full items-center justify-between"
+                    onClick={() => setShowNotes((visible) => !visible)}
+                  >
+                    <span>{t("common.notes")}</span>
+                    <span className="text-lg leading-none">{showNotes ? "−" : "+"}</span>
+                  </Button>
+                  <div className={`order-5  space-y-2 ${showNotes ? "" : "hidden"}`}>
                     <Label htmlFor="notes">{t("common.notes")}</Label>
                     <Textarea
                       id="notes"
@@ -3217,7 +3755,7 @@ export default function Sales() {
                     onValueChange={(v) => setPdfPeriod(v as any)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Period" />
+                      <SelectValue placeholder={t("sales.period")} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="today">{t("sales.today")}</SelectItem>
@@ -3273,7 +3811,7 @@ export default function Sales() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${metrics.revenue.toLocaleString()}
+              {metrics.revenue.toLocaleString()} TJS
             </div>
             <p className="text-xs text-muted-foreground">
               {t("sales.from_paid_invoices")}
@@ -3290,7 +3828,7 @@ export default function Sales() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${metrics.pending.toLocaleString()}
+              {metrics.pending.toLocaleString()} TJS
             </div>
             <p className="text-xs text-muted-foreground">
               {t("sales.awaiting_payment")}
@@ -3418,7 +3956,7 @@ export default function Sales() {
                         toast({
                           title: t("common.error", { defaultValue: "Error" }),
                           description: t("warehouse.invalid_date_range", {
-                            defaultValue: "Invalid date range",
+                            defaultValue: t("sales.invalid_date_range"),
                           }),
                           variant: "destructive",
                         });
@@ -3473,9 +4011,9 @@ export default function Sales() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="hidden md:block">
+          <div className="hidden sm:block">
             <div className="w-full overflow-x-auto">
-              <Table className="min-w-[720px] sm:min-w-0 table-fixed [&_th]:px-4 [&_td]:px-4 md:[&_th]:px-6 md:[&_td]:px-6">
+              <Table className="min-w-[720px] sm:min-w-0 table-fixed [&_th]:px-4 [&_td]:px-4 sm:[&_th]:px-6 sm:[&_td]:px-6">
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("sales.invoice_number")}</TableHead>
@@ -3549,7 +4087,7 @@ export default function Sales() {
                       </TableCell>
                       <TableCell>
                         <div className="font-medium">
-                          {invoice.total.toFixed(2)}c
+                          {invoice.total.toFixed(2)} TJS
                         </div>
                         {!invoice.borrow && (
                           <div className="text-sm text-muted-foreground">
@@ -3655,7 +4193,7 @@ export default function Sales() {
             </div>
           </div>
 
-          <div className="md:hidden space-y-3">
+          <div className="sm:hidden space-y-3">
             {paginatedInvoices.map((invoice) => (
               <div
                 key={invoice.id}
@@ -3879,7 +4417,7 @@ export default function Sales() {
                           {t("sales.unit_price")}
                         </div>
                         <div className="text-right">
-                          ${item.unitPrice.toFixed(2)}
+                          {item.unitPrice.toFixed(2)} TJS
                         </div>
                         <div className="text-muted-foreground">
                           {t("sales.discount")}
@@ -3887,7 +4425,7 @@ export default function Sales() {
                         <div className="text-right">{item.discount}%</div>
                         <div className="font-medium">{t("common.total")}</div>
                         <div className="text-right font-semibold">
-                          ${item.total.toFixed(2)}
+                          {item.total.toFixed(2)} TJS
                         </div>
                       </div>
                     </div>
@@ -3910,9 +4448,9 @@ export default function Sales() {
                         <TableRow key={item.id}>
                           <TableCell>{item.productName}</TableCell>
                           <TableCell>{item.quantity}</TableCell>
-                          <TableCell>${item.unitPrice.toFixed(2)}</TableCell>
+                          <TableCell>{item.unitPrice.toFixed(2)} TJS</TableCell>
                           <TableCell>{item.discount}%</TableCell>
-                          <TableCell>${item.total.toFixed(2)}</TableCell>
+                          <TableCell>{item.total.toFixed(2)} TJS</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -3924,22 +4462,22 @@ export default function Sales() {
               <div className="border rounded-lg p-4 space-y-2 bg-muted text-sm">
                 <div className="flex justify-between">
                   <span>Subtotal:</span>
-                  <span>{selectedInvoice.subtotal.toFixed(2)}c</span>
+                  <span>{selectedInvoice.subtotal.toFixed(2)} TJS</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Tax ({selectedInvoice.taxRate}%):</span>
-                  <span>{selectedInvoice.taxAmount.toFixed(2)}c</span>
+                  <span>{selectedInvoice.taxAmount.toFixed(2)} TJS</span>
                 </div>
                 {selectedInvoice.discountAmount > 0 && (
                   <div className="flex justify-between text-red-600">
                     <span>Discount:</span>
-                    <span>-{selectedInvoice.discountAmount.toFixed(2)}c</span>
+                    <span>-{selectedInvoice.discountAmount.toFixed(2)} TJS</span>
                   </div>
                 )}
                 <hr />
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total:</span>
-                  <span>{selectedInvoice.total.toFixed(2)}c</span>
+                  <span>{selectedInvoice.total.toFixed(2)} TJS</span>
                 </div>
               </div>
 
